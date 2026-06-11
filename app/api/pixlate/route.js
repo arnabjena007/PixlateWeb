@@ -3,6 +3,7 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import fs from 'fs/promises';
 import path from 'path';
+import os from 'os';
 
 const execAsync = promisify(exec);
 
@@ -49,7 +50,7 @@ export async function POST(request) {
     }
     
     // Create a temporary directory for processing
-    const tmpDir = path.join(process.cwd(), 'tmp');
+    const tmpDir = path.join(os.tmpdir(), 'pixlate-tmp');
     await fs.mkdir(tmpDir, { recursive: true });
     
     const inputPath = path.join(tmpDir, `input-${Date.now()}${ext}`);
@@ -57,8 +58,20 @@ export async function POST(request) {
     
     await fs.writeFile(inputPath, buffer);
 
-    // Locate the Go binary (using absolute path for Windows compatibility)
-    const binaryPath = path.join(process.cwd(), 'pix.exe');
+    // Locate the Go binary — platform-aware naming
+    const isWin = process.platform === 'win32';
+    const binaryName = isWin ? 'pix.exe' : 'pix';
+    const binaryPath = path.join(process.cwd(), binaryName);
+
+    // Guard: check if the binary exists (it won't on Vercel / serverless)
+    try {
+      await fs.access(binaryPath);
+    } catch {
+      return NextResponse.json(
+        { error: 'Processing engine not available in this environment. Run locally with pix.exe for full functionality.' },
+        { status: 501 }
+      );
+    }
 
     // Build the CLI execution string
     let cmd = `"${binaryPath}" -in "${inputPath}" -out "${outputPath}" -width ${width} -height ${height}`;

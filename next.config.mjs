@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  /* config options here */
+  serverExternalPackages: ['os', 'child_process', 'fs'],
+  outputFileTracingIncludes: {
+    '/api/pixlate': ['./pix', './pix.exe'],
+  },
 };
 
 export default nextConfig;
