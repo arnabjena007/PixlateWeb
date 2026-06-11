@@ -6,7 +6,7 @@ RUN git clone https://github.com/arnabjena007/Pixlate.git .
 RUN go build -o /pix ./cmd/pix
 
 # Stage 2: Build the Next.js app
-FROM node:18-alpine AS builder
+FROM node:22-alpine AS builder
 WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci
@@ -14,7 +14,7 @@ COPY . .
 RUN npm run build
 
 # Stage 3: Production runner
-FROM node:18-alpine AS runner
+FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
