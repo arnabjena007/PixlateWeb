@@ -513,14 +513,19 @@ export default function PixlateApp() {
                     <img src={previewUrl} alt="Original Input" className="preview-image" />
                   </div>
                 )}
-
-                      <div className="effect-container" style={{ filter: blur ? `blur(${blurStrength}px)` : 'none' }}>
-                        <WorkspacePaintReveal imageUrl={outputUrl} />
-                        {vignette && <div className="effect-overlay effect-vignette" style={{ '--vignette-opacity': vignetteStrength / 100 }} />}
-                        {scanLines && <div className="effect-overlay effect-scanlines" style={{ '--scanline-opacity': scanLineStrength / 100 }} />}
-                        {colorOverlay && <div className="effect-overlay effect-color-overlay" style={{ '--overlay-color': overlayColor, '--overlay-opacity': overlayOpacity / 100, '--overlay-blend': overlayBlend }} />}
-                        {filmGrain && <div className="effect-overlay effect-film-grain" style={{ '--grain-opacity': grainStrength / 100 }} />}
-                      </div>
+                {activeTab === 'Processed' && (
+                  <div className="preview-wrapper">
+                    {outputUrl ? (
+                      <>
+                        <img src={outputUrl} alt="Processed Image" className="main-image" style={{ filter: chromatic ? 'url(#chromatic)' : 'none' }} />
+                        <div className={`effect-container ${crt ? 'effect-crt' : ''}`}>
+                          {colorOverlay && <div className="effect-overlay effect-color-overlay"></div>}
+                          {vignette && <div className="effect-overlay effect-vignette"></div>}
+                          {scanLines && <div className="effect-overlay effect-scanlines"></div>}
+                          {bloom && <img src={outputUrl} className="effect-overlay" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(10px)', mixBlendMode: 'screen', opacity: 0.4 }} />}
+                          {characterBloom && <img src={outputUrl} className="effect-overlay" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(40px)', mixBlendMode: 'screen', opacity: 0.5 }} />}
+                        </div>
+                      </>
                     ) : loading ? (
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
                         <div className="spinner"></div>
