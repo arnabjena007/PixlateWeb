@@ -810,21 +810,6 @@ export default function PixlateApp() {
               />
             </div>
 
-            {/* Variations */}
-            <div className="control-group">
-              <div className="control-label-row">
-                <span>Variations</span>
-                <span className="control-value">{variations}</span>
-              </div>
-              <input
-                type="range"
-                min="1"
-                max="20"
-                step="1"
-                value={variations}
-                onChange={(e) => setVariations(parseInt(e.target.value))}
-              />
-            </div>
 
             {/* Compression */}
             <div className="control-group">
