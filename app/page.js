@@ -86,8 +86,6 @@ export default function PixlateApp() {
   const [scanLineStrength, setScanLineStrength] = useState(20);
   const [crt, setCrt] = useState(false);
   const [chromatic, setChromatic] = useState(false);
-  const [bloom, setBloom] = useState(false);
-  const [characterBloom, setCharacterBloom] = useState(false);
 
   const handleReset = () => {
     // Tuning Reset
@@ -112,8 +110,6 @@ export default function PixlateApp() {
     setScanLineStrength(20);
     setCrt(false);
     setChromatic(false);
-    setBloom(false);
-    setCharacterBloom(false);
   };
 
   const fileInputRef = useRef(null);
@@ -312,29 +308,7 @@ export default function PixlateApp() {
         ctx.drawImage(img, 0, 0);
       }
 
-      // Bloom effects
-      if (bloom || characterBloom) {
-        const blurCanvas = document.createElement('canvas');
-        blurCanvas.width = canvas.width;
-        blurCanvas.height = canvas.height;
-        const bCtx = blurCanvas.getContext('2d');
-        if (bloom) {
-            bCtx.filter = 'blur(10px)';
-            bCtx.drawImage(img, 0, 0);
-            ctx.globalCompositeOperation = 'screen';
-            ctx.globalAlpha = 0.4;
-            ctx.drawImage(blurCanvas, 0, 0);
-        }
-        if (characterBloom) {
-            bCtx.filter = 'blur(40px)';
-            bCtx.drawImage(img, 0, 0);
-            ctx.globalCompositeOperation = 'screen';
-            ctx.globalAlpha = 0.5;
-            ctx.drawImage(blurCanvas, 0, 0);
-        }
-        ctx.globalAlpha = 1.0;
-        ctx.globalCompositeOperation = 'source-over';
-      }
+
 
       if (colorOverlay) {
         ctx.globalCompositeOperation = overlayBlend === 'overlay' ? 'overlay' : overlayBlend === 'screen' ? 'screen' : overlayBlend === 'color-burn' ? 'color-burn' : 'multiply';
@@ -522,8 +496,6 @@ export default function PixlateApp() {
                           {colorOverlay && <div className="effect-overlay effect-color-overlay"></div>}
                           {vignette && <div className="effect-overlay effect-vignette"></div>}
                           {scanLines && <div className="effect-overlay effect-scanlines"></div>}
-                          {bloom && <img src={outputUrl} className="effect-overlay" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(10px)', mixBlendMode: 'screen', opacity: 0.4 }} />}
-                          {characterBloom && <img src={outputUrl} className="effect-overlay" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(40px)', mixBlendMode: 'screen', opacity: 0.5 }} />}
                         </div>
                       </>
                     ) : loading ? (
@@ -853,28 +825,6 @@ export default function PixlateApp() {
                 </label>
                 <div className="toggle-info">
                   <span className="toggle-title" style={{ color: '#d4d4d8' }}>Chromatic</span>
-                </div>
-              </div>
-
-              {/* Bloom */}
-              <div className="toggle-row" onClick={() => setBloom(!bloom)}>
-                <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
-                  <input type="checkbox" checked={bloom} onChange={(e) => setBloom(e.target.checked)} />
-                  <span className="toggle-slider"></span>
-                </label>
-                <div className="toggle-info">
-                  <span className="toggle-title" style={{ color: '#d4d4d8' }}>Bloom</span>
-                </div>
-              </div>
-
-              {/* Character Bloom */}
-              <div className="toggle-row" onClick={() => setCharacterBloom(!characterBloom)}>
-                <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
-                  <input type="checkbox" checked={characterBloom} onChange={(e) => setCharacterBloom(e.target.checked)} />
-                  <span className="toggle-slider"></span>
-                </label>
-                <div className="toggle-info">
-                  <span className="toggle-title" style={{ color: '#d4d4d8' }}>Character Bloom</span>
                 </div>
               </div>
             </div>
