@@ -538,13 +538,27 @@ export default function PixlateApp() {
                 </div>
 
                 {outputUrl && (
-                  <button
-                    onClick={handleDownload}
-                    className="btn-secondary"
-                    style={{ width: 'auto', padding: '6px 16px', fontSize: '12px', height: '32px' }}
-                  >
-                    Download Image
-                  </button>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      onClick={() => {
+                        const newSeed = Math.floor(Math.random() * 9999) + 1;
+                        setRandomSeed(newSeed);
+                        handleProcess(image, width, height, whitePercent, colorSort, random, reverse, sweep, newSeed, variations, compress, seeds);
+                      }}
+                      className="btn-primary"
+                      disabled={loading}
+                      style={{ width: 'auto', padding: '6px 16px', fontSize: '12px', height: '32px' }}
+                    >
+                      Generate Variation
+                    </button>
+                    <button
+                      onClick={handleDownload}
+                      className="btn-secondary"
+                      style={{ width: 'auto', padding: '6px 16px', fontSize: '12px', height: '32px' }}
+                    >
+                      Download Image
+                    </button>
+                  </div>
                 )}
               </div>
 
