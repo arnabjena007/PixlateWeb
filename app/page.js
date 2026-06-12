@@ -47,6 +47,18 @@ export default function PixlateApp() {
   const [loading, setLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [activeTab, setActiveTab] = useState('Processed'); // Original, Processed
+  const [showEditor, setShowEditor] = useState(false);
+
+  useEffect(() => {
+    if (showEditor) {
+      setTimeout(() => {
+        const element = document.getElementById('editor-section');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 50);
+    }
+  }, [showEditor]);
 
   // Custom Settings State
   const [width, setWidth] = useState(800);
@@ -321,10 +333,7 @@ export default function PixlateApp() {
   };
 
   const scrollToEditor = () => {
-    const element = document.getElementById('editor-section');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
+    setShowEditor(true);
   };
 
   const scrollToHero = () => {
@@ -377,7 +386,8 @@ export default function PixlateApp() {
       </section>
 
       {/* Editor & Studio Section (Bottom) */}
-      <section id="editor-section" className="editor-section">
+      {showEditor && (
+        <section id="editor-section" className="editor-section">
 
         {/* Workspace Pane (Left) */}
         <div className="workspace">
@@ -815,7 +825,8 @@ export default function PixlateApp() {
 
         </aside>
 
-      </section>
+        </section>
+      )}
 
     </div>
   );
