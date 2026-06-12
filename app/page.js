@@ -558,9 +558,10 @@ export default function PixlateApp() {
                 {activeTab === 'Processed' && (
                   <div className="preview-wrapper">
                     {outputUrl ? (
-                      <>
-                        <img src={outputUrl} alt="Processed Image" className="main-image" style={{ filter: chromatic ? 'url(#chromatic)' : glitch ? 'url(#glitch)' : blur ? `blur(${blurStrength}px)` : 'none' }} />
-                        <div className={`effect-container ${crt ? 'effect-crt' : ''}`} style={{
+                      <div className="effect-container" style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <img src={outputUrl} alt="Processed Image" className="preview-image" style={{ filter: chromatic ? 'url(#chromatic)' : glitch ? 'url(#glitch)' : blur ? `blur(${blurStrength}px)` : 'none' }} />
+                        <div className={`effect-overlays ${crt ? 'effect-crt' : ''}`} style={{
+                            position: 'absolute', inset: 0, pointerEvents: 'none',
                             '--crt-opacity': crtStrength / 100,
                             '--grain-opacity': grainStrength / 100,
                             '--halftone-size': `${halftoneSize}px`,
@@ -575,7 +576,7 @@ export default function PixlateApp() {
                           {halftone && <div className="effect-overlay effect-halftone"></div>}
                           {filmDust && <div className="effect-overlay effect-film-dust"></div>}
                         </div>
-                      </>
+                      </div>
                     ) : loading ? (
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
                         <div className="spinner"></div>
@@ -638,7 +639,15 @@ export default function PixlateApp() {
             <div className="control-group">
               <div className="control-label-row">
                 <span>Width</span>
-                <span className="control-value">{width}px</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <input
+                    type="number"
+                    value={width}
+                    onChange={(e) => setWidth(parseInt(e.target.value) || 0)}
+                    style={{ width: '60px', textAlign: 'right', background: 'transparent', border: '1px solid #3f3f46', color: 'var(--text-primary)', borderRadius: '4px', padding: '2px 4px', fontSize: '12px' }}
+                  />
+                  <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>px</span>
+                </div>
               </div>
               <input
                 type="range"
@@ -653,7 +662,15 @@ export default function PixlateApp() {
             <div className="control-group">
               <div className="control-label-row">
                 <span>Height</span>
-                <span className="control-value">{height}px</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <input
+                    type="number"
+                    value={height}
+                    onChange={(e) => setHeight(parseInt(e.target.value) || 0)}
+                    style={{ width: '60px', textAlign: 'right', background: 'transparent', border: '1px solid #3f3f46', color: 'var(--text-primary)', borderRadius: '4px', padding: '2px 4px', fontSize: '12px' }}
+                  />
+                  <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>px</span>
+                </div>
               </div>
               <input
                 type="range"
