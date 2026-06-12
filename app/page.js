@@ -84,10 +84,10 @@ export default function PixlateApp() {
   const [vignetteStrength, setVignetteStrength] = useState(50);
   const [scanLines, setScanLines] = useState(false);
   const [scanLineStrength, setScanLineStrength] = useState(20);
-  const [filmGrain, setFilmGrain] = useState(false);
-  const [grainStrength, setGrainStrength] = useState(15);
-  const [blur, setBlur] = useState(false);
-  const [blurStrength, setBlurStrength] = useState(5);
+  const [crt, setCrt] = useState(false);
+  const [chromatic, setChromatic] = useState(false);
+  const [bloom, setBloom] = useState(false);
+  const [characterBloom, setCharacterBloom] = useState(false);
 
   const handleReset = () => {
     // Tuning Reset
@@ -110,10 +110,10 @@ export default function PixlateApp() {
     setVignetteStrength(50);
     setScanLines(false);
     setScanLineStrength(20);
-    setFilmGrain(false);
-    setGrainStrength(15);
-    setBlur(false);
-    setBlurStrength(5);
+    setCrt(false);
+    setChromatic(false);
+    setBloom(false);
+    setCharacterBloom(false);
   };
 
   const fileInputRef = useRef(null);
@@ -288,11 +288,53 @@ export default function PixlateApp() {
       canvas.height = img.height;
       const ctx = canvas.getContext('2d');
 
-      if (blur) {
-        ctx.filter = `blur(${blurStrength}px)`;
+      // SVG Filter for Chromatic Aberration needs to be applied to the Canvas?
+      // Unfortunately, standard 2D Canvas doesn't easily support cross-origin SVG filters.
+      // We will approximate it by drawing the image three times with slightly offset channels.
+      if (chromatic) {
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.globalCompositeOperation = 'screen';
+        
+        // Red channel (offset right)
+        ctx.drawImage(img, 3, 0);
+        
+        // Green channel (center)
+        ctx.drawImage(img, 0, 0);
+        
+        // Blue channel (offset left)
+        ctx.drawImage(img, -3, 0);
+        
+        ctx.globalCompositeOperation = 'source-over';
+        // Note: Full channel separation requires pixel manipulation which is slow.
+        // For a simple approximation on canvas, this is basic but often used.
+      } else {
+        ctx.drawImage(img, 0, 0);
       }
-      ctx.drawImage(img, 0, 0);
-      ctx.filter = 'none';
+
+      // Bloom effects
+      if (bloom || characterBloom) {
+        const blurCanvas = document.createElement('canvas');
+        blurCanvas.width = canvas.width;
+        blurCanvas.height = canvas.height;
+        const bCtx = blurCanvas.getContext('2d');
+        if (bloom) {
+            bCtx.filter = 'blur(10px)';
+            bCtx.drawImage(img, 0, 0);
+            ctx.globalCompositeOperation = 'screen';
+            ctx.globalAlpha = 0.4;
+            ctx.drawImage(blurCanvas, 0, 0);
+        }
+        if (characterBloom) {
+            bCtx.filter = 'blur(40px)';
+            bCtx.drawImage(img, 0, 0);
+            ctx.globalCompositeOperation = 'screen';
+            ctx.globalAlpha = 0.5;
+            ctx.drawImage(blurCanvas, 0, 0);
+        }
+        ctx.globalAlpha = 1.0;
+        ctx.globalCompositeOperation = 'source-over';
+      }
 
       if (colorOverlay) {
         ctx.globalCompositeOperation = overlayBlend === 'overlay' ? 'overlay' : overlayBlend === 'screen' ? 'screen' : overlayBlend === 'color-burn' ? 'color-burn' : 'multiply';
@@ -316,6 +358,12 @@ export default function PixlateApp() {
         for (let y = 0; y < canvas.height; y += 4) {
           ctx.fillRect(0, y, canvas.width, 2);
         }
+      }
+
+      // CRT Fallback
+      if (crt) {
+        ctx.fillStyle = 'rgba(0,0,0,0.15)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
 
       canvas.toBlob((blob) => {
@@ -345,6 +393,20 @@ export default function PixlateApp() {
 
   return (
     <div className="app-container">
+
+      {/* SVG Filters */}
+      <svg width="0" height="0" style={{ position: 'absolute' }}>
+        <filter id="chromatic">
+          <feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="red" />
+          <feOffset in="red" dx="4" dy="0" result="redOffset" />
+          <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="green" />
+          <feOffset in="green" dx="0" dy="0" result="greenOffset" />
+          <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="blue" />
+          <feOffset in="blue" dx="-4" dy="0" result="blueOffset" />
+          <feBlend mode="screen" in="redOffset" in2="greenOffset" result="rg" />
+          <feBlend mode="screen" in="rg" in2="blueOffset" result="rgb" />
+        </filter>
+      </svg>
 
       {/* Hidden file input permanently mounted at the top-level container */}
       <input
@@ -452,9 +514,6 @@ export default function PixlateApp() {
                   </div>
                 )}
 
-                {activeTab === 'Processed' && (
-                  <div className="preview-wrapper">
-                    {outputUrl ? (
                       <div className="effect-container" style={{ filter: blur ? `blur(${blurStrength}px)` : 'none' }}>
                         <WorkspacePaintReveal imageUrl={outputUrl} />
                         {vignette && <div className="effect-overlay effect-vignette" style={{ '--vignette-opacity': vignetteStrength / 100 }} />}
@@ -704,102 +763,116 @@ export default function PixlateApp() {
           <div className="section">
             <span className="section-title">Post-Processing</span>
 
-            {/* Color Overlay */}
-            <div className="toggle-row" onClick={() => setColorOverlay(!colorOverlay)}>
-              <div className="toggle-info">
-                <span className="toggle-title">Color Overlay</span>
-              </div>
-              <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
-                <input type="checkbox" checked={colorOverlay} onChange={(e) => setColorOverlay(e.target.checked)} />
-                <span className="toggle-slider"></span>
-              </label>
-            </div>
-            {colorOverlay && (
-              <div className="control-group" style={{ paddingLeft: '12px' }}>
-                <div className="control-label-row">
-                  <span>Color</span>
-                  <input type="color" value={overlayColor} onChange={(e) => setOverlayColor(e.target.value)} style={{ width: '30px', height: '20px', padding: 0, border: 'none', cursor: 'pointer' }} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              {/* Color Overlay */}
+              <div className="toggle-row" onClick={() => setColorOverlay(!colorOverlay)}>
+                <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                  <input type="checkbox" checked={colorOverlay} onChange={(e) => setColorOverlay(e.target.checked)} />
+                  <span className="toggle-slider"></span>
+                </label>
+                <div className="toggle-info">
+                  <span className="toggle-title" style={{ color: '#d4d4d8' }}>Color Overlay</span>
                 </div>
-                <div className="control-label-row">
-                  <span>Opacity</span>
-                  <span className="control-value">{overlayOpacity}%</span>
+              </div>
+              {colorOverlay && (
+                <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
+                  <div className="control-label-row">
+                    <span>Color</span>
+                    <input type="color" value={overlayColor} onChange={(e) => setOverlayColor(e.target.value)} style={{ width: '30px', height: '20px', padding: 0, border: 'none', cursor: 'pointer' }} />
+                  </div>
+                  <div className="control-label-row">
+                    <span>Opacity</span>
+                    <span className="control-value">{overlayOpacity}%</span>
+                  </div>
+                  <input type="range" min="0" max="100" value={overlayOpacity} onChange={(e) => setOverlayOpacity(parseInt(e.target.value))} />
+                  <div className="control-label-row" style={{ marginTop: '4px' }}>
+                    <span>Blend</span>
+                  </div>
+                  <select className="select-dropdown" value={overlayBlend} onChange={(e) => setOverlayBlend(e.target.value)}>
+                    <option value="multiply">Multiply</option>
+                    <option value="screen">Screen</option>
+                    <option value="overlay">Overlay</option>
+                    <option value="color-burn">Color Burn</option>
+                  </select>
                 </div>
-                <input type="range" min="0" max="100" value={overlayOpacity} onChange={(e) => setOverlayOpacity(parseInt(e.target.value))} />
-                <div className="control-label-row" style={{ marginTop: '4px' }}>
-                  <span>Blend</span>
+              )}
+
+              {/* Vignette */}
+              <div className="toggle-row" onClick={() => setVignette(!vignette)}>
+                <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                  <input type="checkbox" checked={vignette} onChange={(e) => setVignette(e.target.checked)} />
+                  <span className="toggle-slider"></span>
+                </label>
+                <div className="toggle-info">
+                  <span className="toggle-title" style={{ color: '#d4d4d8' }}>Vignette</span>
                 </div>
-                <select className="select-dropdown" value={overlayBlend} onChange={(e) => setOverlayBlend(e.target.value)}>
-                  <option value="multiply">Multiply</option>
-                  <option value="screen">Screen</option>
-                  <option value="overlay">Overlay</option>
-                  <option value="color-burn">Color Burn</option>
-                </select>
               </div>
-            )}
+              {vignette && (
+                <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
+                  <input type="range" min="0" max="100" value={vignetteStrength} onChange={(e) => setVignetteStrength(parseInt(e.target.value))} />
+                </div>
+              )}
 
-            {/* Vignette */}
-            <div className="toggle-row" onClick={() => setVignette(!vignette)}>
-              <div className="toggle-info">
-                <span className="toggle-title">Vignette</span>
+              {/* Scan Lines */}
+              <div className="toggle-row" onClick={() => setScanLines(!scanLines)}>
+                <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                  <input type="checkbox" checked={scanLines} onChange={(e) => setScanLines(e.target.checked)} />
+                  <span className="toggle-slider"></span>
+                </label>
+                <div className="toggle-info">
+                  <span className="toggle-title" style={{ color: '#d4d4d8' }}>Scan Lines</span>
+                </div>
               </div>
-              <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
-                <input type="checkbox" checked={vignette} onChange={(e) => setVignette(e.target.checked)} />
-                <span className="toggle-slider"></span>
-              </label>
-            </div>
-            {vignette && (
-              <div className="control-group" style={{ paddingLeft: '12px' }}>
-                <input type="range" min="0" max="100" value={vignetteStrength} onChange={(e) => setVignetteStrength(parseInt(e.target.value))} />
-              </div>
-            )}
+              {scanLines && (
+                <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
+                  <input type="range" min="0" max="100" value={scanLineStrength} onChange={(e) => setScanLineStrength(parseInt(e.target.value))} />
+                </div>
+              )}
 
-            {/* Scan Lines */}
-            <div className="toggle-row" onClick={() => setScanLines(!scanLines)}>
-              <div className="toggle-info">
-                <span className="toggle-title">Scan Lines</span>
+              {/* CRT Curvature */}
+              <div className="toggle-row" onClick={() => setCrt(!crt)}>
+                <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                  <input type="checkbox" checked={crt} onChange={(e) => setCrt(e.target.checked)} />
+                  <span className="toggle-slider"></span>
+                </label>
+                <div className="toggle-info">
+                  <span className="toggle-title" style={{ color: '#d4d4d8' }}>CRT Curvature</span>
+                </div>
               </div>
-              <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
-                <input type="checkbox" checked={scanLines} onChange={(e) => setScanLines(e.target.checked)} />
-                <span className="toggle-slider"></span>
-              </label>
-            </div>
-            {scanLines && (
-              <div className="control-group" style={{ paddingLeft: '12px' }}>
-                <input type="range" min="0" max="100" value={scanLineStrength} onChange={(e) => setScanLineStrength(parseInt(e.target.value))} />
-              </div>
-            )}
 
-            {/* Film Grain */}
-            <div className="toggle-row" onClick={() => setFilmGrain(!filmGrain)}>
-              <div className="toggle-info">
-                <span className="toggle-title">Film Grain</span>
+              {/* Chromatic */}
+              <div className="toggle-row" onClick={() => setChromatic(!chromatic)}>
+                <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                  <input type="checkbox" checked={chromatic} onChange={(e) => setChromatic(e.target.checked)} />
+                  <span className="toggle-slider"></span>
+                </label>
+                <div className="toggle-info">
+                  <span className="toggle-title" style={{ color: '#d4d4d8' }}>Chromatic</span>
+                </div>
               </div>
-              <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
-                <input type="checkbox" checked={filmGrain} onChange={(e) => setFilmGrain(e.target.checked)} />
-                <span className="toggle-slider"></span>
-              </label>
-            </div>
-            {filmGrain && (
-              <div className="control-group" style={{ paddingLeft: '12px' }}>
-                <input type="range" min="0" max="100" value={grainStrength} onChange={(e) => setGrainStrength(parseInt(e.target.value))} />
-              </div>
-            )}
 
-            {/* Blur */}
-            <div className="toggle-row" onClick={() => setBlur(!blur)}>
-              <div className="toggle-info">
-                <span className="toggle-title">Blur</span>
+              {/* Bloom */}
+              <div className="toggle-row" onClick={() => setBloom(!bloom)}>
+                <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                  <input type="checkbox" checked={bloom} onChange={(e) => setBloom(e.target.checked)} />
+                  <span className="toggle-slider"></span>
+                </label>
+                <div className="toggle-info">
+                  <span className="toggle-title" style={{ color: '#d4d4d8' }}>Bloom</span>
+                </div>
               </div>
-              <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
-                <input type="checkbox" checked={blur} onChange={(e) => setBlur(e.target.checked)} />
-                <span className="toggle-slider"></span>
-              </label>
+
+              {/* Character Bloom */}
+              <div className="toggle-row" onClick={() => setCharacterBloom(!characterBloom)}>
+                <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                  <input type="checkbox" checked={characterBloom} onChange={(e) => setCharacterBloom(e.target.checked)} />
+                  <span className="toggle-slider"></span>
+                </label>
+                <div className="toggle-info">
+                  <span className="toggle-title" style={{ color: '#d4d4d8' }}>Character Bloom</span>
+                </div>
+              </div>
             </div>
-            {blur && (
-              <div className="control-group" style={{ paddingLeft: '12px' }}>
-                <input type="range" min="0" max="20" value={blurStrength} onChange={(e) => setBlurStrength(parseInt(e.target.value))} />
-              </div>
-            )}
           </div>
 
           {/* Action Buttons */}
