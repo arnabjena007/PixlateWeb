@@ -56,13 +56,27 @@ export default function PixlateApp() {
   const [compress, setCompress] = useState(0);
   const [seeds, setSeeds] = useState('');
 
+  // Post-Processing State
+  const [colorOverlay, setColorOverlay] = useState(false);
+  const [overlayColor, setOverlayColor] = useState('#ff0000');
+  const [overlayOpacity, setOverlayOpacity] = useState(30);
+  const [overlayBlend, setOverlayBlend] = useState('multiply');
+  const [vignette, setVignette] = useState(false);
+  const [vignetteStrength, setVignetteStrength] = useState(50);
+  const [scanLines, setScanLines] = useState(false);
+  const [scanLineStrength, setScanLineStrength] = useState(20);
+  const [filmGrain, setFilmGrain] = useState(false);
+  const [grainStrength, setGrainStrength] = useState(15);
+  const [blur, setBlur] = useState(false);
+  const [blurStrength, setBlurStrength] = useState(5);
+
   const fileInputRef = useRef(null);
 
   const handleFile = async (file) => {
     if (file && file.type.startsWith('image/')) {
       setImage(file);
       setPreviewUrl(URL.createObjectURL(file));
-      setOutputUrl(null); 
+      setOutputUrl(null);
       setOutputBlob(null);
       setActiveTab('Processed');
       try {
@@ -125,7 +139,7 @@ export default function PixlateApp() {
       const file = new File([blob], `${randomPreset.id}.png`, { type: 'image/png' });
       setImage(file);
       setPreviewUrl(randomPreset.path);
-      setOutputUrl(null); 
+      setOutputUrl(null);
       setOutputBlob(null);
       setActiveTab('Processed');
       const dims = await getImageDimensions(file);
@@ -150,7 +164,7 @@ export default function PixlateApp() {
       const file = new File([blob], `${preset.id}.png`, { type: 'image/png' });
       setImage(file);
       setPreviewUrl(preset.path);
-      setOutputUrl(null); 
+      setOutputUrl(null);
       setOutputBlob(null);
       setActiveTab('Processed');
       const dims = await getImageDimensions(file);
@@ -167,11 +181,11 @@ export default function PixlateApp() {
   };
 
   const handleProcess = async (
-    img = image, 
-    w = width, 
-    h = height, 
-    wp = whitePercent, 
-    cs = colorSort, 
+    img = image,
+    w = width,
+    h = height,
+    wp = whitePercent,
+    cs = colorSort,
     rand = random,
     rev = reverse,
     sw = sweep,
@@ -218,18 +232,58 @@ export default function PixlateApp() {
   };
 
   const handleDownload = () => {
-    if (!outputBlob) return;
-    const downloadBlob = new Blob([outputBlob], { type: 'application/octet-stream' });
-    const url = URL.createObjectURL(downloadBlob);
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'custom-pixlate.png';
-    document.body.appendChild(link);
-    link.click();
-    
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    if (!outputUrl) return;
+
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+
+      if (blur) {
+        ctx.filter = `blur(${blurStrength}px)`;
+      }
+      ctx.drawImage(img, 0, 0);
+      ctx.filter = 'none';
+
+      if (colorOverlay) {
+        ctx.globalCompositeOperation = overlayBlend === 'overlay' ? 'overlay' : overlayBlend === 'screen' ? 'screen' : overlayBlend === 'color-burn' ? 'color-burn' : 'multiply';
+        ctx.fillStyle = overlayColor;
+        ctx.globalAlpha = overlayOpacity / 100;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.globalAlpha = 1.0;
+        ctx.globalCompositeOperation = 'source-over';
+      }
+
+      if (vignette) {
+        const gradient = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 0, canvas.width/2, canvas.height/2, Math.max(canvas.width, canvas.height)/1.5);
+        gradient.addColorStop(0.4, 'rgba(0,0,0,0)');
+        gradient.addColorStop(1, `rgba(0,0,0,${vignetteStrength / 100})`);
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+
+      if (scanLines) {
+        ctx.fillStyle = `rgba(0,0,0,${scanLineStrength / 100})`;
+        for (let y = 0; y < canvas.height; y += 4) {
+          ctx.fillRect(0, y, canvas.width, 2);
+        }
+      }
+
+      canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'custom-pixlate.png';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, 'image/png');
+    };
+    img.src = outputUrl;
   };
 
   const scrollToEditor = () => {
@@ -248,12 +302,12 @@ export default function PixlateApp() {
 
   return (
     <div className="app-container">
-      
+
       {/* Hidden file input permanently mounted at the top-level container */}
-      <input 
+      <input
         ref={fileInputRef}
-        type="file" 
-        accept="image/*" 
+        type="file"
+        accept="image/*"
         onChange={handleFileChange}
         style={{ display: 'none' }}
       />
@@ -261,23 +315,23 @@ export default function PixlateApp() {
       {/* Hero Section (Top) */}
       <section id="hero-section" className="hero-section">
         <BackgroundRippleEffect />
-        
+
         <div className="hero-content">
-          <div className="hero-badge">Go and Next.js Image Engine</div>
+
           <h1 className="hero-title">Pixlate Studio</h1>
           <p className="hero-subtitle">
-            An advanced, high-performance pixel sorting and shuffling laboratory. Rearrange color patterns in real-time.
+            Professional-grade background patterns and gradients. Easily download and seamlessly integrate it into your projects.
           </p>
           <div className="hero-buttons">
-            <button 
-              type="button" 
-              className="btn-primary" 
+            <button
+              type="button"
+              className="btn-primary"
               onClick={scrollToEditor}
               style={{ width: 'auto', padding: '14px 36px', fontSize: '14px' }}
             >
               Try it yourself
             </button>
-            <Link 
+            <Link
               href="/about"
               className="btn-secondary"
               style={{ width: 'auto', padding: '14px 36px', fontSize: '14px', display: 'inline-block', textAlign: 'center', textDecoration: 'none' }}
@@ -290,12 +344,12 @@ export default function PixlateApp() {
 
       {/* Editor & Studio Section (Bottom) */}
       <section id="editor-section" className="editor-section">
-        
+
         {/* Workspace Pane (Left) */}
         <div className="workspace">
           {!previewUrl ? (
             <div className="workspace-empty">
-              <div 
+              <div
                 className={`dropzone-container ${dragActive ? 'active' : ''}`}
                 onDragEnter={handleDrag}
                 onDragLeave={handleDrag}
@@ -305,10 +359,10 @@ export default function PixlateApp() {
               >
                 <span className="dropzone-title">Drop an image here</span>
                 <span className="dropzone-sub">or click to browse / paste from clipboard</span>
-                
-                <button 
-                  type="button" 
-                  className="btn-secondary" 
+
+                <button
+                  type="button"
+                  className="btn-secondary"
                   onClick={(e) => { e.stopPropagation(); handleInspireMe(); }}
                   style={{ marginTop: '12px', width: 'auto', padding: '8px 20px' }}
                 >
@@ -321,13 +375,13 @@ export default function PixlateApp() {
               {/* Workspace Navigation Bar */}
               <div className="workspace-header">
                 <div className="workspace-tabs">
-                  <button 
+                  <button
                     className={`tab-btn ${activeTab === 'Original' ? 'active' : ''}`}
                     onClick={() => setActiveTab('Original')}
                   >
                     Original
                   </button>
-                  <button 
+                  <button
                     className={`tab-btn ${activeTab === 'Processed' ? 'active' : ''}`}
                     onClick={() => setActiveTab('Processed')}
                   >
@@ -336,7 +390,7 @@ export default function PixlateApp() {
                 </div>
 
                 {outputUrl && (
-                  <button 
+                  <button
                     onClick={handleDownload}
                     className="btn-secondary"
                     style={{ width: 'auto', padding: '6px 16px', fontSize: '12px', height: '32px' }}
@@ -357,7 +411,13 @@ export default function PixlateApp() {
                 {activeTab === 'Processed' && (
                   <div className="preview-wrapper">
                     {outputUrl ? (
-                      <WorkspacePaintReveal imageUrl={outputUrl} />
+                      <div className="effect-container" style={{ filter: blur ? `blur(${blurStrength}px)` : 'none' }}>
+                        <WorkspacePaintReveal imageUrl={outputUrl} />
+                        {vignette && <div className="effect-overlay effect-vignette" style={{ '--vignette-opacity': vignetteStrength / 100 }} />}
+                        {scanLines && <div className="effect-overlay effect-scanlines" style={{ '--scanline-opacity': scanLineStrength / 100 }} />}
+                        {colorOverlay && <div className="effect-overlay effect-color-overlay" style={{ '--overlay-color': overlayColor, '--overlay-opacity': overlayOpacity / 100, '--overlay-blend': overlayBlend }} />}
+                        {filmGrain && <div className="effect-overlay effect-film-grain" style={{ '--grain-opacity': grainStrength / 100 }} />}
+                      </div>
                     ) : loading ? (
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
                         <div className="spinner"></div>
@@ -375,10 +435,10 @@ export default function PixlateApp() {
 
         {/* Sidebar Pane (Right) */}
         <aside className="sidebar">
-          
+
           {/* Header */}
           <div className="sidebar-header">
-            <span 
+            <span
               className="sidebar-title"
               onClick={scrollToHero}
               style={{ cursor: 'pointer' }}
@@ -390,10 +450,10 @@ export default function PixlateApp() {
           {/* Backgrounds Section */}
           <div className="section">
             <span className="section-title">Backgrounds</span>
-            
+
             <div className="presets-grid">
               {PRESETS.map((preset) => (
-                <div 
+                <div
                   key={preset.id}
                   className={`preset-thumbnail ${previewUrl === preset.path ? 'active' : ''}`}
                   onClick={() => handleSelectPreset(preset)}
@@ -404,9 +464,9 @@ export default function PixlateApp() {
               ))}
             </div>
 
-            <button 
-              type="button" 
-              className="btn-secondary" 
+            <button
+              type="button"
+              className="btn-secondary"
               onClick={triggerFileInput}
             >
               Upload Custom Image
@@ -416,19 +476,19 @@ export default function PixlateApp() {
           {/* Dimensions Section */}
           <div className="section">
             <span className="section-title">Dimensions</span>
-            
+
             <div className="control-group">
               <div className="control-label-row">
                 <span>Width</span>
                 <span className="control-value">{width}px</span>
               </div>
-              <input 
-                type="range" 
-                min="100" 
-                max={sliderMaxWidth} 
-                step="50" 
-                value={width} 
-                onChange={(e) => setWidth(parseInt(e.target.value))} 
+              <input
+                type="range"
+                min="100"
+                max={sliderMaxWidth}
+                step="50"
+                value={width}
+                onChange={(e) => setWidth(parseInt(e.target.value))}
               />
             </div>
 
@@ -437,13 +497,13 @@ export default function PixlateApp() {
                 <span>Height</span>
                 <span className="control-value">{height}px</span>
               </div>
-              <input 
-                type="range" 
-                min="100" 
-                max={sliderMaxHeight} 
-                step="50" 
-                value={height} 
-                onChange={(e) => setHeight(parseInt(e.target.value))} 
+              <input
+                type="range"
+                min="100"
+                max={sliderMaxHeight}
+                step="50"
+                value={height}
+                onChange={(e) => setHeight(parseInt(e.target.value))}
               />
             </div>
           </div>
@@ -458,12 +518,12 @@ export default function PixlateApp() {
                 <span>White Threshold</span>
                 <span className="control-value">{whitePercent}%</span>
               </div>
-              <input 
-                type="range" 
-                min="0" 
-                max="100" 
-                value={whitePercent} 
-                onChange={(e) => setWhitePercent(parseInt(e.target.value))} 
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={whitePercent}
+                onChange={(e) => setWhitePercent(parseInt(e.target.value))}
               />
             </div>
 
@@ -474,10 +534,10 @@ export default function PixlateApp() {
                 <span className="toggle-desc">Sort pixels by brightness</span>
               </div>
               <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
-                <input 
-                  type="checkbox" 
-                  checked={colorSort} 
-                  onChange={(e) => setColorSort(e.target.checked)} 
+                <input
+                  type="checkbox"
+                  checked={colorSort}
+                  onChange={(e) => setColorSort(e.target.checked)}
                 />
                 <span className="toggle-slider"></span>
               </label>
@@ -489,13 +549,13 @@ export default function PixlateApp() {
                 <span>Randomness Weight</span>
                 <span className="control-value">{random === 0 ? 'Off' : random}</span>
               </div>
-              <input 
-                type="range" 
-                min="0" 
-                max="100" 
-                step="5" 
-                value={random} 
-                onChange={(e) => setRandom(parseInt(e.target.value))} 
+              <input
+                type="range"
+                min="0"
+                max="100"
+                step="5"
+                value={random}
+                onChange={(e) => setRandom(parseInt(e.target.value))}
               />
             </div>
 
@@ -506,10 +566,10 @@ export default function PixlateApp() {
                 <span className="toggle-desc">Invert pixel sort direction</span>
               </div>
               <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
-                <input 
-                  type="checkbox" 
-                  checked={reverse} 
-                  onChange={(e) => setReverse(e.target.checked)} 
+                <input
+                  type="checkbox"
+                  checked={reverse}
+                  onChange={(e) => setReverse(e.target.checked)}
                 />
                 <span className="toggle-slider"></span>
               </label>
@@ -522,10 +582,10 @@ export default function PixlateApp() {
                 <span className="toggle-desc">Sweep across tuning properties</span>
               </div>
               <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
-                <input 
-                  type="checkbox" 
-                  checked={sweep} 
-                  onChange={(e) => setSweep(e.target.checked)} 
+                <input
+                  type="checkbox"
+                  checked={sweep}
+                  onChange={(e) => setSweep(e.target.checked)}
                 />
                 <span className="toggle-slider"></span>
               </label>
@@ -537,13 +597,13 @@ export default function PixlateApp() {
                 <span>Random Seed</span>
                 <span className="control-value">{randomSeed === 0 ? 'Off' : randomSeed}</span>
               </div>
-              <input 
-                type="range" 
-                min="0" 
-                max="9999" 
-                step="1" 
-                value={randomSeed} 
-                onChange={(e) => setRandomSeed(parseInt(e.target.value))} 
+              <input
+                type="range"
+                min="0"
+                max="9999"
+                step="1"
+                value={randomSeed}
+                onChange={(e) => setRandomSeed(parseInt(e.target.value))}
               />
             </div>
 
@@ -553,13 +613,13 @@ export default function PixlateApp() {
                 <span>Variations</span>
                 <span className="control-value">{variations}</span>
               </div>
-              <input 
-                type="range" 
-                min="1" 
-                max="20" 
-                step="1" 
-                value={variations} 
-                onChange={(e) => setVariations(parseInt(e.target.value))} 
+              <input
+                type="range"
+                min="1"
+                max="20"
+                step="1"
+                value={variations}
+                onChange={(e) => setVariations(parseInt(e.target.value))}
               />
             </div>
 
@@ -585,31 +645,136 @@ export default function PixlateApp() {
               <div className="control-label-row">
                 <span>Custom Seed Positions</span>
               </div>
-              <input 
-                type="text" 
-                className="text-input" 
-                value={seeds} 
-                onChange={(e) => setSeeds(e.target.value)} 
+              <input
+                type="text"
+                className="text-input"
+                value={seeds}
+                onChange={(e) => setSeeds(e.target.value)}
                 placeholder='e.g. "x y x y ..."'
               />
             </div>
 
-            {/* Process Changes Button */}
+          </div>
+
+          {/* Post-Processing Section */}
+          <div className="section">
+            <span className="section-title">Post-Processing</span>
+
+            {/* Color Overlay */}
+            <div className="toggle-row" onClick={() => setColorOverlay(!colorOverlay)}>
+              <div className="toggle-info">
+                <span className="toggle-title">Color Overlay</span>
+              </div>
+              <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                <input type="checkbox" checked={colorOverlay} onChange={(e) => setColorOverlay(e.target.checked)} />
+                <span className="toggle-slider"></span>
+              </label>
+            </div>
+            {colorOverlay && (
+              <div className="control-group" style={{ paddingLeft: '12px' }}>
+                <div className="control-label-row">
+                  <span>Color</span>
+                  <input type="color" value={overlayColor} onChange={(e) => setOverlayColor(e.target.value)} style={{ width: '30px', height: '20px', padding: 0, border: 'none', cursor: 'pointer' }} />
+                </div>
+                <div className="control-label-row">
+                  <span>Opacity</span>
+                  <span className="control-value">{overlayOpacity}%</span>
+                </div>
+                <input type="range" min="0" max="100" value={overlayOpacity} onChange={(e) => setOverlayOpacity(parseInt(e.target.value))} />
+                <div className="control-label-row" style={{ marginTop: '4px' }}>
+                  <span>Blend</span>
+                </div>
+                <select className="select-dropdown" value={overlayBlend} onChange={(e) => setOverlayBlend(e.target.value)}>
+                  <option value="multiply">Multiply</option>
+                  <option value="screen">Screen</option>
+                  <option value="overlay">Overlay</option>
+                  <option value="color-burn">Color Burn</option>
+                </select>
+              </div>
+            )}
+
+            {/* Vignette */}
+            <div className="toggle-row" onClick={() => setVignette(!vignette)}>
+              <div className="toggle-info">
+                <span className="toggle-title">Vignette</span>
+              </div>
+              <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                <input type="checkbox" checked={vignette} onChange={(e) => setVignette(e.target.checked)} />
+                <span className="toggle-slider"></span>
+              </label>
+            </div>
+            {vignette && (
+              <div className="control-group" style={{ paddingLeft: '12px' }}>
+                <input type="range" min="0" max="100" value={vignetteStrength} onChange={(e) => setVignetteStrength(parseInt(e.target.value))} />
+              </div>
+            )}
+
+            {/* Scan Lines */}
+            <div className="toggle-row" onClick={() => setScanLines(!scanLines)}>
+              <div className="toggle-info">
+                <span className="toggle-title">Scan Lines</span>
+              </div>
+              <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                <input type="checkbox" checked={scanLines} onChange={(e) => setScanLines(e.target.checked)} />
+                <span className="toggle-slider"></span>
+              </label>
+            </div>
+            {scanLines && (
+              <div className="control-group" style={{ paddingLeft: '12px' }}>
+                <input type="range" min="0" max="100" value={scanLineStrength} onChange={(e) => setScanLineStrength(parseInt(e.target.value))} />
+              </div>
+            )}
+
+            {/* Film Grain */}
+            <div className="toggle-row" onClick={() => setFilmGrain(!filmGrain)}>
+              <div className="toggle-info">
+                <span className="toggle-title">Film Grain</span>
+              </div>
+              <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                <input type="checkbox" checked={filmGrain} onChange={(e) => setFilmGrain(e.target.checked)} />
+                <span className="toggle-slider"></span>
+              </label>
+            </div>
+            {filmGrain && (
+              <div className="control-group" style={{ paddingLeft: '12px' }}>
+                <input type="range" min="0" max="100" value={grainStrength} onChange={(e) => setGrainStrength(parseInt(e.target.value))} />
+              </div>
+            )}
+
+            {/* Blur */}
+            <div className="toggle-row" onClick={() => setBlur(!blur)}>
+              <div className="toggle-info">
+                <span className="toggle-title">Blur</span>
+              </div>
+              <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                <input type="checkbox" checked={blur} onChange={(e) => setBlur(e.target.checked)} />
+                <span className="toggle-slider"></span>
+              </label>
+            </div>
+            {blur && (
+              <div className="control-group" style={{ paddingLeft: '12px' }}>
+                <input type="range" min="0" max="20" value={blurStrength} onChange={(e) => setBlurStrength(parseInt(e.target.value))} />
+              </div>
+            )}
+          </div>
+
+          {/* Process Changes Button */}
+          <div style={{ marginTop: 'auto', paddingTop: '16px' }}>
             <button 
               type="button" 
               className="btn-primary" 
               disabled={loading || !image}
               onClick={() => handleProcess()}
-              style={{ marginTop: '16px', width: '100%' }}
+              style={{ width: '100%' }}
             >
               {loading ? 'Processing...' : 'Process Changes'}
             </button>
           </div>
 
         </aside>
-        
+
       </section>
-      
+
     </div>
   );
 }

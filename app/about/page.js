@@ -26,16 +26,16 @@ const TransparentImage = ({ src, alt, className }) => {
       try {
         const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imgData.data;
-        
+
         // Replaces pixels close to white with `#09090b` (the background color)
         for (let i = 0; i < data.length; i += 4) {
           const r = data[i];
-          const g = data[i+1];
-          const b = data[i+2];
+          const g = data[i + 1];
+          const b = data[i + 2];
           if (r > 240 && g > 240 && b > 240) {
             data[i] = 9;     // R
-            data[i+1] = 9;   // G
-            data[i+2] = 11;  // B
+            data[i + 1] = 9;   // G
+            data[i + 2] = 11;  // B
           }
         }
         ctx.putImageData(imgData, 0, 0);
@@ -289,7 +289,7 @@ export default function AboutPage() {
         <p className="about-body">
           In tasks like rendering, clustering, or color organization, a significant number of pixels need to be
           processed to determine relationships, groupings, or proximity. Performing these operations in a naive,
-          brute-force manner—such as comparing every pixel with all others—results in a computational bottleneck
+          brute-force manner such as comparing every pixel with all others—results in a computational bottleneck
           due to the O(n²) complexity.
         </p>
       </section>

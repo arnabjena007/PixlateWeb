@@ -48,7 +48,7 @@
 
 /* ── Hero ── */
 .about-hero {
-  padding: 100px 64px 60px;
+  padding: 100px 64px 20px;
   max-width: 900px;
   margin: 0 auto;
   display: flex;
@@ -58,7 +58,7 @@
 }
 
 .about-hero-inner {
-  margin-bottom: 48px;
+  margin-bottom: 0;
 }
 
 .about-title {
@@ -531,7 +531,7 @@
 .about-animation-section {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 40px 64px 60px;
+  padding: 20px 64px 60px;
   display: flex;
   flex-direction: column;
   align-items: center;
