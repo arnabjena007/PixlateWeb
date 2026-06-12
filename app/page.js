@@ -28,6 +28,13 @@ const getImageDimensions = (file) => {
 const PRESETS = [
   { id: 'canyon', name: 'Canyon', path: '/presets/canyon.jpg' },
   { id: 'sunset', name: 'Sunset', path: '/presets/sunset.jpg' },
+  { id: 'coast', name: 'Coast', path: '/presets/coast.jpg' },
+  { id: 'valley', name: 'Valley', path: '/presets/valley.jpg' },
+  { id: 'cove', name: 'Cove', path: '/presets/cove.jpg' },
+  { id: 'lake', name: 'Lake', path: '/presets/lake.jpg' },
+  { id: 'cows', name: 'Cows', path: '/presets/cows.jpg' },
+  { id: 'garden', name: 'Garden', path: '/presets/garden.jpg' },
+  { id: 'yosemite', name: 'Yosemite', path: '/presets/yosemite.jpg' },
   { id: 'lofoten', name: 'Dock', path: '/presets/lofoten.jpg' },
   { id: 'daisies', name: 'Flowers', path: '/presets/daisies.jpg' },
 ];
@@ -69,6 +76,33 @@ export default function PixlateApp() {
   const [grainStrength, setGrainStrength] = useState(15);
   const [blur, setBlur] = useState(false);
   const [blurStrength, setBlurStrength] = useState(5);
+
+  const handleReset = () => {
+    // Tuning Reset
+    setWhitePercent(0);
+    setColorSort(false);
+    setRandom(0);
+    setReverse(false);
+    setSweep(false);
+    setRandomSeed(0);
+    setVariations(1);
+    setCompress(0);
+    setSeeds('');
+
+    // Post-Processing Reset
+    setColorOverlay(false);
+    setOverlayColor('#ff0000');
+    setOverlayOpacity(30);
+    setOverlayBlend('multiply');
+    setVignette(false);
+    setVignetteStrength(50);
+    setScanLines(false);
+    setScanLineStrength(20);
+    setFilmGrain(false);
+    setGrainStrength(15);
+    setBlur(false);
+    setBlurStrength(5);
+  };
 
   const fileInputRef = useRef(null);
 
@@ -758,8 +792,16 @@ export default function PixlateApp() {
             )}
           </div>
 
-          {/* Process Changes Button */}
-          <div style={{ marginTop: 'auto', paddingTop: '16px' }}>
+          {/* Action Buttons */}
+          <div style={{ marginTop: 'auto', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <button 
+              type="button" 
+              className="btn-secondary" 
+              onClick={handleReset}
+              style={{ width: '100%' }}
+            >
+              Reset to Defaults
+            </button>
             <button 
               type="button" 
               className="btn-primary" 
