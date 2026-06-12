@@ -85,7 +85,19 @@ export default function PixlateApp() {
   const [scanLines, setScanLines] = useState(false);
   const [scanLineStrength, setScanLineStrength] = useState(20);
   const [crt, setCrt] = useState(false);
+  const [crtStrength, setCrtStrength] = useState(20);
   const [chromatic, setChromatic] = useState(false);
+  const [chromaticStrength, setChromaticStrength] = useState(4);
+  const [glitch, setGlitch] = useState(false);
+  const [glitchStrength, setGlitchStrength] = useState(10);
+  const [blur, setBlur] = useState(false);
+  const [blurStrength, setBlurStrength] = useState(5);
+  const [filmGrain, setFilmGrain] = useState(false);
+  const [grainStrength, setGrainStrength] = useState(15);
+  const [halftone, setHalftone] = useState(false);
+  const [halftoneSize, setHalftoneSize] = useState(4);
+  const [filmDust, setFilmDust] = useState(false);
+  const [dustAmount, setDustAmount] = useState(30);
 
   const handleReset = () => {
     // Tuning Reset
@@ -109,7 +121,19 @@ export default function PixlateApp() {
     setScanLines(false);
     setScanLineStrength(20);
     setCrt(false);
+    setCrtStrength(20);
     setChromatic(false);
+    setChromaticStrength(4);
+    setGlitch(false);
+    setGlitchStrength(10);
+    setBlur(false);
+    setBlurStrength(5);
+    setFilmGrain(false);
+    setGrainStrength(15);
+    setHalftone(false);
+    setHalftoneSize(4);
+    setFilmDust(false);
+    setDustAmount(30);
   };
 
   const fileInputRef = useRef(null);
@@ -284,31 +308,33 @@ export default function PixlateApp() {
       canvas.height = img.height;
       const ctx = canvas.getContext('2d');
 
-      // SVG Filter for Chromatic Aberration needs to be applied to the Canvas?
-      // Unfortunately, standard 2D Canvas doesn't easily support cross-origin SVG filters.
-      // We will approximate it by drawing the image three times with slightly offset channels.
+      if (blur) {
+        ctx.filter = `blur(${blurStrength}px)`;
+      } else {
+        ctx.filter = 'none';
+      }
+
       if (chromatic) {
-        // Clear canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.globalCompositeOperation = 'screen';
-        
-        // Red channel (offset right)
-        ctx.drawImage(img, 3, 0);
-        
-        // Green channel (center)
+        ctx.drawImage(img, chromaticStrength * 2, 0);
         ctx.drawImage(img, 0, 0);
-        
-        // Blue channel (offset left)
-        ctx.drawImage(img, -3, 0);
-        
+        ctx.drawImage(img, -chromaticStrength * 2, 0);
         ctx.globalCompositeOperation = 'source-over';
-        // Note: Full channel separation requires pixel manipulation which is slow.
-        // For a simple approximation on canvas, this is basic but often used.
+      } else if (glitch) {
+        ctx.drawImage(img, 0, 0);
+        const sliceCount = glitchStrength * 2;
+        for (let i = 0; i < sliceCount; i++) {
+          const y = Math.random() * canvas.height;
+          const h = Math.random() * (canvas.height / 15);
+          const xOffset = (Math.random() - 0.5) * glitchStrength * 4;
+          ctx.drawImage(img, 0, y, canvas.width, h, xOffset, y, canvas.width, h);
+        }
       } else {
         ctx.drawImage(img, 0, 0);
       }
-
-
+      
+      ctx.filter = 'none';
 
       if (colorOverlay) {
         ctx.globalCompositeOperation = overlayBlend === 'overlay' ? 'overlay' : overlayBlend === 'screen' ? 'screen' : overlayBlend === 'color-burn' ? 'color-burn' : 'multiply';
@@ -334,10 +360,47 @@ export default function PixlateApp() {
         }
       }
 
-      // CRT Fallback
       if (crt) {
-        ctx.fillStyle = 'rgba(0,0,0,0.15)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = `rgba(0,0,0,${crtStrength / 100})`;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(canvas.width / 2, 20, canvas.width, 0);
+        ctx.lineTo(canvas.width, canvas.height);
+        ctx.quadraticCurveTo(canvas.width / 2, canvas.height - 20, 0, canvas.height);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      if (filmGrain) {
+        ctx.fillStyle = `rgba(128,128,128,${grainStrength/100})`;
+        ctx.globalCompositeOperation = 'overlay';
+        ctx.fillRect(0,0,canvas.width, canvas.height);
+        ctx.globalCompositeOperation = 'source-over';
+      }
+
+      if (halftone) {
+        ctx.fillStyle = 'rgba(0,0,0,0.6)';
+        ctx.globalCompositeOperation = 'overlay';
+        const s = halftoneSize * 2;
+        for (let y = 0; y < canvas.height; y += s) {
+          for (let x = 0; x < canvas.width; x += s) {
+            ctx.beginPath();
+            ctx.arc(x + s/2, y + s/2, halftoneSize, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+        ctx.globalCompositeOperation = 'source-over';
+      }
+
+      if (filmDust) {
+        ctx.fillStyle = `rgba(255,255,255,${dustAmount/100})`;
+        ctx.globalCompositeOperation = 'overlay';
+        for (let i = 0; i < dustAmount * 20; i++) {
+          ctx.beginPath();
+          ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.globalCompositeOperation = 'source-over';
       }
 
       canvas.toBlob((blob) => {
@@ -372,13 +435,18 @@ export default function PixlateApp() {
       <svg width="0" height="0" style={{ position: 'absolute' }}>
         <filter id="chromatic">
           <feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="red" />
-          <feOffset in="red" dx="4" dy="0" result="redOffset" />
+          <feOffset in="red" dx={chromaticStrength * 2} dy="0" result="redOffset" />
           <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="green" />
           <feOffset in="green" dx="0" dy="0" result="greenOffset" />
           <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="blue" />
-          <feOffset in="blue" dx="-4" dy="0" result="blueOffset" />
+          <feOffset in="blue" dx={-chromaticStrength * 2} dy="0" result="blueOffset" />
           <feBlend mode="screen" in="redOffset" in2="greenOffset" result="rg" />
           <feBlend mode="screen" in="rg" in2="blueOffset" result="rgb" />
+        </filter>
+        <filter id="glitch">
+          <feTurbulence type="fractalNoise" baseFrequency={`0 ${glitchStrength / 100}`} numOctaves="1" result="noise" />
+          <feColorMatrix type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" in="noise" result="coloredNoise" />
+          <feDisplacementMap in="SourceGraphic" in2="coloredNoise" scale={glitchStrength * 2} xChannelSelector="R" yChannelSelector="G" />
         </filter>
       </svg>
 
@@ -491,11 +559,21 @@ export default function PixlateApp() {
                   <div className="preview-wrapper">
                     {outputUrl ? (
                       <>
-                        <img src={outputUrl} alt="Processed Image" className="main-image" style={{ filter: chromatic ? 'url(#chromatic)' : 'none' }} />
-                        <div className={`effect-container ${crt ? 'effect-crt' : ''}`}>
-                          {colorOverlay && <div className="effect-overlay effect-color-overlay"></div>}
+                        <img src={outputUrl} alt="Processed Image" className="main-image" style={{ filter: chromatic ? 'url(#chromatic)' : glitch ? 'url(#glitch)' : blur ? `blur(${blurStrength}px)` : 'none' }} />
+                        <div className={`effect-container ${crt ? 'effect-crt' : ''}`} style={{
+                            '--crt-opacity': crtStrength / 100,
+                            '--grain-opacity': grainStrength / 100,
+                            '--halftone-size': `${halftoneSize}px`,
+                            '--dust-opacity': dustAmount / 100,
+                            '--scanline-opacity': scanLineStrength / 100,
+                            '--vignette-opacity': vignetteStrength / 100
+                        }}>
+                          {colorOverlay && <div className="effect-overlay effect-color-overlay" style={{ '--overlay-color': overlayColor, '--overlay-opacity': overlayOpacity / 100, '--overlay-blend': overlayBlend }}></div>}
                           {vignette && <div className="effect-overlay effect-vignette"></div>}
                           {scanLines && <div className="effect-overlay effect-scanlines"></div>}
+                          {filmGrain && <div className="effect-overlay effect-film-grain"></div>}
+                          {halftone && <div className="effect-overlay effect-halftone"></div>}
+                          {filmDust && <div className="effect-overlay effect-film-dust"></div>}
                         </div>
                       </>
                     ) : loading ? (
@@ -816,17 +894,107 @@ export default function PixlateApp() {
                   <span className="toggle-title" style={{ color: '#d4d4d8' }}>CRT Curvature</span>
                 </div>
               </div>
+              {crt && (
+                <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
+                  <input type="range" min="0" max="100" value={crtStrength} onChange={(e) => setCrtStrength(parseInt(e.target.value))} />
+                </div>
+              )}
 
-              {/* Chromatic */}
+              {/* RGB Split (formerly Chromatic) */}
               <div className="toggle-row" onClick={() => setChromatic(!chromatic)}>
                 <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
                   <input type="checkbox" checked={chromatic} onChange={(e) => setChromatic(e.target.checked)} />
                   <span className="toggle-slider"></span>
                 </label>
                 <div className="toggle-info">
-                  <span className="toggle-title" style={{ color: '#d4d4d8' }}>Chromatic</span>
+                  <span className="toggle-title" style={{ color: '#d4d4d8' }}>RGB Split</span>
                 </div>
               </div>
+              {chromatic && (
+                <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
+                  <input type="range" min="1" max="20" value={chromaticStrength} onChange={(e) => setChromaticStrength(parseInt(e.target.value))} />
+                </div>
+              )}
+
+              {/* Glitch */}
+              <div className="toggle-row" onClick={() => setGlitch(!glitch)}>
+                <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                  <input type="checkbox" checked={glitch} onChange={(e) => setGlitch(e.target.checked)} />
+                  <span className="toggle-slider"></span>
+                </label>
+                <div className="toggle-info">
+                  <span className="toggle-title" style={{ color: '#d4d4d8' }}>Glitch</span>
+                </div>
+              </div>
+              {glitch && (
+                <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
+                  <input type="range" min="1" max="50" value={glitchStrength} onChange={(e) => setGlitchStrength(parseInt(e.target.value))} />
+                </div>
+              )}
+
+              {/* Blur */}
+              <div className="toggle-row" onClick={() => setBlur(!blur)}>
+                <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                  <input type="checkbox" checked={blur} onChange={(e) => setBlur(e.target.checked)} />
+                  <span className="toggle-slider"></span>
+                </label>
+                <div className="toggle-info">
+                  <span className="toggle-title" style={{ color: '#d4d4d8' }}>Blur</span>
+                </div>
+              </div>
+              {blur && (
+                <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
+                  <input type="range" min="1" max="20" value={blurStrength} onChange={(e) => setBlurStrength(parseInt(e.target.value))} />
+                </div>
+              )}
+
+              {/* Film Grain */}
+              <div className="toggle-row" onClick={() => setFilmGrain(!filmGrain)}>
+                <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                  <input type="checkbox" checked={filmGrain} onChange={(e) => setFilmGrain(e.target.checked)} />
+                  <span className="toggle-slider"></span>
+                </label>
+                <div className="toggle-info">
+                  <span className="toggle-title" style={{ color: '#d4d4d8' }}>Film Grain</span>
+                </div>
+              </div>
+              {filmGrain && (
+                <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
+                  <input type="range" min="1" max="100" value={grainStrength} onChange={(e) => setGrainStrength(parseInt(e.target.value))} />
+                </div>
+              )}
+
+              {/* Halftone */}
+              <div className="toggle-row" onClick={() => setHalftone(!halftone)}>
+                <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                  <input type="checkbox" checked={halftone} onChange={(e) => setHalftone(e.target.checked)} />
+                  <span className="toggle-slider"></span>
+                </label>
+                <div className="toggle-info">
+                  <span className="toggle-title" style={{ color: '#d4d4d8' }}>Halftone</span>
+                </div>
+              </div>
+              {halftone && (
+                <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
+                  <input type="range" min="2" max="20" value={halftoneSize} onChange={(e) => setHalftoneSize(parseInt(e.target.value))} />
+                </div>
+              )}
+
+              {/* Film Dust */}
+              <div className="toggle-row" onClick={() => setFilmDust(!filmDust)}>
+                <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                  <input type="checkbox" checked={filmDust} onChange={(e) => setFilmDust(e.target.checked)} />
+                  <span className="toggle-slider"></span>
+                </label>
+                <div className="toggle-info">
+                  <span className="toggle-title" style={{ color: '#d4d4d8' }}>Film Dust</span>
+                </div>
+              </div>
+              {filmDust && (
+                <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
+                  <input type="range" min="1" max="100" value={dustAmount} onChange={(e) => setDustAmount(parseInt(e.target.value))} />
+                </div>
+              )}
             </div>
           </div>
 
