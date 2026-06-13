@@ -84,14 +84,8 @@ export const PixlateProvider = ({ children }) => {
 
   // Text Overlay State
   const [textOverlay, setTextOverlay] = useState(false);
-  const [textValue, setTextValue] = useState('PIXLATE');
-  const [textFont, setTextFont] = useState('Instrument Serif');
-  const [textSize, setTextSize] = useState(150);
-  const [textColor, setTextColor] = useState('#ffffff');
-  const [textBold, setTextBold] = useState(true);
-  const [textItalic, setTextItalic] = useState(false);
-  const [textUnderline, setTextUnderline] = useState(false);
-  const [textFront, setTextFront] = useState(true);
+  const [textOverlays, setTextOverlays] = useState([]);
+  const [selectedTextId, setSelectedTextId] = useState(null);
 
   // Image Overlay State
   const [imageOverlay, setImageOverlay] = useState(false);
@@ -124,14 +118,8 @@ export const PixlateProvider = ({ children }) => {
 
   const handleReset = () => {
     setTextOverlay(false);
-    setTextValue('PIXLATE');
-    setTextFont('Instrument Serif');
-    setTextSize(150);
-    setTextColor('#ffffff');
-    setTextBold(true);
-    setTextItalic(false);
-    setTextUnderline(false);
-    setTextFront(true);
+    setTextOverlays([]);
+    setSelectedTextId(null);
 
     setImageOverlay(false);
     setImageOverlays([]);
@@ -448,29 +436,38 @@ export const PixlateProvider = ({ children }) => {
         ctx.globalCompositeOperation = 'source-over';
       }
 
-      const drawTextOverlay = () => {
-        if (textOverlay && textValue) {
-          ctx.fillStyle = textColor;
+      const drawTextOverlay = (isFront) => {
+        if (!textOverlay) return;
+        textOverlays.forEach(textObj => {
+          if (textObj.front !== isFront) return;
+          ctx.fillStyle = textObj.color;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           let fontString = '';
-          if (textItalic) fontString += 'italic ';
-          if (textBold) fontString += 'bold ';
-          fontString += `${textSize}px "${textFont}", sans-serif`;
+          if (textObj.italic) fontString += 'italic ';
+          if (textObj.bold) fontString += 'bold ';
+          
+          let numericSize = 70; // Medium
+          if (textObj.size === 'Small') numericSize = 30;
+          else if (textObj.size === 'Large') numericSize = 150;
+          else if (textObj.size === 'Extra Large') numericSize = 300;
+          
+          fontString += `${numericSize}px "${textObj.font}", sans-serif`;
           ctx.font = fontString;
-          ctx.fillText(textValue, canvas.width / 2, canvas.height / 2);
+          
+          const xPos = canvas.width * (textObj.x / 100);
+          const yPos = canvas.height * (textObj.y / 100);
+          ctx.fillText(textObj.value, xPos, yPos);
   
-          if (textUnderline) {
-            const textMetrics = ctx.measureText(textValue);
+          if (textObj.underline) {
+            const textMetrics = ctx.measureText(textObj.value);
             const textWidth = textMetrics.width;
-            ctx.fillRect(canvas.width / 2 - textWidth / 2, canvas.height / 2 + textSize / 2 - (textSize * 0.1), textWidth, textSize / 15);
+            ctx.fillRect(xPos - textWidth / 2, yPos + numericSize / 2 - (numericSize * 0.1), textWidth, numericSize / 15);
           }
-        }
+        });
       };
 
-      if (!textFront) {
-        drawTextOverlay();
-      }
+      drawTextOverlay(false); // Draw background texts
 
       const exportCanvas = () => {
         canvas.toBlob((blob) => {
@@ -504,9 +501,7 @@ export const PixlateProvider = ({ children }) => {
           }
         }
         
-        if (textFront) {
-          drawTextOverlay();
-        }
+        drawTextOverlay(true); // Draw foreground texts
         
         exportCanvas();
       };
@@ -550,14 +545,8 @@ export const PixlateProvider = ({ children }) => {
     variations, setVariations,
 
     textOverlay, setTextOverlay,
-    textValue, setTextValue,
-    textFont, setTextFont,
-    textSize, setTextSize,
-    textColor, setTextColor,
-    textBold, setTextBold,
-    textItalic, setTextItalic,
-    textUnderline, setTextUnderline,
-    textFront, setTextFront,
+    textOverlays, setTextOverlays,
+    selectedTextId, setSelectedTextId,
 
     imageOverlay, setImageOverlay,
     imageOverlays, setImageOverlays,

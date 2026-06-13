@@ -6,7 +6,7 @@ export default function WorkspaceSection() {
   const {
     image, width, height, whitePercent, colorSort, reverse, randomSeed, variations,
     previewUrl, outputUrl, loading, dragActive, activeTab, setActiveTab,
-    textOverlay, textValue, textFont, textSize, textColor, textBold, textItalic, textUnderline, textFront,
+    textOverlay, textOverlays, setTextOverlays, selectedTextId, setSelectedTextId,
     imageOverlay, imageOverlays, setImageOverlays, selectedOverlayId, setSelectedOverlayId,
     colorOverlay, overlayColor, overlayOpacity, overlayBlend,
     vignette, vignetteStrength, scanLines, scanLineStrength,
@@ -106,6 +106,7 @@ export default function WorkspaceSection() {
                     onMouseDown={(e) => {
                       if (e.target.id === 'canvas-preview-container' || e.target.classList.contains('preview-image') || e.target.classList.contains('effect-overlay')) {
                         setSelectedOverlayId(null);
+                        setSelectedTextId(null);
                       }
                     }}
                   >
@@ -132,26 +133,83 @@ export default function WorkspaceSection() {
                       {filmDust && <div className="effect-overlay effect-film-dust"></div>}
                     </div>
 
-                    {textOverlay && textValue && (
-                      <div style={{
-                        position: 'absolute',
-                        left: '50%',
-                        top: '50%',
-                        transform: `translate(-50%, -50%) scale(${Math.min(1, 800 / Math.max(width || 1, 1))})`,
-                        transformOrigin: 'center',
-                        fontFamily: `"${textFont}", sans-serif`,
-                        fontSize: `${textSize}px`,
-                        color: textColor,
-                        fontWeight: textBold ? 'bold' : 'normal',
-                        fontStyle: textItalic ? 'italic' : 'normal',
-                        textDecoration: textUnderline ? 'underline' : 'none',
-                        pointerEvents: 'none',
-                        whiteSpace: 'nowrap',
-                        zIndex: textFront ? 15 : 10
-                      }}>
-                        {textValue}
-                      </div>
-                    )}
+                    {textOverlay && textOverlays.map(textObj => (
+                      <Rnd
+                        key={textObj.id}
+                        style={{
+                          border: selectedTextId === textObj.id ? '2px dashed #a855f7' : 'none',
+                          zIndex: selectedTextId === textObj.id ? 16 : textObj.front ? 15 : 10,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontFamily: `"${textObj.font}", sans-serif`,
+                          fontSize: `${textObj.size === 'Small' ? 30 : textObj.size === 'Large' ? 150 : textObj.size === 'Extra Large' ? 300 : 70}px`,
+                          color: textObj.color,
+                          fontWeight: textObj.bold ? 'bold' : 'normal',
+                          fontStyle: textObj.italic ? 'italic' : 'normal',
+                          textDecoration: textObj.underline ? 'underline' : 'none',
+                          whiteSpace: 'nowrap',
+                          transform: `scale(${Math.min(1, 800 / Math.max(width || 1, 1))})`
+                        }}
+                        position={{
+                          x: (textObj.x / 100) * (document.getElementById('canvas-preview-container')?.clientWidth || 800),
+                          y: (textObj.y / 100) * (document.getElementById('canvas-preview-container')?.clientHeight || 800)
+                        }}
+                        enableResizing={false}
+                        onDragStart={() => setSelectedTextId(textObj.id)}
+                        onDrag={(e, d) => {
+                          const parent = document.getElementById('canvas-preview-container');
+                          if (parent) {
+                            setTextOverlays(prev => prev.map(t => t.id === textObj.id ? {
+                              ...t,
+                              x: (d.x / parent.clientWidth) * 100,
+                              y: (d.y / parent.clientHeight) * 100
+                            } : t));
+                          }
+                        }}
+                        onMouseDown={(e) => {
+                          setSelectedTextId(textObj.id);
+                        }}
+                      >
+                        {selectedTextId === textObj.id && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              setTextOverlays(prev => prev.filter(t => t.id !== textObj.id));
+                              setSelectedTextId(null);
+                            }}
+                            style={{
+                              position: 'absolute',
+                              top: '-34px',
+                              right: '0',
+                              background: '#ef4444',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '6px',
+                              padding: '6px',
+                              cursor: 'pointer',
+                              pointerEvents: 'auto',
+                              zIndex: 20,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                            }}
+                            title="Remove text"
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M3 6h18" />
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                              <line x1="10" y1="11" x2="10" y2="17" />
+                              <line x1="14" y1="11" x2="14" y2="17" />
+                            </svg>
+                          </button>
+                        )}
+                        {textObj.value}
+                      </Rnd>
+                    ))}
 
                     {imageOverlay && imageOverlays.map(overlay => (
                       <Rnd

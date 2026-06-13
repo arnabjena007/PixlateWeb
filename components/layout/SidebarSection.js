@@ -7,9 +7,7 @@ export default function SidebarSection() {
     dimensionPreset, setDimensionPreset, width, setWidth, height, setHeight,
     sliderMaxWidth, sliderMaxHeight,
     whitePercent, setWhitePercent, colorSort, setColorSort, reverse, setReverse, randomSeed, setRandomSeed,
-    textOverlay, setTextOverlay, textValue, setTextValue, textFont, setTextFont,
-    textSize, setTextSize, textColor, setTextColor, textBold, setTextBold,
-    textItalic, setTextItalic, textUnderline, setTextUnderline, textFront, setTextFront,
+    textOverlay, setTextOverlay, textOverlays, setTextOverlays, selectedTextId, setSelectedTextId,
     imageOverlay, setImageOverlay, overlayFileInputRef,
     colorOverlay, setColorOverlay, overlayColor, setOverlayColor, overlayOpacity, setOverlayOpacity, overlayBlend, setOverlayBlend,
     vignette, setVignette, vignetteStrength, setVignetteStrength,
@@ -65,7 +63,6 @@ export default function SidebarSection() {
       </div>
 
       {/* Dimensions Section */}
-      <hr style={{ border: 'none', borderTop: '1px solid #27272a', margin: '16px 0' }} />
       <div className="section">
         <span className="section-title">Dimensions</span>
 
@@ -145,7 +142,6 @@ export default function SidebarSection() {
       </div>
 
       {/* Tuning Section */}
-      <hr style={{ border: 'none', borderTop: '1px solid #27272a', margin: '16px 0' }} />
       <div className="section">
         <span className="section-title">Tuning</span>
 
@@ -211,7 +207,6 @@ export default function SidebarSection() {
       </div>
 
       {/* Text Overlay Section */}
-      <hr style={{ border: 'none', borderTop: '1px solid #27272a', margin: '16px 0' }} />
       <div className="section">
         <span className="section-title">Text Overlay</span>
 
@@ -228,70 +223,108 @@ export default function SidebarSection() {
 
         {textOverlay && (
           <div className="control-group" style={{ paddingLeft: '10px', paddingBottom: '8px', paddingTop: '8px' }}>
-            <input type="text" className="text-input" value={textValue} onChange={(e) => setTextValue(e.target.value)} placeholder="Enter text..." style={{ width: '100%', marginBottom: '12px' }} />
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => {
+                const newText = {
+                  id: Date.now().toString(),
+                  value: 'NEW TEXT',
+                  font: 'Instrument Serif',
+                  size: 'Medium',
+                  color: '#ffffff',
+                  bold: true,
+                  italic: false,
+                  underline: false,
+                  front: true,
+                  x: 50,
+                  y: 50,
+                };
+                setTextOverlays([...textOverlays, newText]);
+                setSelectedTextId(newText.id);
+              }}
+              style={{ width: '100%', marginBottom: '16px', padding: '8px' }}
+            >
+              Add Text Overlay
+            </button>
 
-            <div className="control-label-row">
-              <span>Font Family</span>
-            </div>
-            <select className="select-dropdown" value={textFont} onChange={(e) => setTextFont(e.target.value)} style={{ marginBottom: '12px' }}>
-              <option value="Instrument Serif">Instrument Serif</option>
-              <option value="Geist">Geist</option>
-              <option value="Arial">Arial</option>
-              <option value="Impact">Impact</option>
-              <option value="Times New Roman">Times New Roman</option>
-            </select>
+            {selectedTextId && textOverlays.find(t => t.id === selectedTextId) && (() => {
+              const selectedText = textOverlays.find(t => t.id === selectedTextId);
+              const updateText = (updates) => {
+                setTextOverlays(textOverlays.map(t => t.id === selectedTextId ? { ...t, ...updates } : t));
+              };
+              return (
+                <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '8px', border: '1px solid #27272a' }}>
+                  <input type="text" className="text-input" value={selectedText.value} onChange={(e) => updateText({ value: e.target.value })} placeholder="Enter text..." style={{ width: '100%', marginBottom: '12px' }} />
 
-            <div className="control-label-row">
-              <span>Size</span>
-              <span className="control-value">{textSize}px</span>
-            </div>
-            <input type="range" min="10" max="500" value={textSize} onChange={(e) => setTextSize(parseInt(e.target.value))} style={{ marginBottom: '12px' }} />
+                  <div className="control-label-row">
+                    <span>Font Family</span>
+                  </div>
+                  <select className="select-dropdown" value={selectedText.font} onChange={(e) => updateText({ font: e.target.value })} style={{ marginBottom: '12px' }}>
+                    <option value="Instrument Serif">Instrument Serif</option>
+                    <option value="Geist">Geist</option>
+                    <option value="Arial">Arial</option>
+                    <option value="Impact">Impact</option>
+                    <option value="Times New Roman">Times New Roman</option>
+                  </select>
 
-            <div className="control-label-row">
-              <span>Color</span>
-              <input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} style={{ width: '30px', height: '24px', padding: 0, border: 'none', cursor: 'pointer', background: 'transparent' }} />
-            </div>
+                  <div className="control-label-row">
+                    <span>Size</span>
+                  </div>
+                  <select className="select-dropdown" value={selectedText.size} onChange={(e) => updateText({ size: e.target.value })} style={{ marginBottom: '12px' }}>
+                    <option value="Small">Small (30px)</option>
+                    <option value="Medium">Medium (70px)</option>
+                    <option value="Large">Large (150px)</option>
+                    <option value="Extra Large">Extra Large (300px)</option>
+                  </select>
 
-            <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-              <button className={`tab-btn ${textBold ? 'active' : ''}`} onClick={() => setTextBold(!textBold)} style={{ padding: '6px 12px', fontSize: '14px', fontWeight: 'bold', flex: 1 }}>B</button>
-              <button className={`tab-btn ${textItalic ? 'active' : ''}`} onClick={() => setTextItalic(!textItalic)} style={{ padding: '6px 12px', fontSize: '14px', fontStyle: 'italic', flex: 1 }}>I</button>
-              <button className={`tab-btn ${textUnderline ? 'active' : ''}`} onClick={() => setTextUnderline(!textUnderline)} style={{ padding: '6px 12px', fontSize: '14px', textDecoration: 'underline', flex: 1 }}>U</button>
-            </div>
-            
-            <div className="control-label-row" style={{ marginTop: '16px', marginBottom: '8px' }}>
-              <span>Layer Position</span>
-            </div>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button 
-                className={`tab-btn ${textFront ? 'active' : ''}`} 
-                onClick={() => setTextFront(true)} 
-                title="Bring to Front"
-                style={{ padding: '8px', fontSize: '14px', flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="8" y="8" width="14" height="14" rx="2" ry="2" fill="currentColor" fillOpacity="0.8" stroke="none"></rect>
-                  <rect x="2" y="2" width="14" height="14" rx="2" ry="2"></rect>
-                </svg>
-                Front
-              </button>
-              <button 
-                className={`tab-btn ${!textFront ? 'active' : ''}`} 
-                onClick={() => setTextFront(false)} 
-                title="Send to Back"
-                style={{ padding: '8px', fontSize: '14px', flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="2" y="2" width="14" height="14" rx="2" ry="2" fill="currentColor" fillOpacity="0.8" stroke="none"></rect>
-                  <rect x="8" y="8" width="14" height="14" rx="2" ry="2"></rect>
-                </svg>
-                Back
-              </button>
-            </div>
+                  <div className="control-label-row">
+                    <span>Color</span>
+                    <input type="color" value={selectedText.color} onChange={(e) => updateText({ color: e.target.value })} style={{ width: '30px', height: '24px', padding: 0, border: 'none', cursor: 'pointer', background: 'transparent' }} />
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                    <button className={`tab-btn ${selectedText.bold ? 'active' : ''}`} onClick={() => updateText({ bold: !selectedText.bold })} style={{ padding: '6px 12px', fontSize: '14px', fontWeight: 'bold', flex: 1 }}>B</button>
+                    <button className={`tab-btn ${selectedText.italic ? 'active' : ''}`} onClick={() => updateText({ italic: !selectedText.italic })} style={{ padding: '6px 12px', fontSize: '14px', fontStyle: 'italic', flex: 1 }}>I</button>
+                    <button className={`tab-btn ${selectedText.underline ? 'active' : ''}`} onClick={() => updateText({ underline: !selectedText.underline })} style={{ padding: '6px 12px', fontSize: '14px', textDecoration: 'underline', flex: 1 }}>U</button>
+                  </div>
+                  
+                  <div className="control-label-row" style={{ marginTop: '16px', marginBottom: '8px' }}>
+                    <span>Layer Position</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button 
+                      className={`tab-btn ${selectedText.front ? 'active' : ''}`} 
+                      onClick={() => updateText({ front: true })} 
+                      title="Bring to Front"
+                      style={{ padding: '8px', fontSize: '14px', flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="8" y="8" width="14" height="14" rx="2" ry="2" fill="currentColor" fillOpacity="0.8" stroke="none"></rect>
+                        <rect x="2" y="2" width="14" height="14" rx="2" ry="2"></rect>
+                      </svg>
+                      Front
+                    </button>
+                    <button 
+                      className={`tab-btn ${!selectedText.front ? 'active' : ''}`} 
+                      onClick={() => updateText({ front: false })} 
+                      title="Send to Back"
+                      style={{ padding: '8px', fontSize: '14px', flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="2" y="2" width="14" height="14" rx="2" ry="2" fill="currentColor" fillOpacity="0.8" stroke="none"></rect>
+                        <rect x="8" y="8" width="14" height="14" rx="2" ry="2"></rect>
+                      </svg>
+                      Back
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         )}
       </div>
 
-      <hr style={{ border: 'none', borderTop: '1px solid #27272a', margin: '16px 0' }} />
 
       {/* Image Overlay Section */}
       <div className="section">
@@ -322,7 +355,6 @@ export default function SidebarSection() {
         )}
       </div>
 
-      <hr style={{ border: 'none', borderTop: '1px solid #27272a', margin: '16px 0' }} />
 
       {/* Post-Processing Section */}
       <div className="section">
@@ -508,7 +540,6 @@ export default function SidebarSection() {
         </div>
       </div>
 
-      <hr style={{ border: 'none', borderTop: '1px solid #27272a', margin: '16px 0' }} />
 
       {/* Action Buttons */}
       <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
