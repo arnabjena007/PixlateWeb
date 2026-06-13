@@ -9,6 +9,11 @@ const PixelPaintAnimation = dynamic(
   { ssr: false }
 );
 
+const GenerativeCanvas = dynamic(
+  () => import('@/components/ui/generative-canvas'),
+  { ssr: false }
+);
+
 const TransparentImage = ({ src, alt, className }) => {
   const canvasRef = useRef(null);
 
@@ -159,38 +164,12 @@ export default function AboutPage() {
         </p>
 
         <p className="about-body" style={{ marginBottom: '1.25rem', marginTop: '1.5rem' }}>
-          To showcase interactive creative coding, we can build custom stateful React components. For example, here is a React component that controls a canvas-based generative art crystal growth engine:
+          To showcase interactive creative coding, here is a functional React component that controls a canvas-based generative art crystal growth engine. Try clicking "Grow Canvas" below!
         </p>
-        <div className="about-code-block" style={{ marginBottom: '2rem' }}>
-          <div className="about-code-header">
-            <span className="about-code-lang">jsx</span>
-            <span className="about-code-label">GenerativeCanvas.jsx</span>
+        <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'center' }}>
+          <div style={{ width: '100%', maxWidth: '400px' }}>
+            <GenerativeCanvas />
           </div>
-          <pre className="about-code-pre">
-            <code>
-              <span className="code-keyword">const</span> <span className="code-name">GenerativeCanvas</span> = () =&gt; {"{\n"}
-              {"  "}<span className="code-keyword">const</span> [pixels, setPixels] = <span className="code-name">React</span>.<span className="code-func">useState</span>(<span className="code-number">0</span>);{"\n"}
-              {"  "}<span className="code-keyword">const</span> canvasRef = <span className="code-name">React</span>.<span className="code-func">useRef</span>(<span className="code-number">null</span>);{"\n\n"}
-              {"  "}<span className="code-keyword">const</span> <span className="code-func">startGrowth</span> = () =&gt; {"{\n"}
-              {"    "}<span className="code-keyword">const</span> ctx = canvasRef.current.<span className="code-func">getContext</span>(<span className="code-string">'2d'</span>);{"\n"}
-              {"    "}<span className="code-func">growPattern</span>(ctx, setPixels);{"\n"}
-              {"  };\n\n"}
-              {"  "}<span className="code-keyword">return</span> ({"\n"}
-              {"    "}&lt;<span className="code-tag">div</span> <span className="code-attr">className</span>=<span className="code-string">"p-4 border rounded-lg"</span>&gt;{"\n"}
-              {"      "}&lt;<span className="code-tag">h2</span> <span className="code-attr">className</span>=<span className="code-string">"text-xl font-bold mb-4"</span>&gt;Crystal Growth Engine&lt;/<span className="code-tag">h2</span>&gt;{"\n"}
-              {"      "}&lt;<span className="code-tag">p</span> <span className="code-attr">className</span>=<span className="code-string">"mb-2"</span>&gt;Active Pixels: {"{pixels}"}&lt;/<span className="code-tag">p</span>&gt;{"\n"}
-              {"      "}&lt;<span className="code-tag">canvas</span> <span className="code-attr">ref</span>={"{"}canvasRef{"}"} <span className="code-attr">className</span>=<span className="code-string">"bg-black mb-4"</span> /&gt;{"\n"}
-              {"      "}&lt;<span className="code-tag">button</span>{"\n"}
-              {"        "}<span className="code-attr">onClick</span>={"{startGrowth}"}{"\n"}
-              {"        "}<span className="code-attr">className</span>=<span className="code-string">"px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"</span>{"\n"}
-              {"      "}&gt;{"\n"}
-              {"        "}Grow Canvas{"\n"}
-              {"      "}&lt;/<span className="code-tag">button</span>&gt;{"\n"}
-              {"    "}&lt;/<span className="code-tag">div</span>&gt;{"\n"}
-              {"  "});{"\n"}
-              {"};"}
-            </code>
-          </pre>
         </div>
 
         <p className="about-body" style={{ marginBottom: '1.25rem' }}>
