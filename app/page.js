@@ -102,6 +102,40 @@ export default function PixlateApp() {
   const [overlayImageScale, setOverlayImageScale] = useState(100);
   const [overlayImageX, setOverlayImageX] = useState(50);
   const [overlayImageY, setOverlayImageY] = useState(50);
+  const [isDraggingOverlay, setIsDraggingOverlay] = useState(false);
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!isDraggingOverlay) return;
+      
+      const container = document.getElementById('canvas-preview-container');
+      if (container) {
+        const rect = container.getBoundingClientRect();
+        let x = ((e.clientX - rect.left) / rect.width) * 100;
+        let y = ((e.clientY - rect.top) / rect.height) * 100;
+        
+        x = Math.max(0, Math.min(100, x));
+        y = Math.max(0, Math.min(100, y));
+        
+        setOverlayImageX(Math.round(x));
+        setOverlayImageY(Math.round(y));
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDraggingOverlay(false);
+    };
+
+    if (isDraggingOverlay) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDraggingOverlay]);
 
   // Post-Processing State
   const [colorOverlay, setColorOverlay] = useState(false);
@@ -678,7 +712,7 @@ export default function PixlateApp() {
                   {activeTab === 'Processed' && (
                     <div className="preview-wrapper">
                       {outputUrl ? (
-                        <div className="effect-container" style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div id="canvas-preview-container" className="effect-container" style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <img src={outputUrl} alt="Processed Image" className="preview-image" style={{ filter: chromatic ? 'url(#chromatic)' : glitch ? 'url(#glitch)' : blur ? `blur(${blurStrength}px)` : 'none' }} />
                           <div className={`effect-overlays ${crt ? 'effect-crt' : ''}`} style={{
                             position: 'absolute', inset: 0, pointerEvents: 'none',
@@ -722,13 +756,14 @@ export default function PixlateApp() {
                             <img 
                               src={overlayImageUrl} 
                               alt="Overlay" 
+                              onMouseDown={(e) => { e.preventDefault(); setIsDraggingOverlay(true); }}
                               style={{
                                 position: 'absolute',
                                 left: `${overlayImageX}%`,
                                 top: `${overlayImageY}%`,
                                 width: `${50 * (overlayImageScale / 100)}%`,
                                 transform: 'translate(-50%, -50%)',
-                                pointerEvents: 'none',
+                                cursor: isDraggingOverlay ? 'grabbing' : 'grab',
                                 zIndex: 11
                               }} 
                             />
