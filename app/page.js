@@ -713,7 +713,11 @@ export default function PixlateApp() {
                     <div className="preview-wrapper">
                       {outputUrl ? (
                         <div id="canvas-preview-container" className="effect-container" style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <img src={outputUrl} alt="Processed Image" className="preview-image" style={{ filter: chromatic ? 'url(#chromatic)' : glitch ? 'url(#glitch)' : blur ? `blur(${blurStrength}px)` : 'none' }} />
+                          <WorkspacePaintReveal 
+                            imageUrl={outputUrl} 
+                            className="preview-image" 
+                            imageStyle={{ filter: chromatic ? 'url(#chromatic)' : glitch ? 'url(#glitch)' : blur ? `blur(${blurStrength}px)` : 'none' }} 
+                          />
                           <div className={`effect-overlays ${crt ? 'effect-crt' : ''}`} style={{
                             position: 'absolute', inset: 0, pointerEvents: 'none',
                             '--crt-opacity': crtStrength / 100,

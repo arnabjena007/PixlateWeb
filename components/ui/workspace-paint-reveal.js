@@ -94,7 +94,7 @@ class Mask {
  * Returns: { order: Int32Array of display-pixel indices, colors: Uint8Array [r,g,b per pixel] }
  */
 function buildDisplayOrder(raw, IW, IH, CW, CH) {
-  const scale = Math.max(CW / IW, CH / IH);
+  const scale = Math.min(CW / IW, CH / IH);
   const ox    = (CW - IW * scale) / 2;
   const oy    = (CH - IH * scale) / 2;
 
@@ -138,7 +138,7 @@ function brighterRgb(r, g, b, f = 2.8) {
 // ── Component ────────────────────────────────────────────────────────────────
 const SPEED = 8000; // display-pixels revealed per animation frame
 
-export default function WorkspacePaintReveal({ imageUrl }) {
+export default function WorkspacePaintReveal({ imageUrl, className, imageStyle }) {
   const wrapRef = useRef(null);
   const maskEl  = useRef(null);
   const partEl  = useRef(null);
@@ -150,6 +150,7 @@ export default function WorkspacePaintReveal({ imageUrl }) {
 
   const [imgSrc, setImgSrc] = useState(null);
   const [done,   setDone]   = useState(false);
+  const [status, setStatus] = useState('idle');
 
   // Init objects once
   useEffect(() => {
@@ -160,39 +161,47 @@ export default function WorkspacePaintReveal({ imageUrl }) {
     return () => cancelAnimationFrame(rafRef.current);
   }, []);
 
-  // Kick off animation whenever imageUrl changes
+  // Show image immediately, reset state
   useEffect(() => {
-    if (!imageUrl) { setImgSrc(null); setDone(false); return; }
+    if (!imageUrl) { setImgSrc(null); setDone(false); setStatus('idle'); return; }
 
     cancelAnimationFrame(rafRef.current);
     setDone(false);
-    setImgSrc(null);
+    setStatus('idle');
+    setImgSrc(imageUrl);
+    if (maskObj.current) maskObj.current.clear();
+    if (partObj.current) partObj.current.reset();
+  }, [imageUrl]);
+
+  const handlePlay = useCallback(() => {
+    if (status === 'playing' || !imageUrl) return;
+
+    cancelAnimationFrame(rafRef.current);
+    setDone(false);
+    setStatus('playing');
+
     if (maskObj.current) maskObj.current.clear();
     if (partObj.current) partObj.current.reset();
 
     const img = new Image();
-
+    img.crossOrigin = "anonymous";
     img.onload = () => {
-      setImgSrc(imageUrl); // show base img
+      setImgSrc(imageUrl);
 
       const IW = img.naturalWidth;
       const IH = img.naturalHeight;
 
-      // Read container display size
       const CW = wrapRef.current?.clientWidth  || 800;
       const CH = wrapRef.current?.clientHeight || 600;
 
-      // Read image pixels
       const offscreen = document.createElement('canvas');
       offscreen.width  = IW;
       offscreen.height = IH;
       offscreen.getContext('2d').drawImage(img, 0, 0);
       const { data: raw } = offscreen.getContext('2d').getImageData(0, 0, IW, IH);
 
-      // Build display-space order
       const { order, colR, colG, colB } = buildDisplayOrder(raw, IW, IH, CW, CH);
 
-      // Arm mask & particles at display size
       maskObj.current.arm(CW, CH);
       partObj.current.resize(CW, CH);
       partObj.current.reset();
@@ -210,7 +219,16 @@ export default function WorkspacePaintReveal({ imageUrl }) {
           const idx = order[index++];
           const cx  = idx % CW;
           const cy  = (idx / CW) | 0;
-          maskObj.current.uncoverPixel(cx, cy);
+          
+          // Only uncover pixels that are inside the image bounds
+          const ix = Math.round((cx - ox) / scale);
+          const iy = Math.round((cy - oy) / scale);
+          if (ix >= 0 && ix < IW && iy >= 0 && iy < IH) {
+            maskObj.current.uncoverPixel(cx, cy);
+          } else {
+             // For blank margins in contain, we should perhaps keep them uncovered, but let's just uncover them instantly
+             maskObj.current.uncoverPixel(cx, cy);
+          }
 
           if (i % 300 === 0) {
             const color = brighterRgb(colR[idx], colG[idx], colB[idx]);
@@ -225,36 +243,37 @@ export default function WorkspacePaintReveal({ imageUrl }) {
           rafRef.current = requestAnimationFrame(frame);
         } else {
           setDone(true);
+          setStatus('done');
         }
       };
 
       rafRef.current = requestAnimationFrame(frame);
     };
 
-    img.onerror = () => { setImgSrc(imageUrl); setDone(true); };
+    img.onerror = () => { setImgSrc(imageUrl); setDone(true); setStatus('done'); };
     img.src = imageUrl;
+  }, [imageUrl, status]);
 
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [imageUrl]);
-
+  // Expose play function to external caller if needed, or trigger on click
   return (
     <div
       ref={wrapRef}
-      style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}
+      className={className}
+      onClick={status !== 'playing' ? handlePlay : undefined}
+      style={{ position: 'relative', overflow: 'hidden', cursor: status !== 'playing' ? 'pointer' : 'default' }}
+      title={status !== 'playing' ? "Click to paint" : ""}
     >
-      {/* Base image fills container — object-fit:cover */}
+      {/* Base image */}
       {imgSrc && (
         <img
           src={imgSrc}
           alt="Processed output"
           style={{
-            position: 'absolute',
-            inset: 0,
+            display: 'block',
             width: '100%',
             height: '100%',
-            objectFit: 'cover',
-            borderRadius: '4px',
-            display: 'block',
+            objectFit: 'contain',
+            ...imageStyle
           }}
         />
       )}
