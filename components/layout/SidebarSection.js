@@ -79,6 +79,7 @@ export default function SidebarSection() {
                 if (preset) {
                   setWidth(preset.width);
                   setHeight(preset.height);
+                  handleProcess(undefined, preset.width, preset.height);
                 }
               }
             }}
