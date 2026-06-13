@@ -3,8 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { BackgroundRippleEffect } from "@/components/ui/background-ripple-effect";
 import dynamic from 'next/dynamic';
-
-
+import { Rnd } from 'react-rnd';
 
 const getImageDimensions = (file) => {
   return new Promise((resolve) => {
@@ -95,44 +94,8 @@ export default function PixlateApp() {
 
   // Image Overlay State
   const [imageOverlay, setImageOverlay] = useState(false);
-  const [overlayImageUrl, setOverlayImageUrl] = useState(null);
-  const [overlayImageScale, setOverlayImageScale] = useState(100);
-  const [overlayImageX, setOverlayImageX] = useState(50);
-  const [overlayImageY, setOverlayImageY] = useState(50);
-  const [isDraggingOverlay, setIsDraggingOverlay] = useState(false);
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      if (!isDraggingOverlay) return;
-      
-      const container = document.getElementById('canvas-preview-container');
-      if (container) {
-        const rect = container.getBoundingClientRect();
-        let x = ((e.clientX - rect.left) / rect.width) * 100;
-        let y = ((e.clientY - rect.top) / rect.height) * 100;
-        
-        x = Math.max(0, Math.min(100, x));
-        y = Math.max(0, Math.min(100, y));
-        
-        setOverlayImageX(Math.round(x));
-        setOverlayImageY(Math.round(y));
-      }
-    };
-
-    const handleMouseUp = () => {
-      setIsDraggingOverlay(false);
-    };
-
-    if (isDraggingOverlay) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-    }
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isDraggingOverlay]);
+  const [imageOverlays, setImageOverlays] = useState([]);
+  const [selectedOverlayId, setSelectedOverlayId] = useState(null);
 
   // Post-Processing State
   const [colorOverlay, setColorOverlay] = useState(false);
@@ -171,10 +134,8 @@ export default function PixlateApp() {
 
     // Image Overlay Reset
     setImageOverlay(false);
-    setOverlayImageUrl(null);
-    setOverlayImageScale(100);
-    setOverlayImageX(50);
-    setOverlayImageY(50);
+    setImageOverlays([]);
+    setSelectedOverlayId(null);
 
     // Tuning Reset
     setWhitePercent(0);
@@ -215,8 +176,18 @@ export default function PixlateApp() {
     const file = e.target.files[0];
     if (file && file.type.startsWith('image/')) {
       const url = URL.createObjectURL(file);
-      setOverlayImageUrl(url);
+      const newOverlay = {
+        id: Date.now().toString(),
+        url,
+        x: 25,
+        y: 25,
+        width: 50,
+        height: 50
+      };
+      setImageOverlays(prev => [...prev, newOverlay]);
+      setSelectedOverlayId(newOverlay.id);
     }
+    if (e.target) e.target.value = '';
   };
 
   const handleFile = async (file) => {
@@ -511,24 +482,28 @@ export default function PixlateApp() {
         }, 'image/png');
       };
 
-      if (imageOverlay && overlayImageUrl) {
-        const overlayImg = new Image();
-        overlayImg.crossOrigin = "anonymous";
-        overlayImg.onload = () => {
-          const aspect = overlayImg.width / overlayImg.height;
-          // Base size is relative to canvas width, e.g. 100% scale = 50% canvas width
-          const baseWidth = canvas.width * 0.5;
-          const overlayW = baseWidth * (overlayImageScale / 100);
-          const overlayH = overlayW / aspect;
-          const x = (canvas.width * (overlayImageX / 100)) - (overlayW / 2);
-          const y = (canvas.height * (overlayImageY / 100)) - (overlayH / 2);
-          ctx.drawImage(overlayImg, x, y, overlayW, overlayH);
-          exportCanvas();
-        };
-        overlayImg.src = overlayImageUrl;
-      } else {
+      const drawOverlaysAndExport = async () => {
+        if (imageOverlay && imageOverlays.length > 0) {
+          for (const overlay of imageOverlays) {
+            await new Promise((resolve) => {
+              const overlayImg = new Image();
+              overlayImg.crossOrigin = "anonymous";
+              overlayImg.onload = () => {
+                const overlayW = canvas.width * (overlay.width / 100);
+                const overlayH = canvas.height * (overlay.height / 100);
+                const x = canvas.width * (overlay.x / 100);
+                const y = canvas.height * (overlay.y / 100);
+                ctx.drawImage(overlayImg, x, y, overlayW, overlayH);
+                resolve();
+              };
+              overlayImg.src = overlay.url;
+            });
+          }
+        }
         exportCanvas();
-      }
+      };
+      
+      drawOverlaysAndExport();
     };
     img.src = outputUrl;
   };
@@ -709,12 +684,21 @@ export default function PixlateApp() {
                   {activeTab === 'Processed' && (
                     <div className="preview-wrapper">
                       {outputUrl ? (
-                        <div id="canvas-preview-container" className="effect-container" style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <img 
-                            src={outputUrl} 
-                            alt="Processed Image" 
-                            className="preview-image" 
-                            style={{ filter: chromatic ? 'url(#chromatic)' : glitch ? 'url(#glitch)' : blur ? `blur(${blurStrength}px)` : 'none' }} 
+                        <div 
+                          id="canvas-preview-container" 
+                          className="effect-container" 
+                          style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                          onMouseDown={(e) => {
+                            if (e.target.id === 'canvas-preview-container' || e.target.classList.contains('preview-image') || e.target.classList.contains('effect-overlay')) {
+                              setSelectedOverlayId(null);
+                            }
+                          }}
+                        >
+                          <img
+                            src={outputUrl}
+                            alt="Processed Image"
+                            className="preview-image"
+                            style={{ filter: chromatic ? 'url(#chromatic)' : glitch ? 'url(#glitch)' : blur ? `blur(${blurStrength}px)` : 'none' }}
                           />
                           <div className={`effect-overlays ${crt ? 'effect-crt' : ''}`} style={{
                             position: 'absolute', inset: 0, pointerEvents: 'none',
@@ -732,7 +716,7 @@ export default function PixlateApp() {
                             {halftone && <div className="effect-overlay effect-halftone"></div>}
                             {filmDust && <div className="effect-overlay effect-film-dust"></div>}
                           </div>
-                          
+
                           {textOverlay && textValue && (
                             <div style={{
                               position: 'absolute',
@@ -753,23 +737,101 @@ export default function PixlateApp() {
                               {textValue}
                             </div>
                           )}
-                          
-                          {imageOverlay && overlayImageUrl && (
-                            <img 
-                              src={overlayImageUrl} 
-                              alt="Overlay" 
-                              onMouseDown={(e) => { e.preventDefault(); setIsDraggingOverlay(true); }}
-                              style={{
-                                position: 'absolute',
-                                left: `${overlayImageX}%`,
-                                top: `${overlayImageY}%`,
-                                width: `${50 * (overlayImageScale / 100)}%`,
-                                transform: 'translate(-50%, -50%)',
-                                cursor: isDraggingOverlay ? 'grabbing' : 'grab',
-                                zIndex: 11
-                              }} 
-                            />
-                          )}
+
+                          {imageOverlay && imageOverlays.map(overlay => (
+                            <Rnd
+                              key={overlay.id}
+                              style={{ 
+                                border: selectedOverlayId === overlay.id ? '2px solid #a855f7' : 'none', 
+                                zIndex: selectedOverlayId === overlay.id ? 12 : 11 
+                              }}
+                              position={{
+                                x: (overlay.x / 100) * (document.getElementById('canvas-preview-container')?.clientWidth || 800),
+                                y: (overlay.y / 100) * (document.getElementById('canvas-preview-container')?.clientHeight || 800)
+                              }}
+                              size={{
+                                width: `${overlay.width}%`,
+                                height: `${overlay.height}%`
+                              }}
+                              onDragStart={() => setSelectedOverlayId(overlay.id)}
+                              onDragStop={(e, d) => {
+                                const parent = document.getElementById('canvas-preview-container');
+                                if (parent) {
+                                  setImageOverlays(prev => prev.map(o => o.id === overlay.id ? {
+                                    ...o,
+                                    x: (d.x / parent.clientWidth) * 100,
+                                    y: (d.y / parent.clientHeight) * 100
+                                  } : o));
+                                }
+                              }}
+                              onResizeStart={() => setSelectedOverlayId(overlay.id)}
+                              onResizeStop={(e, direction, ref, delta, position) => {
+                                const parent = document.getElementById('canvas-preview-container');
+                                if (parent) {
+                                  setImageOverlays(prev => prev.map(o => o.id === overlay.id ? {
+                                    ...o,
+                                    width: (parseFloat(ref.style.width) / parent.clientWidth) * 100,
+                                    height: (parseFloat(ref.style.height) / parent.clientHeight) * 100,
+                                    x: (position.x / parent.clientWidth) * 100,
+                                    y: (position.y / parent.clientHeight) * 100
+                                  } : o));
+                                }
+                              }}
+                              bounds="parent"
+                              enableResizing={selectedOverlayId === overlay.id ? undefined : false}
+                              onMouseDown={(e) => {
+                                setSelectedOverlayId(overlay.id);
+                              }}
+                              resizeHandleStyles={selectedOverlayId === overlay.id ? {
+                                top: { width: '20px', height: '8px', background: 'white', borderRadius: '4px', left: '50%', marginLeft: '-10px', top: '-5px', border: '1px solid #a855f7' },
+                                right: { width: '8px', height: '20px', background: 'white', borderRadius: '4px', top: '50%', marginTop: '-10px', right: '-5px', border: '1px solid #a855f7' },
+                                bottom: { width: '20px', height: '8px', background: 'white', borderRadius: '4px', left: '50%', marginLeft: '-10px', bottom: '-5px', border: '1px solid #a855f7' },
+                                left: { width: '8px', height: '20px', background: 'white', borderRadius: '4px', top: '50%', marginTop: '-10px', left: '-5px', border: '1px solid #a855f7' },
+                                topLeft: { width: '12px', height: '12px', background: 'white', borderRadius: '50%', left: '-6px', top: '-6px', border: '1px solid #a855f7' },
+                                topRight: { width: '12px', height: '12px', background: 'white', borderRadius: '50%', right: '-6px', top: '-6px', border: '1px solid #a855f7' },
+                                bottomLeft: { width: '12px', height: '12px', background: 'white', borderRadius: '50%', left: '-6px', bottom: '-6px', border: '1px solid #a855f7' },
+                                bottomRight: { width: '12px', height: '12px', background: 'white', borderRadius: '50%', right: '-6px', bottom: '-6px', border: '1px solid #a855f7' },
+                              } : {}}
+                            >
+                              {selectedOverlayId === overlay.id && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    setImageOverlays(prev => prev.filter(o => o.id !== overlay.id));
+                                    setSelectedOverlayId(null);
+                                  }}
+                                  style={{
+                                    position: 'absolute',
+                                    top: '-30px',
+                                    right: '0',
+                                    background: '#ef4444',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    padding: '4px 8px',
+                                    fontSize: '12px',
+                                    cursor: 'pointer',
+                                    pointerEvents: 'auto',
+                                    zIndex: 20
+                                  }}
+                                >
+                                  Remove
+                                </button>
+                              )}
+                              <img 
+                                src={overlay.url} 
+                                alt="Overlay" 
+                                draggable="false"
+                                style={{
+                                  width: '100%',
+                                  height: '100%',
+                                  pointerEvents: 'none'
+                                }} 
+                              />
+                            </Rnd>
+                          ))}
                         </div>
                       ) : loading ? (
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
@@ -834,8 +896,8 @@ export default function PixlateApp() {
                 <div className="control-label-row">
                   <span>Preset</span>
                 </div>
-                <select 
-                  className="select-dropdown" 
+                <select
+                  className="select-dropdown"
                   value={dimensionPreset}
                   onChange={(e) => {
                     const presetName = e.target.value;
@@ -1002,7 +1064,6 @@ export default function PixlateApp() {
                   </div>
                   <select className="select-dropdown" value={textFont} onChange={(e) => setTextFont(e.target.value)} style={{ marginBottom: '12px' }}>
                     <option value="Instrument Serif">Instrument Serif</option>
-                    <option value="Instrument Sans">Instrument Sans</option>
                     <option value="Geist">Geist</option>
                     <option value="Arial">Arial</option>
                     <option value="Impact">Impact</option>
@@ -1054,26 +1115,8 @@ export default function PixlateApp() {
                     onClick={() => overlayFileInputRef.current && overlayFileInputRef.current.click()}
                     style={{ width: '100%', marginBottom: '16px', padding: '8px' }}
                   >
-                    {overlayImageUrl ? 'Change Image' : 'Upload Image'}
+                    Add Image Overlay
                   </button>
-
-                  <div className="control-label-row">
-                    <span>Scale</span>
-                    <span className="control-value">{overlayImageScale}%</span>
-                  </div>
-                  <input type="range" min="10" max="300" value={overlayImageScale} onChange={(e) => setOverlayImageScale(parseInt(e.target.value))} style={{ marginBottom: '12px' }} />
-
-                  <div className="control-label-row">
-                    <span>Horizontal Position</span>
-                    <span className="control-value">{overlayImageX}%</span>
-                  </div>
-                  <input type="range" min="0" max="100" value={overlayImageX} onChange={(e) => setOverlayImageX(parseInt(e.target.value))} style={{ marginBottom: '12px' }} />
-
-                  <div className="control-label-row">
-                    <span>Vertical Position</span>
-                    <span className="control-value">{overlayImageY}%</span>
-                  </div>
-                  <input type="range" min="0" max="100" value={overlayImageY} onChange={(e) => setOverlayImageY(parseInt(e.target.value))} style={{ marginBottom: '12px' }} />
                 </div>
               )}
             </div>
