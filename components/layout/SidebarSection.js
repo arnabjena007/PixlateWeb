@@ -297,25 +297,17 @@ export default function SidebarSection() {
                       className={`tab-btn ${selectedText.front ? 'active' : ''}`} 
                       onClick={() => updateText({ front: true })} 
                       title="Bring to Front"
-                      style={{ padding: '8px', fontSize: '14px', flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
+                      style={{ padding: '8px', fontSize: '12px', flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
                     >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="8" y="8" width="14" height="14" rx="2" ry="2" fill="currentColor" fillOpacity="0.8" stroke="none"></rect>
-                        <rect x="2" y="2" width="14" height="14" rx="2" ry="2"></rect>
-                      </svg>
-                      Front
+                      In front of img
                     </button>
                     <button 
                       className={`tab-btn ${!selectedText.front ? 'active' : ''}`} 
                       onClick={() => updateText({ front: false })} 
                       title="Send to Back"
-                      style={{ padding: '8px', fontSize: '14px', flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
+                      style={{ padding: '8px', fontSize: '12px', flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
                     >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="2" y="2" width="14" height="14" rx="2" ry="2" fill="currentColor" fillOpacity="0.8" stroke="none"></rect>
-                        <rect x="8" y="8" width="14" height="14" rx="2" ry="2"></rect>
-                      </svg>
-                      Back
+                      Behind img
                     </button>
                   </div>
                 </div>
@@ -400,15 +392,15 @@ export default function SidebarSection() {
               <input type="checkbox" checked={vignette} onChange={(e) => setVignette(e.target.checked)} />
               <span className="toggle-slider"></span>
             </label>
-            <div className="toggle-info">
+            <div className="toggle-info" style={{ flex: vignette ? '0 0 auto' : 1, minWidth: '70px' }}>
               <span className="toggle-title" style={{ color: '#d4d4d8' }}>Vignette</span>
             </div>
+            {vignette && (
+              <div style={{ flex: 1, paddingLeft: '12px', display: 'flex', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
+                <input type="range" min="0" max="100" value={vignetteStrength} onChange={(e) => setVignetteStrength(parseInt(e.target.value))} style={{ width: '100%', margin: 0 }} />
+              </div>
+            )}
           </div>
-          {vignette && (
-            <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
-              <input type="range" min="0" max="100" value={vignetteStrength} onChange={(e) => setVignetteStrength(parseInt(e.target.value))} />
-            </div>
-          )}
 
           {/* Scan Lines */}
           <div className="toggle-row" onClick={() => setScanLines(!scanLines)}>
@@ -416,15 +408,15 @@ export default function SidebarSection() {
               <input type="checkbox" checked={scanLines} onChange={(e) => setScanLines(e.target.checked)} />
               <span className="toggle-slider"></span>
             </label>
-            <div className="toggle-info">
+            <div className="toggle-info" style={{ flex: scanLines ? '0 0 auto' : 1, minWidth: '70px' }}>
               <span className="toggle-title" style={{ color: '#d4d4d8' }}>Scan Lines</span>
             </div>
+            {scanLines && (
+              <div style={{ flex: 1, paddingLeft: '12px', display: 'flex', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
+                <input type="range" min="0" max="100" value={scanLineStrength} onChange={(e) => setScanLineStrength(parseInt(e.target.value))} style={{ width: '100%', margin: 0 }} />
+              </div>
+            )}
           </div>
-          {scanLines && (
-            <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
-              <input type="range" min="0" max="100" value={scanLineStrength} onChange={(e) => setScanLineStrength(parseInt(e.target.value))} />
-            </div>
-          )}
 
           {/* CRT Curvature */}
           <div className="toggle-row" onClick={() => setCrt(!crt)}>
@@ -432,15 +424,15 @@ export default function SidebarSection() {
               <input type="checkbox" checked={crt} onChange={(e) => setCrt(e.target.checked)} />
               <span className="toggle-slider"></span>
             </label>
-            <div className="toggle-info">
+            <div className="toggle-info" style={{ flex: crt ? '0 0 auto' : 1, minWidth: '95px' }}>
               <span className="toggle-title" style={{ color: '#d4d4d8' }}>CRT Curvature</span>
             </div>
+            {crt && (
+              <div style={{ flex: 1, paddingLeft: '12px', display: 'flex', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
+                <input type="range" min="0" max="100" value={crtStrength} onChange={(e) => setCrtStrength(parseInt(e.target.value))} style={{ width: '100%', margin: 0 }} />
+              </div>
+            )}
           </div>
-          {crt && (
-            <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
-              <input type="range" min="0" max="100" value={crtStrength} onChange={(e) => setCrtStrength(parseInt(e.target.value))} />
-            </div>
-          )}
 
           {/* RGB Split (formerly Chromatic) */}
           <div className="toggle-row" onClick={() => setChromatic(!chromatic)}>
@@ -448,15 +440,15 @@ export default function SidebarSection() {
               <input type="checkbox" checked={chromatic} onChange={(e) => setChromatic(e.target.checked)} />
               <span className="toggle-slider"></span>
             </label>
-            <div className="toggle-info">
+            <div className="toggle-info" style={{ flex: chromatic ? '0 0 auto' : 1, minWidth: '70px' }}>
               <span className="toggle-title" style={{ color: '#d4d4d8' }}>RGB Split</span>
             </div>
+            {chromatic && (
+              <div style={{ flex: 1, paddingLeft: '12px', display: 'flex', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
+                <input type="range" min="1" max="20" value={chromaticStrength} onChange={(e) => setChromaticStrength(parseInt(e.target.value))} style={{ width: '100%', margin: 0 }} />
+              </div>
+            )}
           </div>
-          {chromatic && (
-            <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
-              <input type="range" min="1" max="20" value={chromaticStrength} onChange={(e) => setChromaticStrength(parseInt(e.target.value))} />
-            </div>
-          )}
 
           {/* Glitch */}
           <div className="toggle-row" onClick={() => setGlitch(!glitch)}>
@@ -464,15 +456,15 @@ export default function SidebarSection() {
               <input type="checkbox" checked={glitch} onChange={(e) => setGlitch(e.target.checked)} />
               <span className="toggle-slider"></span>
             </label>
-            <div className="toggle-info">
+            <div className="toggle-info" style={{ flex: glitch ? '0 0 auto' : 1, minWidth: '50px' }}>
               <span className="toggle-title" style={{ color: '#d4d4d8' }}>Glitch</span>
             </div>
+            {glitch && (
+              <div style={{ flex: 1, paddingLeft: '12px', display: 'flex', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
+                <input type="range" min="1" max="50" value={glitchStrength} onChange={(e) => setGlitchStrength(parseInt(e.target.value))} style={{ width: '100%', margin: 0 }} />
+              </div>
+            )}
           </div>
-          {glitch && (
-            <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
-              <input type="range" min="1" max="50" value={glitchStrength} onChange={(e) => setGlitchStrength(parseInt(e.target.value))} />
-            </div>
-          )}
 
           {/* Blur */}
           <div className="toggle-row" onClick={() => setBlur(!blur)}>
@@ -480,15 +472,15 @@ export default function SidebarSection() {
               <input type="checkbox" checked={blur} onChange={(e) => setBlur(e.target.checked)} />
               <span className="toggle-slider"></span>
             </label>
-            <div className="toggle-info">
+            <div className="toggle-info" style={{ flex: blur ? '0 0 auto' : 1, minWidth: '40px' }}>
               <span className="toggle-title" style={{ color: '#d4d4d8' }}>Blur</span>
             </div>
+            {blur && (
+              <div style={{ flex: 1, paddingLeft: '12px', display: 'flex', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
+                <input type="range" min="1" max="20" value={blurStrength} onChange={(e) => setBlurStrength(parseInt(e.target.value))} style={{ width: '100%', margin: 0 }} />
+              </div>
+            )}
           </div>
-          {blur && (
-            <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
-              <input type="range" min="1" max="20" value={blurStrength} onChange={(e) => setBlurStrength(parseInt(e.target.value))} />
-            </div>
-          )}
 
           {/* Film Grain */}
           <div className="toggle-row" onClick={() => setFilmGrain(!filmGrain)}>
@@ -496,15 +488,15 @@ export default function SidebarSection() {
               <input type="checkbox" checked={filmGrain} onChange={(e) => setFilmGrain(e.target.checked)} />
               <span className="toggle-slider"></span>
             </label>
-            <div className="toggle-info">
+            <div className="toggle-info" style={{ flex: filmGrain ? '0 0 auto' : 1, minWidth: '70px' }}>
               <span className="toggle-title" style={{ color: '#d4d4d8' }}>Film Grain</span>
             </div>
+            {filmGrain && (
+              <div style={{ flex: 1, paddingLeft: '12px', display: 'flex', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
+                <input type="range" min="0" max="100" value={grainStrength} onChange={(e) => setGrainStrength(parseInt(e.target.value))} style={{ width: '100%', margin: 0 }} />
+              </div>
+            )}
           </div>
-          {filmGrain && (
-            <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
-              <input type="range" min="1" max="100" value={grainStrength} onChange={(e) => setGrainStrength(parseInt(e.target.value))} />
-            </div>
-          )}
 
           {/* Halftone */}
           <div className="toggle-row" onClick={() => setHalftone(!halftone)}>
@@ -512,15 +504,15 @@ export default function SidebarSection() {
               <input type="checkbox" checked={halftone} onChange={(e) => setHalftone(e.target.checked)} />
               <span className="toggle-slider"></span>
             </label>
-            <div className="toggle-info">
+            <div className="toggle-info" style={{ flex: halftone ? '0 0 auto' : 1, minWidth: '60px' }}>
               <span className="toggle-title" style={{ color: '#d4d4d8' }}>Halftone</span>
             </div>
+            {halftone && (
+              <div style={{ flex: 1, paddingLeft: '12px', display: 'flex', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
+                <input type="range" min="2" max="20" value={halftoneSize} onChange={(e) => setHalftoneSize(parseInt(e.target.value))} style={{ width: '100%', margin: 0 }} />
+              </div>
+            )}
           </div>
-          {halftone && (
-            <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
-              <input type="range" min="2" max="20" value={halftoneSize} onChange={(e) => setHalftoneSize(parseInt(e.target.value))} />
-            </div>
-          )}
 
           {/* Film Dust */}
           <div className="toggle-row" onClick={() => setFilmDust(!filmDust)}>
@@ -528,15 +520,15 @@ export default function SidebarSection() {
               <input type="checkbox" checked={filmDust} onChange={(e) => setFilmDust(e.target.checked)} />
               <span className="toggle-slider"></span>
             </label>
-            <div className="toggle-info">
+            <div className="toggle-info" style={{ flex: filmDust ? '0 0 auto' : 1, minWidth: '70px' }}>
               <span className="toggle-title" style={{ color: '#d4d4d8' }}>Film Dust</span>
             </div>
+            {filmDust && (
+              <div style={{ flex: 1, paddingLeft: '12px', display: 'flex', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
+                <input type="range" min="1" max="100" value={dustAmount} onChange={(e) => setDustAmount(parseInt(e.target.value))} style={{ width: '100%', margin: 0 }} />
+              </div>
+            )}
           </div>
-          {filmDust && (
-            <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
-              <input type="range" min="1" max="100" value={dustAmount} onChange={(e) => setDustAmount(parseInt(e.target.value))} />
-            </div>
-          )}
         </div>
       </div>
 
