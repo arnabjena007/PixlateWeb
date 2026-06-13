@@ -84,31 +84,19 @@ class Mask {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-/**
- * Build a pixel-reveal order (sorted by luminance ascending = dark→light)
- * operating entirely in DISPLAY-space (CW × CH).
- *
- * For each display pixel we find the corresponding image pixel via the
- * object-fit:cover inverse transform, read its luminance, then sort.
- *
- * Returns: { order: Int32Array of display-pixel indices, colors: Uint8Array [r,g,b per pixel] }
- */
 function buildDisplayOrder(raw, IW, IH, CW, CH) {
   const scale = Math.min(CW / IW, CH / IH);
   const ox    = (CW - IW * scale) / 2;
   const oy    = (CH - IH * scale) / 2;
 
   const N    = CW * CH;
-  const lum  = new Float32Array(N);
   const colR = new Uint8Array(N);
   const colG = new Uint8Array(N);
   const colB = new Uint8Array(N);
-  const order = new Int32Array(N);
 
   for (let cy = 0; cy < CH; cy++) {
     for (let cx = 0; cx < CW; cx++) {
       const idx = cy * CW + cx;
-      order[idx] = idx;
 
       // Map display pixel → image pixel
       const ix = Math.round((cx - ox) / scale);
@@ -117,16 +105,61 @@ function buildDisplayOrder(raw, IW, IH, CW, CH) {
       const iyi = Math.max(0, Math.min(IH - 1, iy));
 
       const b = (iyi * IW + ixi) * 4;
-      const r = raw[b], g = raw[b + 1], bl = raw[b + 2];
-      lum[idx]  = 0.2126 * r + 0.7152 * g + 0.0722 * bl;
-      colR[idx] = r;
-      colG[idx] = g;
-      colB[idx] = bl;
+      colR[idx] = raw[b];
+      colG[idx] = raw[b + 1];
+      colB[idx] = raw[b + 2];
     }
   }
 
-  // Sort by luminance (dark → light)
-  order.sort((a, b) => lum[a] - lum[b]);
+  // Build order using crystal growth pattern
+  const order = new Int32Array(N);
+  const filled = new Uint8Array(N);
+  const frontier = [];
+  
+  const cx = Math.floor(CW / 2);
+  const cy = Math.floor(CH / 2);
+  
+  let orderIdx = 0;
+  
+  const addPixel = (x, y) => {
+    const idx = y * CW + x;
+    if (filled[idx]) return;
+    filled[idx] = 1;
+    order[orderIdx++] = idx;
+    frontier.push({ x, y });
+  };
+  
+  addPixel(cx, cy);
+  
+  while (frontier.length > 0) {
+    const fIdx = Math.floor(Math.random() * frontier.length);
+    const p = frontier[fIdx];
+    
+    let nx, ny;
+    const emptyNeighbors = [];
+    
+    nx = p.x - 1; ny = p.y;
+    if (nx >= 0 && !filled[ny * CW + nx]) emptyNeighbors.push(nx, ny);
+    
+    nx = p.x + 1; ny = p.y;
+    if (nx < CW && !filled[ny * CW + nx]) emptyNeighbors.push(nx, ny);
+    
+    nx = p.x; ny = p.y - 1;
+    if (ny >= 0 && !filled[ny * CW + nx]) emptyNeighbors.push(nx, ny);
+    
+    nx = p.x; ny = p.y + 1;
+    if (ny < CH && !filled[ny * CW + nx]) emptyNeighbors.push(nx, ny);
+    
+    if (emptyNeighbors.length === 0) {
+      const last = frontier.pop();
+      if (fIdx < frontier.length) {
+        frontier[fIdx] = last;
+      }
+    } else {
+      const nIdx = Math.floor(Math.random() * (emptyNeighbors.length / 2)) * 2;
+      addPixel(emptyNeighbors[nIdx], emptyNeighbors[nIdx + 1]);
+    }
+  }
 
   return { order, colR, colG, colB };
 }
