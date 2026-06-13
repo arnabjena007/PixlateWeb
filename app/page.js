@@ -777,7 +777,6 @@ export default function PixlateApp() {
                                 }
                               }}
                               bounds="parent"
-                              lockAspectRatio={true}
                               enableResizing={selectedOverlayId === overlay.id ? undefined : false}
                               onMouseDown={(e) => {
                                 setSelectedOverlayId(overlay.id);
