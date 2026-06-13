@@ -882,6 +882,8 @@ export default function PixlateApp() {
               )}
             </div>
 
+            <hr style={{ border: 'none', borderTop: '1px solid #27272a', margin: '16px 0' }} />
+
             {/* Post-Processing Section */}
             <div className="section">
               <span className="section-title">Post-Processing</span>
@@ -1066,8 +1068,10 @@ export default function PixlateApp() {
               </div>
             </div>
 
+            <hr style={{ border: 'none', borderTop: '1px solid #27272a', margin: '16px 0' }} />
+
             {/* Action Buttons */}
-            <div style={{ marginTop: 'auto', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <button
                 type="button"
                 className="btn-secondary"
