@@ -542,7 +542,7 @@ export default function SidebarSection() {
 
 
       {/* Action Buttons */}
-      <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      <div className="section" style={{ marginTop: 'auto', gap: '8px' }}>
         <button
           type="button"
           className="btn-secondary"
