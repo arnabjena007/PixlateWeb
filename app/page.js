@@ -96,6 +96,13 @@ export default function PixlateApp() {
   const [textItalic, setTextItalic] = useState(false);
   const [textUnderline, setTextUnderline] = useState(false);
 
+  // Image Overlay State
+  const [imageOverlay, setImageOverlay] = useState(false);
+  const [overlayImageUrl, setOverlayImageUrl] = useState(null);
+  const [overlayImageScale, setOverlayImageScale] = useState(100);
+  const [overlayImageX, setOverlayImageX] = useState(50);
+  const [overlayImageY, setOverlayImageY] = useState(50);
+
   // Post-Processing State
   const [colorOverlay, setColorOverlay] = useState(false);
   const [overlayColor, setOverlayColor] = useState('#ff0000');
@@ -131,6 +138,13 @@ export default function PixlateApp() {
     setTextItalic(false);
     setTextUnderline(false);
 
+    // Image Overlay Reset
+    setImageOverlay(false);
+    setOverlayImageUrl(null);
+    setOverlayImageScale(100);
+    setOverlayImageX(50);
+    setOverlayImageY(50);
+
     // Tuning Reset
     setWhitePercent(0);
     setColorSort(false);
@@ -164,6 +178,15 @@ export default function PixlateApp() {
   };
 
   const fileInputRef = useRef(null);
+  const overlayFileInputRef = useRef(null);
+
+  const handleOverlayFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+      const url = URL.createObjectURL(file);
+      setOverlayImageUrl(url);
+    }
+  };
 
   const handleFile = async (file) => {
     if (file && file.type.startsWith('image/')) {
@@ -444,16 +467,37 @@ export default function PixlateApp() {
         }
       }
 
-      canvas.toBlob((blob) => {
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'custom-pixlate.png';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      }, 'image/png');
+      const exportCanvas = () => {
+        canvas.toBlob((blob) => {
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = 'custom-pixlate.png';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        }, 'image/png');
+      };
+
+      if (imageOverlay && overlayImageUrl) {
+        const overlayImg = new Image();
+        overlayImg.crossOrigin = "anonymous";
+        overlayImg.onload = () => {
+          const aspect = overlayImg.width / overlayImg.height;
+          // Base size is relative to canvas width, e.g. 100% scale = 50% canvas width
+          const baseWidth = canvas.width * 0.5;
+          const overlayW = baseWidth * (overlayImageScale / 100);
+          const overlayH = overlayW / aspect;
+          const x = (canvas.width * (overlayImageX / 100)) - (overlayW / 2);
+          const y = (canvas.height * (overlayImageY / 100)) - (overlayH / 2);
+          ctx.drawImage(overlayImg, x, y, overlayW, overlayH);
+          exportCanvas();
+        };
+        overlayImg.src = overlayImageUrl;
+      } else {
+        exportCanvas();
+      }
     };
     img.src = outputUrl;
   };
@@ -497,6 +541,13 @@ export default function PixlateApp() {
         type="file"
         accept="image/*"
         onChange={handleFileChange}
+        style={{ display: 'none' }}
+      />
+      <input
+        ref={overlayFileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleOverlayFileChange}
         style={{ display: 'none' }}
       />
 
@@ -665,6 +716,22 @@ export default function PixlateApp() {
                             }}>
                               {textValue}
                             </div>
+                          )}
+                          
+                          {imageOverlay && overlayImageUrl && (
+                            <img 
+                              src={overlayImageUrl} 
+                              alt="Overlay" 
+                              style={{
+                                position: 'absolute',
+                                left: `${overlayImageX}%`,
+                                top: `${overlayImageY}%`,
+                                width: `${50 * (overlayImageScale / 100)}%`,
+                                transform: 'translate(-50%, -50%)',
+                                pointerEvents: 'none',
+                                zIndex: 11
+                              }} 
+                            />
                           )}
                         </div>
                       ) : loading ? (
@@ -921,6 +988,55 @@ export default function PixlateApp() {
                     <button className={`tab-btn ${textItalic ? 'active' : ''}`} onClick={() => setTextItalic(!textItalic)} style={{ padding: '6px 12px', fontSize: '14px', fontStyle: 'italic', flex: 1 }}>I</button>
                     <button className={`tab-btn ${textUnderline ? 'active' : ''}`} onClick={() => setTextUnderline(!textUnderline)} style={{ padding: '6px 12px', fontSize: '14px', textDecoration: 'underline', flex: 1 }}>U</button>
                   </div>
+                </div>
+              )}
+            </div>
+
+            <hr style={{ border: 'none', borderTop: '1px solid #27272a', margin: '16px 0' }} />
+
+            {/* Image Overlay Section */}
+            <div className="section">
+              <span className="section-title">Image Overlay</span>
+
+              <div className="toggle-row" onClick={() => setImageOverlay(!imageOverlay)}>
+                <div className="toggle-info">
+                  <span className="toggle-title">Enable Image</span>
+                  <span className="toggle-desc">Add a custom image</span>
+                </div>
+                <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                  <input type="checkbox" checked={imageOverlay} onChange={(e) => setImageOverlay(e.target.checked)} />
+                  <span className="toggle-slider"></span>
+                </label>
+              </div>
+
+              {imageOverlay && (
+                <div className="control-group" style={{ paddingLeft: '10px', paddingBottom: '8px', paddingTop: '8px' }}>
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    onClick={() => overlayFileInputRef.current && overlayFileInputRef.current.click()}
+                    style={{ width: '100%', marginBottom: '16px', padding: '8px' }}
+                  >
+                    {overlayImageUrl ? 'Change Image' : 'Upload Image'}
+                  </button>
+
+                  <div className="control-label-row">
+                    <span>Scale</span>
+                    <span className="control-value">{overlayImageScale}%</span>
+                  </div>
+                  <input type="range" min="10" max="300" value={overlayImageScale} onChange={(e) => setOverlayImageScale(parseInt(e.target.value))} style={{ marginBottom: '12px' }} />
+
+                  <div className="control-label-row">
+                    <span>Horizontal Position</span>
+                    <span className="control-value">{overlayImageX}%</span>
+                  </div>
+                  <input type="range" min="0" max="100" value={overlayImageX} onChange={(e) => setOverlayImageX(parseInt(e.target.value))} style={{ marginBottom: '12px' }} />
+
+                  <div className="control-label-row">
+                    <span>Vertical Position</span>
+                    <span className="control-value">{overlayImageY}%</span>
+                  </div>
+                  <input type="range" min="0" max="100" value={overlayImageY} onChange={(e) => setOverlayImageY(parseInt(e.target.value))} style={{ marginBottom: '12px' }} />
                 </div>
               )}
             </div>
