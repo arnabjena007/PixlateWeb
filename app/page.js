@@ -67,12 +67,9 @@ export default function PixlateApp() {
   const [sliderMaxHeight, setSliderMaxHeight] = useState(2000);
   const [whitePercent, setWhitePercent] = useState(0);
   const [colorSort, setColorSort] = useState(false);
-  const [random, setRandom] = useState(0); // integer weight, 0 = off
   const [reverse, setReverse] = useState(false);
-  const [sweep, setSweep] = useState(false);
   const [randomSeed, setRandomSeed] = useState(0); // integer seed, 0 = off
   const [variations, setVariations] = useState(1);
-  const [seeds, setSeeds] = useState('');
 
   // Text Overlay State
   const [textOverlay, setTextOverlay] = useState(false);
@@ -122,13 +119,9 @@ export default function PixlateApp() {
     // Tuning Reset
     setWhitePercent(0);
     setColorSort(false);
-    setRandom(0);
     setReverse(false);
-    setSweep(false);
     setRandomSeed(0);
     setVariations(1);
-    setCompress(0);
-    setSeeds('');
 
     // Post-Processing Reset
     setColorOverlay(false);
@@ -170,12 +163,12 @@ export default function PixlateApp() {
         setHeight(dims.height);
         setSliderMaxWidth(Math.max(2000, dims.width));
         setSliderMaxHeight(Math.max(2000, dims.height));
-        await handleProcess(file, dims.width, dims.height, whitePercent, colorSort, random, reverse, sweep, randomSeed, variations, compress, seeds);
+        await handleProcess(file, dims.width, dims.height, whitePercent, colorSort, reverse, randomSeed, variations);
       } catch (err) {
         console.error("Failed to read image dimensions:", err);
         setWidth(800);
         setHeight(800);
-        await handleProcess(file, 800, 800, whitePercent, colorSort, random, reverse, sweep, randomSeed, variations, compress, seeds);
+        await handleProcess(file, 800, 800, whitePercent, colorSort, reverse, randomSeed, variations);
       }
     } else {
       alert('Please upload a valid image file.');
@@ -232,7 +225,7 @@ export default function PixlateApp() {
       setHeight(dims.height);
       setSliderMaxWidth(Math.max(2000, dims.width));
       setSliderMaxHeight(Math.max(2000, dims.height));
-      await handleProcess(file, dims.width, dims.height, whitePercent, colorSort, random, reverse, sweep, randomSeed, variations, compress, seeds);
+      await handleProcess(file, dims.width, dims.height, whitePercent, colorSort, reverse, randomSeed, variations);
     } catch (err) {
       alert('Failed to load preset image: ' + err.message);
     } finally {
@@ -257,7 +250,7 @@ export default function PixlateApp() {
       setHeight(dims.height);
       setSliderMaxWidth(Math.max(2000, dims.width));
       setSliderMaxHeight(Math.max(2000, dims.height));
-      await handleProcess(file, dims.width, dims.height, whitePercent, colorSort, random, reverse, sweep, randomSeed, variations, compress, seeds);
+      await handleProcess(file, dims.width, dims.height, whitePercent, colorSort, reverse, randomSeed, variations);
     } catch (err) {
       alert('Failed to load preset image: ' + err.message);
     } finally {
@@ -271,13 +264,9 @@ export default function PixlateApp() {
     h = height,
     wp = whitePercent,
     cs = colorSort,
-    rand = random,
     rev = reverse,
-    sw = sweep,
     rs = randomSeed,
-    varCount = variations,
-    comp = compress,
-    sd = seeds
+    varCount = variations
   ) => {
     if (!img) return;
     setLoading(true);
@@ -289,13 +278,13 @@ export default function PixlateApp() {
     formData.append('height', h);
     formData.append('whitePercent', wp);
     formData.append('colorSort', cs);
-    formData.append('random', rand);
+    formData.append('random', 0);
     formData.append('reverse', rev);
-    formData.append('sweep', sw);
+    formData.append('sweep', false);
     formData.append('randomSeed', rs);
     formData.append('variations', varCount);
-    formData.append('compress', comp);
-    formData.append('seeds', sd);
+    formData.append('compress', 0);
+    formData.append('seeds', '');
 
     try {
       const response = await fetch('/api/pixlate', {
