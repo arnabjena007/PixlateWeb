@@ -91,6 +91,7 @@ export default function PixlateApp() {
   const [textBold, setTextBold] = useState(true);
   const [textItalic, setTextItalic] = useState(false);
   const [textUnderline, setTextUnderline] = useState(false);
+  const [textFront, setTextFront] = useState(true);
 
   // Image Overlay State
   const [imageOverlay, setImageOverlay] = useState(false);
@@ -131,6 +132,7 @@ export default function PixlateApp() {
     setTextBold(true);
     setTextItalic(false);
     setTextUnderline(false);
+    setTextFront(true);
 
     // Image Overlay Reset
     setImageOverlay(false);
@@ -451,22 +453,28 @@ export default function PixlateApp() {
         ctx.globalCompositeOperation = 'source-over';
       }
 
-      if (textOverlay && textValue) {
-        ctx.fillStyle = textColor;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        let fontString = '';
-        if (textItalic) fontString += 'italic ';
-        if (textBold) fontString += 'bold ';
-        fontString += `${textSize}px "${textFont}", sans-serif`;
-        ctx.font = fontString;
-        ctx.fillText(textValue, canvas.width / 2, canvas.height / 2);
-
-        if (textUnderline) {
-          const textMetrics = ctx.measureText(textValue);
-          const textWidth = textMetrics.width;
-          ctx.fillRect(canvas.width / 2 - textWidth / 2, canvas.height / 2 + textSize / 2 - (textSize * 0.1), textWidth, textSize / 15);
+      const drawTextOverlay = () => {
+        if (textOverlay && textValue) {
+          ctx.fillStyle = textColor;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          let fontString = '';
+          if (textItalic) fontString += 'italic ';
+          if (textBold) fontString += 'bold ';
+          fontString += `${textSize}px "${textFont}", sans-serif`;
+          ctx.font = fontString;
+          ctx.fillText(textValue, canvas.width / 2, canvas.height / 2);
+  
+          if (textUnderline) {
+            const textMetrics = ctx.measureText(textValue);
+            const textWidth = textMetrics.width;
+            ctx.fillRect(canvas.width / 2 - textWidth / 2, canvas.height / 2 + textSize / 2 - (textSize * 0.1), textWidth, textSize / 15);
+          }
         }
+      };
+
+      if (!textFront) {
+        drawTextOverlay();
       }
 
       const exportCanvas = () => {
@@ -500,6 +508,11 @@ export default function PixlateApp() {
             });
           }
         }
+        
+        if (textFront) {
+          drawTextOverlay();
+        }
+        
         exportCanvas();
       };
       
@@ -732,7 +745,7 @@ export default function PixlateApp() {
                               textDecoration: textUnderline ? 'underline' : 'none',
                               pointerEvents: 'none',
                               whiteSpace: 'nowrap',
-                              zIndex: 10
+                              zIndex: textFront ? 15 : 10
                             }}>
                               {textValue}
                             </div>
@@ -1093,6 +1106,36 @@ export default function PixlateApp() {
                     <button className={`tab-btn ${textBold ? 'active' : ''}`} onClick={() => setTextBold(!textBold)} style={{ padding: '6px 12px', fontSize: '14px', fontWeight: 'bold', flex: 1 }}>B</button>
                     <button className={`tab-btn ${textItalic ? 'active' : ''}`} onClick={() => setTextItalic(!textItalic)} style={{ padding: '6px 12px', fontSize: '14px', fontStyle: 'italic', flex: 1 }}>I</button>
                     <button className={`tab-btn ${textUnderline ? 'active' : ''}`} onClick={() => setTextUnderline(!textUnderline)} style={{ padding: '6px 12px', fontSize: '14px', textDecoration: 'underline', flex: 1 }}>U</button>
+                  </div>
+                  
+                  <div className="control-label-row" style={{ marginTop: '16px', marginBottom: '8px' }}>
+                    <span>Layer Position</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button 
+                      className={`tab-btn ${textFront ? 'active' : ''}`} 
+                      onClick={() => setTextFront(true)} 
+                      title="Bring to Front"
+                      style={{ padding: '8px', fontSize: '14px', flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="8" y="8" width="14" height="14" rx="2" ry="2" fill="currentColor" fillOpacity="0.8" stroke="none"></rect>
+                        <rect x="2" y="2" width="14" height="14" rx="2" ry="2"></rect>
+                      </svg>
+                      Front
+                    </button>
+                    <button 
+                      className={`tab-btn ${!textFront ? 'active' : ''}`} 
+                      onClick={() => setTextFront(false)} 
+                      title="Send to Back"
+                      style={{ padding: '8px', fontSize: '14px', flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="2" y="2" width="14" height="14" rx="2" ry="2" fill="currentColor" fillOpacity="0.8" stroke="none"></rect>
+                        <rect x="8" y="8" width="14" height="14" rx="2" ry="2"></rect>
+                      </svg>
+                      Back
+                    </button>
                   </div>
                 </div>
               )}
