@@ -39,6 +39,20 @@ const PRESETS = [
   { id: 'daisies', name: 'Flowers', path: '/presets/daisies.jpg' },
 ];
 
+const DIMENSION_PRESETS = [
+  { name: 'Custom Size', width: null, height: null },
+  { name: 'Instagram Post', width: 1080, height: 1350 },
+  { name: 'Facebook Post', width: 940, height: 788 },
+  { name: 'Facebook Page Cover', width: 851, height: 315 },
+  { name: 'Facebook Event Cover', width: 1920, height: 1080 },
+  { name: 'YouTube Thumbnail', width: 1280, height: 720 },
+  { name: 'YouTube Banner', width: 2560, height: 1440 },
+  { name: 'LinkedIn Background Photo', width: 1584, height: 396 },
+  { name: 'LinkedIn Post', width: 1200, height: 1200 },
+  { name: 'Pinterest Pin', width: 1000, height: 1500 },
+  { name: 'Twitter Post', width: 1600, height: 900 },
+];
+
 export default function PixlateApp() {
   const [image, setImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -61,6 +75,7 @@ export default function PixlateApp() {
   }, [showEditor]);
 
   // Custom Settings State
+  const [dimensionPreset, setDimensionPreset] = useState('Custom Size');
   const [width, setWidth] = useState(800);
   const [height, setHeight] = useState(800);
   const [sliderMaxWidth, setSliderMaxWidth] = useState(2000);
@@ -713,12 +728,40 @@ export default function PixlateApp() {
 
               <div className="control-group">
                 <div className="control-label-row">
+                  <span>Preset</span>
+                </div>
+                <select 
+                  className="select-dropdown" 
+                  value={dimensionPreset}
+                  onChange={(e) => {
+                    const presetName = e.target.value;
+                    setDimensionPreset(presetName);
+                    if (presetName !== 'Custom Size') {
+                      const preset = DIMENSION_PRESETS.find(p => p.name === presetName);
+                      if (preset) {
+                        setWidth(preset.width);
+                        setHeight(preset.height);
+                      }
+                    }
+                  }}
+                  style={{ marginBottom: '12px' }}
+                >
+                  {DIMENSION_PRESETS.map(preset => (
+                    <option key={preset.name} value={preset.name}>
+                      {preset.name} {preset.width ? `(${preset.width} × ${preset.height})` : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="control-group">
+                <div className="control-label-row">
                   <span>Width</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <input
                       type="number"
                       value={width}
-                      onChange={(e) => setWidth(parseInt(e.target.value) || 0)}
+                      onChange={(e) => { setWidth(parseInt(e.target.value) || 0); setDimensionPreset('Custom Size'); }}
                       style={{ width: '60px', textAlign: 'right', background: 'transparent', border: '1px solid #3f3f46', color: 'var(--text-primary)', borderRadius: '4px', padding: '2px 4px', fontSize: '12px' }}
                     />
                     <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>px</span>
@@ -730,7 +773,7 @@ export default function PixlateApp() {
                   max={sliderMaxWidth}
                   step="50"
                   value={width}
-                  onChange={(e) => setWidth(parseInt(e.target.value))}
+                  onChange={(e) => { setWidth(parseInt(e.target.value)); setDimensionPreset('Custom Size'); }}
                 />
               </div>
 
@@ -741,7 +784,7 @@ export default function PixlateApp() {
                     <input
                       type="number"
                       value={height}
-                      onChange={(e) => setHeight(parseInt(e.target.value) || 0)}
+                      onChange={(e) => { setHeight(parseInt(e.target.value) || 0); setDimensionPreset('Custom Size'); }}
                       style={{ width: '60px', textAlign: 'right', background: 'transparent', border: '1px solid #3f3f46', color: 'var(--text-primary)', borderRadius: '4px', padding: '2px 4px', fontSize: '12px' }}
                     />
                     <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>px</span>
@@ -753,7 +796,7 @@ export default function PixlateApp() {
                   max={sliderMaxHeight}
                   step="50"
                   value={height}
-                  onChange={(e) => setHeight(parseInt(e.target.value))}
+                  onChange={(e) => { setHeight(parseInt(e.target.value)); setDimensionPreset('Custom Size'); }}
                 />
               </div>
             </div>
