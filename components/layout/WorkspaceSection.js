@@ -12,8 +12,7 @@ export default function WorkspaceSection() {
     vignette, vignetteStrength, scanLines, scanLineStrength,
     crt, crtStrength, chromatic, chromaticStrength,
     glitch, glitchStrength, blur, blurStrength,
-    filmGrain, grainStrength, halftone, halftoneSize,
-    filmDust, dustAmount,
+    halftone, halftoneSize,
     handleDrag, handleDrop, triggerFileInput, handleInspireMe,
     handleProcess, handleDownload, setRandomSeed
   } = usePixlate();
@@ -99,39 +98,44 @@ export default function WorkspaceSection() {
             {activeTab === 'Processed' && (
               <div className="preview-wrapper">
                 {outputUrl ? (
-                  <div 
-                    id="canvas-preview-container" 
-                    className="effect-container" 
-                    style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                    onMouseDown={(e) => {
-                      if (e.target.id === 'canvas-preview-container' || e.target.classList.contains('preview-image') || e.target.classList.contains('effect-overlay')) {
-                        setSelectedOverlayId(null);
-                        setSelectedTextId(null);
-                      }
-                    }}
-                  >
-                    <img
-                      src={outputUrl}
-                      alt="Processed Image"
-                      className="preview-image"
-                      style={{ filter: chromatic ? 'url(#chromatic)' : glitch ? 'url(#glitch)' : blur ? `blur(${blurStrength}px)` : 'none' }}
-                    />
-                    <div className={`effect-overlays ${crt ? 'effect-crt' : ''}`} style={{
-                      position: 'absolute', inset: 0, pointerEvents: 'none',
-                      '--crt-opacity': crtStrength / 100,
-                      '--grain-opacity': grainStrength / 100,
-                      '--halftone-size': `${halftoneSize}px`,
-                      '--dust-opacity': dustAmount / 100,
-                      '--scanline-opacity': scanLineStrength / 100,
-                      '--vignette-opacity': vignetteStrength / 100
-                    }}>
-                      {colorOverlay && <div className="effect-overlay effect-color-overlay" style={{ '--overlay-color': overlayColor, '--overlay-opacity': overlayOpacity / 100, '--overlay-blend': overlayBlend }}></div>}
-                      {vignette && <div className="effect-overlay effect-vignette"></div>}
-                      {scanLines && <div className="effect-overlay effect-scanlines"></div>}
-                      {filmGrain && <div className="effect-overlay effect-film-grain"></div>}
-                      {halftone && <div className="effect-overlay effect-halftone"></div>}
-                      {filmDust && <div className="effect-overlay effect-film-dust"></div>}
-                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
+                      <div 
+                        id="canvas-preview-container" 
+                        className="effect-container" 
+                        style={{ 
+                          position: 'relative', 
+                          aspectRatio: `${width || 1} / ${height || 1}`,
+                          maxWidth: '100%',
+                          maxHeight: '100%',
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center' 
+                        }}
+                        onMouseDown={(e) => {
+                          if (e.target.id === 'canvas-preview-container' || e.target.classList.contains('preview-image') || e.target.classList.contains('effect-overlay')) {
+                            setSelectedOverlayId(null);
+                            setSelectedTextId(null);
+                          }
+                        }}
+                      >
+                        <img
+                          src={outputUrl}
+                          alt="Processed Image"
+                          className="preview-image"
+                          style={{ filter: chromatic ? 'url(#chromatic)' : glitch ? 'url(#glitch)' : blur ? `blur(${blurStrength}px)` : 'none' }}
+                        />
+                        <div className={`effect-overlays ${crt ? 'effect-crt' : ''}`} style={{
+                          position: 'absolute', inset: 0, pointerEvents: 'none',
+                          '--crt-opacity': crtStrength / 100,
+                          '--halftone-size': `${halftoneSize}px`,
+                          '--scanline-opacity': scanLineStrength / 100,
+                          '--vignette-opacity': vignetteStrength / 100
+                        }}>
+                          {colorOverlay && <div className="effect-overlay effect-color-overlay" style={{ '--overlay-color': overlayColor, '--overlay-opacity': overlayOpacity / 100, '--overlay-blend': overlayBlend }}></div>}
+                          {vignette && <div className="effect-overlay effect-vignette"></div>}
+                          {scanLines && <div className="effect-overlay effect-scanlines"></div>}
+                          {halftone && <div className="effect-overlay effect-halftone"></div>}
+                        </div>
 
                     {textOverlay && textOverlays.map(textObj => (
                       <Rnd
@@ -143,13 +147,12 @@ export default function WorkspaceSection() {
                           alignItems: 'center',
                           justifyContent: 'center',
                           fontFamily: `"${textObj.font}", sans-serif`,
-                          fontSize: `${textObj.size === 'Small' ? 30 : textObj.size === 'Large' ? 150 : textObj.size === 'Extra Large' ? 300 : 70}px`,
+                          fontSize: `${(textObj.size === 'Small' ? 30 : textObj.size === 'Large' ? 150 : textObj.size === 'Extra Large' ? 300 : 70) * ((document.getElementById('canvas-preview-container')?.clientWidth || 800) / Math.max(width || 1, 1))}px`,
                           color: textObj.color,
                           fontWeight: textObj.bold ? 'bold' : 'normal',
                           fontStyle: textObj.italic ? 'italic' : 'normal',
                           textDecoration: textObj.underline ? 'underline' : 'none',
-                          whiteSpace: 'nowrap',
-                          transform: `scale(${Math.min(1, 800 / Math.max(width || 1, 1))})`
+                          whiteSpace: 'nowrap'
                         }}
                         position={{
                           x: (textObj.x / 100) * (document.getElementById('canvas-preview-container')?.clientWidth || 800),
@@ -314,6 +317,7 @@ export default function WorkspaceSection() {
                       </Rnd>
                     ))}
                   </div>
+                </div>
                 ) : loading ? (
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
                     <div className="spinner"></div>

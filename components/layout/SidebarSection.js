@@ -16,9 +16,7 @@ export default function SidebarSection() {
     chromatic, setChromatic, chromaticStrength, setChromaticStrength,
     glitch, setGlitch, glitchStrength, setGlitchStrength,
     blur, setBlur, blurStrength, setBlurStrength,
-    filmGrain, setFilmGrain, grainStrength, setGrainStrength,
     halftone, setHalftone, halftoneSize, setHalftoneSize,
-    filmDust, setFilmDust, dustAmount, setDustAmount,
     handleReset, handleProcess
   } = usePixlate();
 
@@ -482,22 +480,6 @@ export default function SidebarSection() {
             )}
           </div>
 
-          {/* Film Grain */}
-          <div className="toggle-row" onClick={() => setFilmGrain(!filmGrain)}>
-            <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
-              <input type="checkbox" checked={filmGrain} onChange={(e) => setFilmGrain(e.target.checked)} />
-              <span className="toggle-slider"></span>
-            </label>
-            <div className="toggle-info" style={{ flex: filmGrain ? '0 0 auto' : 1, minWidth: '70px' }}>
-              <span className="toggle-title" style={{ color: '#d4d4d8' }}>Film Grain</span>
-            </div>
-            {filmGrain && (
-              <div style={{ flex: 1, paddingLeft: '12px', display: 'flex', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
-                <input type="range" min="0" max="100" value={grainStrength} onChange={(e) => setGrainStrength(parseInt(e.target.value))} style={{ width: '100%', margin: 0 }} />
-              </div>
-            )}
-          </div>
-
           {/* Halftone */}
           <div className="toggle-row" onClick={() => setHalftone(!halftone)}>
             <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
@@ -510,22 +492,6 @@ export default function SidebarSection() {
             {halftone && (
               <div style={{ flex: 1, paddingLeft: '12px', display: 'flex', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
                 <input type="range" min="2" max="20" value={halftoneSize} onChange={(e) => setHalftoneSize(parseInt(e.target.value))} style={{ width: '100%', margin: 0 }} />
-              </div>
-            )}
-          </div>
-
-          {/* Film Dust */}
-          <div className="toggle-row" onClick={() => setFilmDust(!filmDust)}>
-            <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
-              <input type="checkbox" checked={filmDust} onChange={(e) => setFilmDust(e.target.checked)} />
-              <span className="toggle-slider"></span>
-            </label>
-            <div className="toggle-info" style={{ flex: filmDust ? '0 0 auto' : 1, minWidth: '70px' }}>
-              <span className="toggle-title" style={{ color: '#d4d4d8' }}>Film Dust</span>
-            </div>
-            {filmDust && (
-              <div style={{ flex: 1, paddingLeft: '12px', display: 'flex', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
-                <input type="range" min="1" max="100" value={dustAmount} onChange={(e) => setDustAmount(parseInt(e.target.value))} style={{ width: '100%', margin: 0 }} />
               </div>
             )}
           </div>

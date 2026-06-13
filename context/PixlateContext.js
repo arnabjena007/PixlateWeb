@@ -109,12 +109,8 @@ export const PixlateProvider = ({ children }) => {
   const [glitchStrength, setGlitchStrength] = useState(10);
   const [blur, setBlur] = useState(false);
   const [blurStrength, setBlurStrength] = useState(5);
-  const [filmGrain, setFilmGrain] = useState(false);
-  const [grainStrength, setGrainStrength] = useState(15);
   const [halftone, setHalftone] = useState(false);
   const [halftoneSize, setHalftoneSize] = useState(4);
-  const [filmDust, setFilmDust] = useState(false);
-  const [dustAmount, setDustAmount] = useState(30);
 
   const handleReset = () => {
     setTextOverlay(false);
@@ -147,12 +143,8 @@ export const PixlateProvider = ({ children }) => {
     setGlitchStrength(10);
     setBlur(false);
     setBlurStrength(5);
-    setFilmGrain(false);
-    setGrainStrength(15);
     setHalftone(false);
     setHalftoneSize(4);
-    setFilmDust(false);
-    setDustAmount(30);
   };
 
   const fileInputRef = useRef(null);
@@ -404,13 +396,6 @@ export const PixlateProvider = ({ children }) => {
         ctx.fill();
       }
 
-      if (filmGrain) {
-        ctx.fillStyle = `rgba(128,128,128,${grainStrength / 100})`;
-        ctx.globalCompositeOperation = 'overlay';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.globalCompositeOperation = 'source-over';
-      }
-
       if (halftone) {
         ctx.fillStyle = 'rgba(0,0,0,0.6)';
         ctx.globalCompositeOperation = 'overlay';
@@ -421,17 +406,6 @@ export const PixlateProvider = ({ children }) => {
             ctx.arc(x + s / 2, y + s / 2, halftoneSize, 0, Math.PI * 2);
             ctx.fill();
           }
-        }
-        ctx.globalCompositeOperation = 'source-over';
-      }
-
-      if (filmDust) {
-        ctx.fillStyle = `rgba(255,255,255,${dustAmount / 100})`;
-        ctx.globalCompositeOperation = 'overlay';
-        for (let i = 0; i < dustAmount * 20; i++) {
-          ctx.beginPath();
-          ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 2, 0, Math.PI * 2);
-          ctx.fill();
         }
         ctx.globalCompositeOperation = 'source-over';
       }
@@ -568,12 +542,8 @@ export const PixlateProvider = ({ children }) => {
     glitchStrength, setGlitchStrength,
     blur, setBlur,
     blurStrength, setBlurStrength,
-    filmGrain, setFilmGrain,
-    grainStrength, setGrainStrength,
     halftone, setHalftone,
     halftoneSize, setHalftoneSize,
-    filmDust, setFilmDust,
-    dustAmount, setDustAmount,
 
     // Refs
     fileInputRef,
