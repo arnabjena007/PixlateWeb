@@ -74,7 +74,7 @@ export default function PixlateApp() {
   // Text Overlay State
   const [textOverlay, setTextOverlay] = useState(false);
   const [textValue, setTextValue] = useState('PIXLATE');
-  const [textFont, setTextFont] = useState('Instrument Sans');
+  const [textFont, setTextFont] = useState('Instrument Serif');
   const [textSize, setTextSize] = useState(150);
   const [textColor, setTextColor] = useState('#ffffff');
   const [textBold, setTextBold] = useState(true);
@@ -109,7 +109,7 @@ export default function PixlateApp() {
     // Text Overlay Reset
     setTextOverlay(false);
     setTextValue('PIXLATE');
-    setTextFont('Instrument Sans');
+    setTextFont('Instrument Serif');
     setTextSize(150);
     setTextColor('#ffffff');
     setTextBold(true);
@@ -854,7 +854,8 @@ export default function PixlateApp() {
                     <span>Font Family</span>
                   </div>
                   <select className="select-dropdown" value={textFont} onChange={(e) => setTextFont(e.target.value)} style={{ marginBottom: '12px' }}>
-                    <option value="Instrument Sans">Instrument</option>
+                    <option value="Instrument Serif">Instrument Serif</option>
+                    <option value="Instrument Sans">Instrument Sans</option>
                     <option value="Geist">Geist</option>
                     <option value="Arial">Arial</option>
                     <option value="Impact">Impact</option>
