@@ -323,12 +323,6 @@ export default function AboutPage() {
         </p>
       </section>
 
-
-
-
-
-
-
       {/* Final Words */}
       <section className="about-section about-final">
         <h2 className="about-heading">Final Words</h2>

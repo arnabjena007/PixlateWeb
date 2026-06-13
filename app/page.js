@@ -72,8 +72,17 @@ export default function PixlateApp() {
   const [sweep, setSweep] = useState(false);
   const [randomSeed, setRandomSeed] = useState(0); // integer seed, 0 = off
   const [variations, setVariations] = useState(1);
-  const [compress, setCompress] = useState(0);
   const [seeds, setSeeds] = useState('');
+
+  // Text Overlay State
+  const [textOverlay, setTextOverlay] = useState(false);
+  const [textValue, setTextValue] = useState('PIXLATE');
+  const [textFont, setTextFont] = useState('Instrument Sans');
+  const [textSize, setTextSize] = useState(150);
+  const [textColor, setTextColor] = useState('#ffffff');
+  const [textBold, setTextBold] = useState(true);
+  const [textItalic, setTextItalic] = useState(false);
+  const [textUnderline, setTextUnderline] = useState(false);
 
   // Post-Processing State
   const [colorOverlay, setColorOverlay] = useState(false);
@@ -100,6 +109,16 @@ export default function PixlateApp() {
   const [dustAmount, setDustAmount] = useState(30);
 
   const handleReset = () => {
+    // Text Overlay Reset
+    setTextOverlay(false);
+    setTextValue('PIXLATE');
+    setTextFont('Instrument Sans');
+    setTextSize(150);
+    setTextColor('#ffffff');
+    setTextBold(true);
+    setTextItalic(false);
+    setTextUnderline(false);
+
     // Tuning Reset
     setWhitePercent(0);
     setColorSort(false);
@@ -333,7 +352,7 @@ export default function PixlateApp() {
       } else {
         ctx.drawImage(img, 0, 0);
       }
-      
+
       ctx.filter = 'none';
 
       if (colorOverlay) {
@@ -346,7 +365,7 @@ export default function PixlateApp() {
       }
 
       if (vignette) {
-        const gradient = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 0, canvas.width/2, canvas.height/2, Math.max(canvas.width, canvas.height)/1.5);
+        const gradient = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, Math.max(canvas.width, canvas.height) / 1.5);
         gradient.addColorStop(0.4, 'rgba(0,0,0,0)');
         gradient.addColorStop(1, `rgba(0,0,0,${vignetteStrength / 100})`);
         ctx.fillStyle = gradient;
@@ -372,9 +391,9 @@ export default function PixlateApp() {
       }
 
       if (filmGrain) {
-        ctx.fillStyle = `rgba(128,128,128,${grainStrength/100})`;
+        ctx.fillStyle = `rgba(128,128,128,${grainStrength / 100})`;
         ctx.globalCompositeOperation = 'overlay';
-        ctx.fillRect(0,0,canvas.width, canvas.height);
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.globalCompositeOperation = 'source-over';
       }
 
@@ -385,7 +404,7 @@ export default function PixlateApp() {
         for (let y = 0; y < canvas.height; y += s) {
           for (let x = 0; x < canvas.width; x += s) {
             ctx.beginPath();
-            ctx.arc(x + s/2, y + s/2, halftoneSize, 0, Math.PI * 2);
+            ctx.arc(x + s / 2, y + s / 2, halftoneSize, 0, Math.PI * 2);
             ctx.fill();
           }
         }
@@ -393,7 +412,7 @@ export default function PixlateApp() {
       }
 
       if (filmDust) {
-        ctx.fillStyle = `rgba(255,255,255,${dustAmount/100})`;
+        ctx.fillStyle = `rgba(255,255,255,${dustAmount / 100})`;
         ctx.globalCompositeOperation = 'overlay';
         for (let i = 0; i < dustAmount * 20; i++) {
           ctx.beginPath();
@@ -401,6 +420,24 @@ export default function PixlateApp() {
           ctx.fill();
         }
         ctx.globalCompositeOperation = 'source-over';
+      }
+
+      if (textOverlay && textValue) {
+        ctx.fillStyle = textColor;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        let fontString = '';
+        if (textItalic) fontString += 'italic ';
+        if (textBold) fontString += 'bold ';
+        fontString += `${textSize}px "${textFont}", sans-serif`;
+        ctx.font = fontString;
+        ctx.fillText(textValue, canvas.width / 2, canvas.height / 2);
+
+        if (textUnderline) {
+          const textMetrics = ctx.measureText(textValue);
+          const textWidth = textMetrics.width;
+          ctx.fillRect(canvas.width / 2 - textWidth / 2, canvas.height / 2 + textSize / 2 - (textSize * 0.1), textWidth, textSize / 15);
+        }
       }
 
       canvas.toBlob((blob) => {
@@ -507,88 +544,88 @@ export default function PixlateApp() {
       {showEditor && (
         <section id="editor-section" className="editor-section">
 
-        {/* Workspace Pane (Left) */}
-        <div className="workspace">
-          {!previewUrl ? (
-            <div className="workspace-empty">
-              <div
-                className={`dropzone-container ${dragActive ? 'active' : ''}`}
-                onDragEnter={handleDrag}
-                onDragLeave={handleDrag}
-                onDragOver={handleDrag}
-                onDrop={handleDrop}
-                onClick={triggerFileInput}
-              >
-                <span className="dropzone-title">Drop an image here</span>
-                <span className="dropzone-sub">or click to browse / paste from clipboard</span>
-
-                <button
-                  type="button"
-                  className="btn-secondary"
-                  onClick={(e) => { e.stopPropagation(); handleInspireMe(); }}
-                  style={{ marginTop: '12px', width: 'auto', padding: '8px 20px' }}
+          {/* Workspace Pane (Left) */}
+          <div className="workspace">
+            {!previewUrl ? (
+              <div className="workspace-empty">
+                <div
+                  className={`dropzone-container ${dragActive ? 'active' : ''}`}
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
+                  onDrop={handleDrop}
+                  onClick={triggerFileInput}
                 >
-                  Inspire Me
-                </button>
-              </div>
-            </div>
-          ) : (
-            <>
-              {/* Workspace Navigation Bar */}
-              <div className="workspace-header">
-                <div className="workspace-tabs">
+                  <span className="dropzone-title">Drop an image here</span>
+                  <span className="dropzone-sub">or click to browse / paste from clipboard</span>
+
                   <button
-                    className={`tab-btn ${activeTab === 'Original' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('Original')}
+                    type="button"
+                    className="btn-secondary"
+                    onClick={(e) => { e.stopPropagation(); handleInspireMe(); }}
+                    style={{ marginTop: '12px', width: 'auto', padding: '8px 20px' }}
                   >
-                    Original
-                  </button>
-                  <button
-                    className={`tab-btn ${activeTab === 'Processed' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('Processed')}
-                  >
-                    Processed
+                    Inspire Me
                   </button>
                 </div>
-
-                {outputUrl && (
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button
-                      onClick={() => {
-                        const newSeed = Math.floor(Math.random() * 9999) + 1;
-                        setRandomSeed(newSeed);
-                        handleProcess(image, width, height, whitePercent, colorSort, random, reverse, sweep, newSeed, variations, compress, seeds);
-                      }}
-                      className="btn-primary"
-                      disabled={loading}
-                      style={{ width: 'auto', padding: '6px 16px', fontSize: '12px', height: '32px' }}
-                    >
-                      Generate Variation
-                    </button>
-                    <button
-                      onClick={handleDownload}
-                      className="btn-secondary"
-                      style={{ width: 'auto', padding: '6px 16px', fontSize: '12px', height: '32px' }}
-                    >
-                      Download Image
-                    </button>
-                  </div>
-                )}
               </div>
-
-              {/* Workspace Image Preview Renderers */}
-              <div className="workspace-content">
-                {activeTab === 'Original' && (
-                  <div className="preview-wrapper">
-                    <img src={previewUrl} alt="Original Input" className="preview-image" />
+            ) : (
+              <>
+                {/* Workspace Navigation Bar */}
+                <div className="workspace-header">
+                  <div className="workspace-tabs">
+                    <button
+                      className={`tab-btn ${activeTab === 'Original' ? 'active' : ''}`}
+                      onClick={() => setActiveTab('Original')}
+                    >
+                      Original
+                    </button>
+                    <button
+                      className={`tab-btn ${activeTab === 'Processed' ? 'active' : ''}`}
+                      onClick={() => setActiveTab('Processed')}
+                    >
+                      Processed
+                    </button>
                   </div>
-                )}
-                {activeTab === 'Processed' && (
-                  <div className="preview-wrapper">
-                    {outputUrl ? (
-                      <div className="effect-container" style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <img src={outputUrl} alt="Processed Image" className="preview-image" style={{ filter: chromatic ? 'url(#chromatic)' : glitch ? 'url(#glitch)' : blur ? `blur(${blurStrength}px)` : 'none' }} />
-                        <div className={`effect-overlays ${crt ? 'effect-crt' : ''}`} style={{
+
+                  {outputUrl && (
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        onClick={() => {
+                          const newSeed = Math.floor(Math.random() * 9999) + 1;
+                          setRandomSeed(newSeed);
+                          handleProcess(image, width, height, whitePercent, colorSort, random, reverse, sweep, newSeed, variations, compress, seeds);
+                        }}
+                        className="btn-primary"
+                        disabled={loading}
+                        style={{ width: 'auto', padding: '6px 16px', fontSize: '12px', height: '32px' }}
+                      >
+                        Generate Variation
+                      </button>
+                      <button
+                        onClick={handleDownload}
+                        className="btn-secondary"
+                        style={{ width: 'auto', padding: '6px 16px', fontSize: '12px', height: '32px' }}
+                      >
+                        Download Image
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Workspace Image Preview Renderers */}
+                <div className="workspace-content">
+                  {activeTab === 'Original' && (
+                    <div className="preview-wrapper">
+                      <img src={previewUrl} alt="Original Input" className="preview-image" />
+                    </div>
+                  )}
+                  {activeTab === 'Processed' && (
+                    <div className="preview-wrapper">
+                      {outputUrl ? (
+                        <div className="effect-container" style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <img src={outputUrl} alt="Processed Image" className="preview-image" style={{ filter: chromatic ? 'url(#chromatic)' : glitch ? 'url(#glitch)' : blur ? `blur(${blurStrength}px)` : 'none' }} />
+                          <div className={`effect-overlays ${crt ? 'effect-crt' : ''}`} style={{
                             position: 'absolute', inset: 0, pointerEvents: 'none',
                             '--crt-opacity': crtStrength / 100,
                             '--grain-opacity': grainStrength / 100,
@@ -596,460 +633,471 @@ export default function PixlateApp() {
                             '--dust-opacity': dustAmount / 100,
                             '--scanline-opacity': scanLineStrength / 100,
                             '--vignette-opacity': vignetteStrength / 100
-                        }}>
-                          {colorOverlay && <div className="effect-overlay effect-color-overlay" style={{ '--overlay-color': overlayColor, '--overlay-opacity': overlayOpacity / 100, '--overlay-blend': overlayBlend }}></div>}
-                          {vignette && <div className="effect-overlay effect-vignette"></div>}
-                          {scanLines && <div className="effect-overlay effect-scanlines"></div>}
-                          {filmGrain && <div className="effect-overlay effect-film-grain"></div>}
-                          {halftone && <div className="effect-overlay effect-halftone"></div>}
-                          {filmDust && <div className="effect-overlay effect-film-dust"></div>}
+                          }}>
+                            {colorOverlay && <div className="effect-overlay effect-color-overlay" style={{ '--overlay-color': overlayColor, '--overlay-opacity': overlayOpacity / 100, '--overlay-blend': overlayBlend }}></div>}
+                            {vignette && <div className="effect-overlay effect-vignette"></div>}
+                            {scanLines && <div className="effect-overlay effect-scanlines"></div>}
+                            {filmGrain && <div className="effect-overlay effect-film-grain"></div>}
+                            {halftone && <div className="effect-overlay effect-halftone"></div>}
+                            {filmDust && <div className="effect-overlay effect-film-dust"></div>}
+                          </div>
+                          
+                          {textOverlay && textValue && (
+                            <div style={{
+                              position: 'absolute',
+                              left: '50%',
+                              top: '50%',
+                              transform: `translate(-50%, -50%) scale(${Math.min(1, 800 / Math.max(width || 1, 1))})`,
+                              transformOrigin: 'center',
+                              fontFamily: `"${textFont}", sans-serif`,
+                              fontSize: `${textSize}px`,
+                              color: textColor,
+                              fontWeight: textBold ? 'bold' : 'normal',
+                              fontStyle: textItalic ? 'italic' : 'normal',
+                              textDecoration: textUnderline ? 'underline' : 'none',
+                              pointerEvents: 'none',
+                              whiteSpace: 'nowrap',
+                              zIndex: 10
+                            }}>
+                              {textValue}
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    ) : loading ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-                        <div className="spinner"></div>
-                        <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Processing your image...</span>
-                      </div>
-                    ) : (
-                      <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Waiting to run process...</span>
-                    )}
+                      ) : loading ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                          <div className="spinner"></div>
+                          <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Processing your image...</span>
+                        </div>
+                      ) : (
+                        <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Waiting to run process...</span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Sidebar Pane (Right) */}
+          <aside className="sidebar">
+
+            {/* Header */}
+            <div className="sidebar-header">
+              <span
+                className="sidebar-title"
+                onClick={scrollToHero}
+                style={{ cursor: 'pointer' }}
+              >
+                Pixlate Studio
+              </span>
+            </div>
+
+            {/* Backgrounds Section */}
+            <div className="section">
+              <span className="section-title">Backgrounds</span>
+
+              <div className="presets-grid">
+                {PRESETS.map((preset) => (
+                  <div
+                    key={preset.id}
+                    className={`preset-thumbnail ${previewUrl === preset.path ? 'active' : ''}`}
+                    onClick={() => handleSelectPreset(preset)}
+                    title={preset.name}
+                  >
+                    <img src={preset.path} alt={preset.name} />
+                  </div>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={triggerFileInput}
+              >
+                Upload Custom Image
+              </button>
+            </div>
+
+            {/* Dimensions Section */}
+            <div className="section">
+              <span className="section-title">Dimensions</span>
+
+              <div className="control-group">
+                <div className="control-label-row">
+                  <span>Width</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <input
+                      type="number"
+                      value={width}
+                      onChange={(e) => setWidth(parseInt(e.target.value) || 0)}
+                      style={{ width: '60px', textAlign: 'right', background: 'transparent', border: '1px solid #3f3f46', color: 'var(--text-primary)', borderRadius: '4px', padding: '2px 4px', fontSize: '12px' }}
+                    />
+                    <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>px</span>
+                  </div>
+                </div>
+                <input
+                  type="range"
+                  min="100"
+                  max={sliderMaxWidth}
+                  step="50"
+                  value={width}
+                  onChange={(e) => setWidth(parseInt(e.target.value))}
+                />
+              </div>
+
+              <div className="control-group">
+                <div className="control-label-row">
+                  <span>Height</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <input
+                      type="number"
+                      value={height}
+                      onChange={(e) => setHeight(parseInt(e.target.value) || 0)}
+                      style={{ width: '60px', textAlign: 'right', background: 'transparent', border: '1px solid #3f3f46', color: 'var(--text-primary)', borderRadius: '4px', padding: '2px 4px', fontSize: '12px' }}
+                    />
+                    <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>px</span>
+                  </div>
+                </div>
+                <input
+                  type="range"
+                  min="100"
+                  max={sliderMaxHeight}
+                  step="50"
+                  value={height}
+                  onChange={(e) => setHeight(parseInt(e.target.value))}
+                />
+              </div>
+            </div>
+
+            {/* Tuning Section */}
+            <div className="section">
+              <span className="section-title">Tuning</span>
+
+              {/* White Threshold */}
+              <div className="control-group">
+                <div className="control-label-row">
+                  <span>White Threshold</span>
+                  <span className="control-value">{whitePercent}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={whitePercent}
+                  onChange={(e) => setWhitePercent(parseInt(e.target.value))}
+                />
+              </div>
+
+              {/* Color Sorting Toggle */}
+              <div className="toggle-row" onClick={() => setColorSort(!colorSort)}>
+                <div className="toggle-info">
+                  <span className="toggle-title">Color Sorting</span>
+                  <span className="toggle-desc">Sort pixels by brightness</span>
+                </div>
+                <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                  <input
+                    type="checkbox"
+                    checked={colorSort}
+                    onChange={(e) => setColorSort(e.target.checked)}
+                  />
+                  <span className="toggle-slider"></span>
+                </label>
+              </div>
+
+
+
+              {/* Reverse Sort Toggle */}
+              <div className="toggle-row" onClick={() => setReverse(!reverse)}>
+                <div className="toggle-info">
+                  <span className="toggle-title">Reverse Order</span>
+                  <span className="toggle-desc">Invert pixel sort direction</span>
+                </div>
+                <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                  <input
+                    type="checkbox"
+                    checked={reverse}
+                    onChange={(e) => setReverse(e.target.checked)}
+                  />
+                  <span className="toggle-slider"></span>
+                </label>
+              </div>
+
+
+
+              {/* Random Seed Input */}
+              <div className="control-group">
+                <div className="control-label-row">
+                  <span>Random Seed</span>
+                  <span className="control-value">{randomSeed === 0 ? 'Off' : randomSeed}</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="9999"
+                  step="1"
+                  value={randomSeed}
+                  onChange={(e) => setRandomSeed(parseInt(e.target.value))}
+                />
+              </div>
+
+            </div>
+
+            {/* Text Overlay Section */}
+            <div className="section">
+              <span className="section-title">Text Overlay</span>
+
+              <div className="toggle-row" onClick={() => setTextOverlay(!textOverlay)}>
+                <div className="toggle-info">
+                  <span className="toggle-title">Enable Text</span>
+                  <span className="toggle-desc">Add text to the center</span>
+                </div>
+                <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                  <input type="checkbox" checked={textOverlay} onChange={(e) => setTextOverlay(e.target.checked)} />
+                  <span className="toggle-slider"></span>
+                </label>
+              </div>
+
+              {textOverlay && (
+                <div className="control-group" style={{ paddingLeft: '10px', paddingBottom: '8px', paddingTop: '8px' }}>
+                  <input type="text" className="text-input" value={textValue} onChange={(e) => setTextValue(e.target.value)} placeholder="Enter text..." style={{ width: '100%', marginBottom: '12px' }} />
+
+                  <div className="control-label-row">
+                    <span>Font Family</span>
+                  </div>
+                  <select className="select-dropdown" value={textFont} onChange={(e) => setTextFont(e.target.value)} style={{ marginBottom: '12px' }}>
+                    <option value="Instrument Sans">Instrument</option>
+                    <option value="Geist">Geist</option>
+                    <option value="Arial">Arial</option>
+                    <option value="Impact">Impact</option>
+                    <option value="Times New Roman">Times New Roman</option>
+                  </select>
+
+                  <div className="control-label-row">
+                    <span>Size</span>
+                    <span className="control-value">{textSize}px</span>
+                  </div>
+                  <input type="range" min="10" max="500" value={textSize} onChange={(e) => setTextSize(parseInt(e.target.value))} style={{ marginBottom: '12px' }} />
+
+                  <div className="control-label-row">
+                    <span>Color</span>
+                    <input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} style={{ width: '30px', height: '24px', padding: 0, border: 'none', cursor: 'pointer', background: 'transparent' }} />
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                    <button className={`tab-btn ${textBold ? 'active' : ''}`} onClick={() => setTextBold(!textBold)} style={{ padding: '6px 12px', fontSize: '14px', fontWeight: 'bold', flex: 1 }}>B</button>
+                    <button className={`tab-btn ${textItalic ? 'active' : ''}`} onClick={() => setTextItalic(!textItalic)} style={{ padding: '6px 12px', fontSize: '14px', fontStyle: 'italic', flex: 1 }}>I</button>
+                    <button className={`tab-btn ${textUnderline ? 'active' : ''}`} onClick={() => setTextUnderline(!textUnderline)} style={{ padding: '6px 12px', fontSize: '14px', textDecoration: 'underline', flex: 1 }}>U</button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Post-Processing Section */}
+            <div className="section">
+              <span className="section-title">Post-Processing</span>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                {/* Color Overlay */}
+                <div className="toggle-row" onClick={() => setColorOverlay(!colorOverlay)}>
+                  <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                    <input type="checkbox" checked={colorOverlay} onChange={(e) => setColorOverlay(e.target.checked)} />
+                    <span className="toggle-slider"></span>
+                  </label>
+                  <div className="toggle-info">
+                    <span className="toggle-title" style={{ color: '#d4d4d8' }}>Color Overlay</span>
+                  </div>
+                </div>
+                {colorOverlay && (
+                  <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
+                    <div className="control-label-row">
+                      <span>Color</span>
+                      <input type="color" value={overlayColor} onChange={(e) => setOverlayColor(e.target.value)} style={{ width: '30px', height: '20px', padding: 0, border: 'none', cursor: 'pointer' }} />
+                    </div>
+                    <div className="control-label-row">
+                      <span>Opacity</span>
+                      <span className="control-value">{overlayOpacity}%</span>
+                    </div>
+                    <input type="range" min="0" max="100" value={overlayOpacity} onChange={(e) => setOverlayOpacity(parseInt(e.target.value))} />
+                    <div className="control-label-row" style={{ marginTop: '4px' }}>
+                      <span>Blend</span>
+                    </div>
+                    <select className="select-dropdown" value={overlayBlend} onChange={(e) => setOverlayBlend(e.target.value)}>
+                      <option value="multiply">Multiply</option>
+                      <option value="screen">Screen</option>
+                      <option value="overlay">Overlay</option>
+                      <option value="color-burn">Color Burn</option>
+                    </select>
+                  </div>
+                )}
+
+                {/* Vignette */}
+                <div className="toggle-row" onClick={() => setVignette(!vignette)}>
+                  <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                    <input type="checkbox" checked={vignette} onChange={(e) => setVignette(e.target.checked)} />
+                    <span className="toggle-slider"></span>
+                  </label>
+                  <div className="toggle-info">
+                    <span className="toggle-title" style={{ color: '#d4d4d8' }}>Vignette</span>
+                  </div>
+                </div>
+                {vignette && (
+                  <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
+                    <input type="range" min="0" max="100" value={vignetteStrength} onChange={(e) => setVignetteStrength(parseInt(e.target.value))} />
+                  </div>
+                )}
+
+                {/* Scan Lines */}
+                <div className="toggle-row" onClick={() => setScanLines(!scanLines)}>
+                  <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                    <input type="checkbox" checked={scanLines} onChange={(e) => setScanLines(e.target.checked)} />
+                    <span className="toggle-slider"></span>
+                  </label>
+                  <div className="toggle-info">
+                    <span className="toggle-title" style={{ color: '#d4d4d8' }}>Scan Lines</span>
+                  </div>
+                </div>
+                {scanLines && (
+                  <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
+                    <input type="range" min="0" max="100" value={scanLineStrength} onChange={(e) => setScanLineStrength(parseInt(e.target.value))} />
+                  </div>
+                )}
+
+                {/* CRT Curvature */}
+                <div className="toggle-row" onClick={() => setCrt(!crt)}>
+                  <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                    <input type="checkbox" checked={crt} onChange={(e) => setCrt(e.target.checked)} />
+                    <span className="toggle-slider"></span>
+                  </label>
+                  <div className="toggle-info">
+                    <span className="toggle-title" style={{ color: '#d4d4d8' }}>CRT Curvature</span>
+                  </div>
+                </div>
+                {crt && (
+                  <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
+                    <input type="range" min="0" max="100" value={crtStrength} onChange={(e) => setCrtStrength(parseInt(e.target.value))} />
+                  </div>
+                )}
+
+                {/* RGB Split (formerly Chromatic) */}
+                <div className="toggle-row" onClick={() => setChromatic(!chromatic)}>
+                  <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                    <input type="checkbox" checked={chromatic} onChange={(e) => setChromatic(e.target.checked)} />
+                    <span className="toggle-slider"></span>
+                  </label>
+                  <div className="toggle-info">
+                    <span className="toggle-title" style={{ color: '#d4d4d8' }}>RGB Split</span>
+                  </div>
+                </div>
+                {chromatic && (
+                  <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
+                    <input type="range" min="1" max="20" value={chromaticStrength} onChange={(e) => setChromaticStrength(parseInt(e.target.value))} />
+                  </div>
+                )}
+
+                {/* Glitch */}
+                <div className="toggle-row" onClick={() => setGlitch(!glitch)}>
+                  <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                    <input type="checkbox" checked={glitch} onChange={(e) => setGlitch(e.target.checked)} />
+                    <span className="toggle-slider"></span>
+                  </label>
+                  <div className="toggle-info">
+                    <span className="toggle-title" style={{ color: '#d4d4d8' }}>Glitch</span>
+                  </div>
+                </div>
+                {glitch && (
+                  <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
+                    <input type="range" min="1" max="50" value={glitchStrength} onChange={(e) => setGlitchStrength(parseInt(e.target.value))} />
+                  </div>
+                )}
+
+                {/* Blur */}
+                <div className="toggle-row" onClick={() => setBlur(!blur)}>
+                  <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                    <input type="checkbox" checked={blur} onChange={(e) => setBlur(e.target.checked)} />
+                    <span className="toggle-slider"></span>
+                  </label>
+                  <div className="toggle-info">
+                    <span className="toggle-title" style={{ color: '#d4d4d8' }}>Blur</span>
+                  </div>
+                </div>
+                {blur && (
+                  <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
+                    <input type="range" min="1" max="20" value={blurStrength} onChange={(e) => setBlurStrength(parseInt(e.target.value))} />
+                  </div>
+                )}
+
+                {/* Film Grain */}
+                <div className="toggle-row" onClick={() => setFilmGrain(!filmGrain)}>
+                  <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                    <input type="checkbox" checked={filmGrain} onChange={(e) => setFilmGrain(e.target.checked)} />
+                    <span className="toggle-slider"></span>
+                  </label>
+                  <div className="toggle-info">
+                    <span className="toggle-title" style={{ color: '#d4d4d8' }}>Film Grain</span>
+                  </div>
+                </div>
+                {filmGrain && (
+                  <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
+                    <input type="range" min="1" max="100" value={grainStrength} onChange={(e) => setGrainStrength(parseInt(e.target.value))} />
+                  </div>
+                )}
+
+                {/* Halftone */}
+                <div className="toggle-row" onClick={() => setHalftone(!halftone)}>
+                  <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                    <input type="checkbox" checked={halftone} onChange={(e) => setHalftone(e.target.checked)} />
+                    <span className="toggle-slider"></span>
+                  </label>
+                  <div className="toggle-info">
+                    <span className="toggle-title" style={{ color: '#d4d4d8' }}>Halftone</span>
+                  </div>
+                </div>
+                {halftone && (
+                  <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
+                    <input type="range" min="2" max="20" value={halftoneSize} onChange={(e) => setHalftoneSize(parseInt(e.target.value))} />
+                  </div>
+                )}
+
+                {/* Film Dust */}
+                <div className="toggle-row" onClick={() => setFilmDust(!filmDust)}>
+                  <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                    <input type="checkbox" checked={filmDust} onChange={(e) => setFilmDust(e.target.checked)} />
+                    <span className="toggle-slider"></span>
+                  </label>
+                  <div className="toggle-info">
+                    <span className="toggle-title" style={{ color: '#d4d4d8' }}>Film Dust</span>
+                  </div>
+                </div>
+                {filmDust && (
+                  <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
+                    <input type="range" min="1" max="100" value={dustAmount} onChange={(e) => setDustAmount(parseInt(e.target.value))} />
                   </div>
                 )}
               </div>
-            </>
-          )}
-        </div>
-
-        {/* Sidebar Pane (Right) */}
-        <aside className="sidebar">
-
-          {/* Header */}
-          <div className="sidebar-header">
-            <span
-              className="sidebar-title"
-              onClick={scrollToHero}
-              style={{ cursor: 'pointer' }}
-            >
-              Pixlate Studio
-            </span>
-          </div>
-
-          {/* Backgrounds Section */}
-          <div className="section">
-            <span className="section-title">Backgrounds</span>
-
-            <div className="presets-grid">
-              {PRESETS.map((preset) => (
-                <div
-                  key={preset.id}
-                  className={`preset-thumbnail ${previewUrl === preset.path ? 'active' : ''}`}
-                  onClick={() => handleSelectPreset(preset)}
-                  title={preset.name}
-                >
-                  <img src={preset.path} alt={preset.name} />
-                </div>
-              ))}
             </div>
 
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={triggerFileInput}
-            >
-              Upload Custom Image
-            </button>
-          </div>
-
-          {/* Dimensions Section */}
-          <div className="section">
-            <span className="section-title">Dimensions</span>
-
-            <div className="control-group">
-              <div className="control-label-row">
-                <span>Width</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <input
-                    type="number"
-                    value={width}
-                    onChange={(e) => setWidth(parseInt(e.target.value) || 0)}
-                    style={{ width: '60px', textAlign: 'right', background: 'transparent', border: '1px solid #3f3f46', color: 'var(--text-primary)', borderRadius: '4px', padding: '2px 4px', fontSize: '12px' }}
-                  />
-                  <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>px</span>
-                </div>
-              </div>
-              <input
-                type="range"
-                min="100"
-                max={sliderMaxWidth}
-                step="50"
-                value={width}
-                onChange={(e) => setWidth(parseInt(e.target.value))}
-              />
-            </div>
-
-            <div className="control-group">
-              <div className="control-label-row">
-                <span>Height</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <input
-                    type="number"
-                    value={height}
-                    onChange={(e) => setHeight(parseInt(e.target.value) || 0)}
-                    style={{ width: '60px', textAlign: 'right', background: 'transparent', border: '1px solid #3f3f46', color: 'var(--text-primary)', borderRadius: '4px', padding: '2px 4px', fontSize: '12px' }}
-                  />
-                  <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>px</span>
-                </div>
-              </div>
-              <input
-                type="range"
-                min="100"
-                max={sliderMaxHeight}
-                step="50"
-                value={height}
-                onChange={(e) => setHeight(parseInt(e.target.value))}
-              />
-            </div>
-          </div>
-
-          {/* Tuning Section */}
-          <div className="section">
-            <span className="section-title">Tuning</span>
-
-            {/* White Threshold */}
-            <div className="control-group">
-              <div className="control-label-row">
-                <span>White Threshold</span>
-                <span className="control-value">{whitePercent}%</span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={whitePercent}
-                onChange={(e) => setWhitePercent(parseInt(e.target.value))}
-              />
-            </div>
-
-            {/* Color Sorting Toggle */}
-            <div className="toggle-row" onClick={() => setColorSort(!colorSort)}>
-              <div className="toggle-info">
-                <span className="toggle-title">Color Sorting</span>
-                <span className="toggle-desc">Sort pixels by brightness</span>
-              </div>
-              <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
-                <input
-                  type="checkbox"
-                  checked={colorSort}
-                  onChange={(e) => setColorSort(e.target.checked)}
-                />
-                <span className="toggle-slider"></span>
-              </label>
-            </div>
-
-            {/* Random Weight Slider */}
-            <div className="control-group">
-              <div className="control-label-row">
-                <span>Randomness Weight</span>
-                <span className="control-value">{random === 0 ? 'Off' : random}</span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                step="5"
-                value={random}
-                onChange={(e) => setRandom(parseInt(e.target.value))}
-              />
-            </div>
-
-            {/* Reverse Sort Toggle */}
-            <div className="toggle-row" onClick={() => setReverse(!reverse)}>
-              <div className="toggle-info">
-                <span className="toggle-title">Reverse Order</span>
-                <span className="toggle-desc">Invert pixel sort direction</span>
-              </div>
-              <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
-                <input
-                  type="checkbox"
-                  checked={reverse}
-                  onChange={(e) => setReverse(e.target.checked)}
-                />
-                <span className="toggle-slider"></span>
-              </label>
-            </div>
-
-            {/* Sweep Toggle */}
-            <div className="toggle-row" onClick={() => setSweep(!sweep)}>
-              <div className="toggle-info">
-                <span className="toggle-title">Parameter Sweep</span>
-                <span className="toggle-desc">Sweep across tuning properties</span>
-              </div>
-              <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
-                <input
-                  type="checkbox"
-                  checked={sweep}
-                  onChange={(e) => setSweep(e.target.checked)}
-                />
-                <span className="toggle-slider"></span>
-              </label>
-            </div>
-
-            {/* Random Seed Input */}
-            <div className="control-group">
-              <div className="control-label-row">
-                <span>Random Seed</span>
-                <span className="control-value">{randomSeed === 0 ? 'Off' : randomSeed}</span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max="9999"
-                step="1"
-                value={randomSeed}
-                onChange={(e) => setRandomSeed(parseInt(e.target.value))}
-              />
-            </div>
-
-
-            {/* Compression */}
-            <div className="control-group">
-              <div className="control-label-row">
-                <span>PNG Compression</span>
-              </div>
-              <select
-                className="select-dropdown"
-                value={compress}
-                onChange={(e) => setCompress(parseInt(e.target.value))}
+            {/* Action Buttons */}
+            <div style={{ marginTop: 'auto', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={handleReset}
+                style={{ width: '100%' }}
               >
-                <option value="0">Default Compression</option>
-                <option value="-1">No Compression</option>
-                <option value="-2">Best Speed</option>
-                <option value="-3">Best Compression</option>
-              </select>
+                Reset to Defaults
+              </button>
+              <button
+                type="button"
+                className="btn-primary"
+                disabled={loading || !image}
+                onClick={() => handleProcess()}
+                style={{ width: '100%' }}
+              >
+                {loading ? 'Processing...' : 'Process Changes'}
+              </button>
             </div>
 
-            {/* Seeds Input */}
-            <div className="control-group">
-              <div className="control-label-row">
-                <span>Custom Seed Positions</span>
-              </div>
-              <input
-                type="text"
-                className="text-input"
-                value={seeds}
-                onChange={(e) => setSeeds(e.target.value)}
-                placeholder='e.g. "x y x y ..."'
-              />
-            </div>
-
-          </div>
-
-          {/* Post-Processing Section */}
-          <div className="section">
-            <span className="section-title">Post-Processing</span>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              {/* Color Overlay */}
-              <div className="toggle-row" onClick={() => setColorOverlay(!colorOverlay)}>
-                <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
-                  <input type="checkbox" checked={colorOverlay} onChange={(e) => setColorOverlay(e.target.checked)} />
-                  <span className="toggle-slider"></span>
-                </label>
-                <div className="toggle-info">
-                  <span className="toggle-title" style={{ color: '#d4d4d8' }}>Color Overlay</span>
-                </div>
-              </div>
-              {colorOverlay && (
-                <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
-                  <div className="control-label-row">
-                    <span>Color</span>
-                    <input type="color" value={overlayColor} onChange={(e) => setOverlayColor(e.target.value)} style={{ width: '30px', height: '20px', padding: 0, border: 'none', cursor: 'pointer' }} />
-                  </div>
-                  <div className="control-label-row">
-                    <span>Opacity</span>
-                    <span className="control-value">{overlayOpacity}%</span>
-                  </div>
-                  <input type="range" min="0" max="100" value={overlayOpacity} onChange={(e) => setOverlayOpacity(parseInt(e.target.value))} />
-                  <div className="control-label-row" style={{ marginTop: '4px' }}>
-                    <span>Blend</span>
-                  </div>
-                  <select className="select-dropdown" value={overlayBlend} onChange={(e) => setOverlayBlend(e.target.value)}>
-                    <option value="multiply">Multiply</option>
-                    <option value="screen">Screen</option>
-                    <option value="overlay">Overlay</option>
-                    <option value="color-burn">Color Burn</option>
-                  </select>
-                </div>
-              )}
-
-              {/* Vignette */}
-              <div className="toggle-row" onClick={() => setVignette(!vignette)}>
-                <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
-                  <input type="checkbox" checked={vignette} onChange={(e) => setVignette(e.target.checked)} />
-                  <span className="toggle-slider"></span>
-                </label>
-                <div className="toggle-info">
-                  <span className="toggle-title" style={{ color: '#d4d4d8' }}>Vignette</span>
-                </div>
-              </div>
-              {vignette && (
-                <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
-                  <input type="range" min="0" max="100" value={vignetteStrength} onChange={(e) => setVignetteStrength(parseInt(e.target.value))} />
-                </div>
-              )}
-
-              {/* Scan Lines */}
-              <div className="toggle-row" onClick={() => setScanLines(!scanLines)}>
-                <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
-                  <input type="checkbox" checked={scanLines} onChange={(e) => setScanLines(e.target.checked)} />
-                  <span className="toggle-slider"></span>
-                </label>
-                <div className="toggle-info">
-                  <span className="toggle-title" style={{ color: '#d4d4d8' }}>Scan Lines</span>
-                </div>
-              </div>
-              {scanLines && (
-                <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
-                  <input type="range" min="0" max="100" value={scanLineStrength} onChange={(e) => setScanLineStrength(parseInt(e.target.value))} />
-                </div>
-              )}
-
-              {/* CRT Curvature */}
-              <div className="toggle-row" onClick={() => setCrt(!crt)}>
-                <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
-                  <input type="checkbox" checked={crt} onChange={(e) => setCrt(e.target.checked)} />
-                  <span className="toggle-slider"></span>
-                </label>
-                <div className="toggle-info">
-                  <span className="toggle-title" style={{ color: '#d4d4d8' }}>CRT Curvature</span>
-                </div>
-              </div>
-              {crt && (
-                <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
-                  <input type="range" min="0" max="100" value={crtStrength} onChange={(e) => setCrtStrength(parseInt(e.target.value))} />
-                </div>
-              )}
-
-              {/* RGB Split (formerly Chromatic) */}
-              <div className="toggle-row" onClick={() => setChromatic(!chromatic)}>
-                <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
-                  <input type="checkbox" checked={chromatic} onChange={(e) => setChromatic(e.target.checked)} />
-                  <span className="toggle-slider"></span>
-                </label>
-                <div className="toggle-info">
-                  <span className="toggle-title" style={{ color: '#d4d4d8' }}>RGB Split</span>
-                </div>
-              </div>
-              {chromatic && (
-                <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
-                  <input type="range" min="1" max="20" value={chromaticStrength} onChange={(e) => setChromaticStrength(parseInt(e.target.value))} />
-                </div>
-              )}
-
-              {/* Glitch */}
-              <div className="toggle-row" onClick={() => setGlitch(!glitch)}>
-                <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
-                  <input type="checkbox" checked={glitch} onChange={(e) => setGlitch(e.target.checked)} />
-                  <span className="toggle-slider"></span>
-                </label>
-                <div className="toggle-info">
-                  <span className="toggle-title" style={{ color: '#d4d4d8' }}>Glitch</span>
-                </div>
-              </div>
-              {glitch && (
-                <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
-                  <input type="range" min="1" max="50" value={glitchStrength} onChange={(e) => setGlitchStrength(parseInt(e.target.value))} />
-                </div>
-              )}
-
-              {/* Blur */}
-              <div className="toggle-row" onClick={() => setBlur(!blur)}>
-                <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
-                  <input type="checkbox" checked={blur} onChange={(e) => setBlur(e.target.checked)} />
-                  <span className="toggle-slider"></span>
-                </label>
-                <div className="toggle-info">
-                  <span className="toggle-title" style={{ color: '#d4d4d8' }}>Blur</span>
-                </div>
-              </div>
-              {blur && (
-                <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
-                  <input type="range" min="1" max="20" value={blurStrength} onChange={(e) => setBlurStrength(parseInt(e.target.value))} />
-                </div>
-              )}
-
-              {/* Film Grain */}
-              <div className="toggle-row" onClick={() => setFilmGrain(!filmGrain)}>
-                <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
-                  <input type="checkbox" checked={filmGrain} onChange={(e) => setFilmGrain(e.target.checked)} />
-                  <span className="toggle-slider"></span>
-                </label>
-                <div className="toggle-info">
-                  <span className="toggle-title" style={{ color: '#d4d4d8' }}>Film Grain</span>
-                </div>
-              </div>
-              {filmGrain && (
-                <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
-                  <input type="range" min="1" max="100" value={grainStrength} onChange={(e) => setGrainStrength(parseInt(e.target.value))} />
-                </div>
-              )}
-
-              {/* Halftone */}
-              <div className="toggle-row" onClick={() => setHalftone(!halftone)}>
-                <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
-                  <input type="checkbox" checked={halftone} onChange={(e) => setHalftone(e.target.checked)} />
-                  <span className="toggle-slider"></span>
-                </label>
-                <div className="toggle-info">
-                  <span className="toggle-title" style={{ color: '#d4d4d8' }}>Halftone</span>
-                </div>
-              </div>
-              {halftone && (
-                <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
-                  <input type="range" min="2" max="20" value={halftoneSize} onChange={(e) => setHalftoneSize(parseInt(e.target.value))} />
-                </div>
-              )}
-
-              {/* Film Dust */}
-              <div className="toggle-row" onClick={() => setFilmDust(!filmDust)}>
-                <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
-                  <input type="checkbox" checked={filmDust} onChange={(e) => setFilmDust(e.target.checked)} />
-                  <span className="toggle-slider"></span>
-                </label>
-                <div className="toggle-info">
-                  <span className="toggle-title" style={{ color: '#d4d4d8' }}>Film Dust</span>
-                </div>
-              </div>
-              {filmDust && (
-                <div className="control-group" style={{ paddingLeft: '40px', paddingBottom: '8px' }}>
-                  <input type="range" min="1" max="100" value={dustAmount} onChange={(e) => setDustAmount(parseInt(e.target.value))} />
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div style={{ marginTop: 'auto', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <button 
-              type="button" 
-              className="btn-secondary" 
-              onClick={handleReset}
-              style={{ width: '100%' }}
-            >
-              Reset to Defaults
-            </button>
-            <button 
-              type="button" 
-              className="btn-primary" 
-              disabled={loading || !image}
-              onClick={() => handleProcess()}
-              style={{ width: '100%' }}
-            >
-              {loading ? 'Processing...' : 'Process Changes'}
-            </button>
-          </div>
-
-        </aside>
+          </aside>
 
         </section>
       )}
