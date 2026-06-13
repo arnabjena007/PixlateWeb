@@ -754,7 +754,7 @@ export default function PixlateApp() {
                                 height: `${overlay.height}%`
                               }}
                               onDragStart={() => setSelectedOverlayId(overlay.id)}
-                              onDragStop={(e, d) => {
+                              onDrag={(e, d) => {
                                 const parent = document.getElementById('canvas-preview-container');
                                 if (parent) {
                                   setImageOverlays(prev => prev.map(o => o.id === overlay.id ? {
@@ -764,20 +764,20 @@ export default function PixlateApp() {
                                   } : o));
                                 }
                               }}
-                              onResizeStart={() => setSelectedOverlayId(overlay.id)}
-                              onResizeStop={(e, direction, ref, delta, position) => {
+                              onResize={(e, direction, ref, delta, position) => {
                                 const parent = document.getElementById('canvas-preview-container');
                                 if (parent) {
                                   setImageOverlays(prev => prev.map(o => o.id === overlay.id ? {
                                     ...o,
-                                    width: (parseFloat(ref.style.width) / parent.clientWidth) * 100,
-                                    height: (parseFloat(ref.style.height) / parent.clientHeight) * 100,
+                                    width: (ref.offsetWidth / parent.clientWidth) * 100,
+                                    height: (ref.offsetHeight / parent.clientHeight) * 100,
                                     x: (position.x / parent.clientWidth) * 100,
                                     y: (position.y / parent.clientHeight) * 100
                                   } : o));
                                 }
                               }}
                               bounds="parent"
+                              lockAspectRatio={true}
                               enableResizing={selectedOverlayId === overlay.id ? undefined : false}
                               onMouseDown={(e) => {
                                 setSelectedOverlayId(overlay.id);
