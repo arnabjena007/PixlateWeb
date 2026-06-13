@@ -4,10 +4,7 @@ import Link from 'next/link';
 import { BackgroundRippleEffect } from "@/components/ui/background-ripple-effect";
 import dynamic from 'next/dynamic';
 
-const WorkspacePaintReveal = dynamic(
-  () => import('@/components/ui/workspace-paint-reveal'),
-  { ssr: false }
-);
+
 
 const getImageDimensions = (file) => {
   return new Promise((resolve) => {
@@ -713,10 +710,11 @@ export default function PixlateApp() {
                     <div className="preview-wrapper">
                       {outputUrl ? (
                         <div id="canvas-preview-container" className="effect-container" style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <WorkspacePaintReveal 
-                            imageUrl={outputUrl} 
+                          <img 
+                            src={outputUrl} 
+                            alt="Processed Image" 
                             className="preview-image" 
-                            imageStyle={{ filter: chromatic ? 'url(#chromatic)' : glitch ? 'url(#glitch)' : blur ? `blur(${blurStrength}px)` : 'none' }} 
+                            style={{ filter: chromatic ? 'url(#chromatic)' : glitch ? 'url(#glitch)' : blur ? `blur(${blurStrength}px)` : 'none' }} 
                           />
                           <div className={`effect-overlays ${crt ? 'effect-crt' : ''}`} style={{
                             position: 'absolute', inset: 0, pointerEvents: 'none',
