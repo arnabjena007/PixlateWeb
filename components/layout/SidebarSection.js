@@ -34,7 +34,7 @@ export default function SidebarSection() {
     glitch, setGlitch, glitchStrength, setGlitchStrength,
     blur, setBlur, blurStrength, setBlurStrength,
     halftone, setHalftone, halftoneSize, setHalftoneSize,
-    coverage, setCoverage, edgeEmphasis, setEdgeEmphasis, density, setDensity, brightness, setBrightness, contrast, setContrast,
+    coverage, setCoverage, edgeEmphasis, setEdgeEmphasis, density, setDensity, brightness, setBrightness, contrast, setContrast, borderRadius, setBorderRadius,
     handleReset, handleProcess
   } = usePixlate();
 
@@ -178,6 +178,10 @@ export default function SidebarSection() {
               <img src={preset.path} alt={preset.name} />
             </div>
           ))}
+        </div>
+
+        <div style={{ fontSize: '12px', color: '#71717a', marginTop: '4px', marginBottom: '12px', textAlign: 'left' }}>
+          Presets by <a href="https://x.com/mandolinaes" target="_blank" rel="noopener noreferrer" style={{ color: '#a1a1aa', textDecoration: 'none', transition: 'color 0.2s' }} onMouseOver={(e) => e.target.style.color = '#fff'} onMouseOut={(e) => e.target.style.color = '#a1a1aa'}>mandolinaes</a>
         </div>
 
         <button
@@ -542,6 +546,20 @@ export default function SidebarSection() {
             max="200"
             value={contrast}
             onChange={(e) => setContrast(parseInt(e.target.value))}
+          />
+        </div>
+
+        <div className="control-group">
+          <div className="control-label-row">
+            <span>Rounded Border</span>
+            <span className="control-value">{borderRadius}%</span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="50"
+            value={borderRadius}
+            onChange={(e) => setBorderRadius(parseInt(e.target.value))}
           />
         </div>
 

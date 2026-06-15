@@ -13,6 +13,7 @@ export default function WorkspaceSection() {
     crt, crtStrength, chromatic, chromaticStrength,
     glitch, glitchStrength, blur, blurStrength,
     halftone, halftoneSize,
+    coverage, edgeEmphasis, density, brightness, contrast, borderRadius,
     handleDrag, handleDrop, triggerFileInput, handleInspireMe,
     handleProcess, handleDownload, setRandomSeed
   } = usePixlate();
@@ -124,7 +125,24 @@ export default function WorkspaceSection() {
           <div className="workspace-content">
             {activeTab === 'Original' && (
               <div className="preview-wrapper">
-                <img src={previewUrl} alt="Original Input" className="preview-image" />
+                <img 
+                  src={previewUrl} 
+                  alt="Original Input" 
+                  className="preview-image" 
+                  style={{ 
+                    filter: `
+                      ${chromatic ? 'url(#chromatic) ' : ''}
+                      ${glitch ? 'url(#glitch) ' : ''}
+                      ${blur ? `blur(${blurStrength}px) ` : ''}
+                      brightness(${100 + brightness}%)
+                      contrast(${contrast}%)
+                      saturate(${100 + (density - 30)}%)
+                      drop-shadow(0 0 ${edgeEmphasis / 5}px rgba(255,255,255,${edgeEmphasis / 200}))
+                    `.replace(/\n/g, ' ').trim(),
+                    opacity: coverage / 85,
+                    borderRadius: `${borderRadius}%`
+                  }}
+                />
               </div>
             )}
             {activeTab === 'Processed' && (
@@ -154,7 +172,19 @@ export default function WorkspaceSection() {
                           src={outputUrl}
                           alt="Processed Image"
                           className="preview-image"
-                          style={{ filter: chromatic ? 'url(#chromatic)' : glitch ? 'url(#glitch)' : blur ? `blur(${blurStrength}px)` : 'none' }}
+                          style={{ 
+                            filter: `
+                              ${chromatic ? 'url(#chromatic) ' : ''}
+                              ${glitch ? 'url(#glitch) ' : ''}
+                              ${blur ? `blur(${blurStrength}px) ` : ''}
+                              brightness(${100 + brightness}%)
+                              contrast(${contrast}%)
+                              saturate(${100 + (density - 30)}%)
+                              drop-shadow(0 0 ${edgeEmphasis / 5}px rgba(255,255,255,${edgeEmphasis / 200}))
+                            `.replace(/\n/g, ' ').trim(),
+                            opacity: coverage / 85,
+                            borderRadius: `${borderRadius}%`
+                          }}
                         />
                         <div className={`effect-overlays ${crt ? 'effect-crt' : ''}`} style={{
                           position: 'absolute', inset: 0, pointerEvents: 'none',

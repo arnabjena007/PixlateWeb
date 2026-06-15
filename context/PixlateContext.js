@@ -33,6 +33,7 @@ export const PRESETS = [
   { id: 'yosemite', name: 'Yosemite', path: '/presets/yosemite.jpg' },
   { id: 'lofoten', name: 'Dock', path: '/presets/lofoten.jpg' },
   { id: 'daisies', name: 'Flowers', path: '/presets/daisies.jpg' },
+  { id: 'beach', name: 'Beach', path: '/presets/beach.jpg' },
 ];
 
 export const DIMENSION_PRESETS = [
@@ -118,6 +119,7 @@ export const PixlateProvider = ({ children }) => {
   const [density, setDensity] = useState(30);
   const [brightness, setBrightness] = useState(0);
   const [contrast, setContrast] = useState(100);
+  const [borderRadius, setBorderRadius] = useState(0);
 
   const handleReset = () => {
     setTextOverlay(false);
@@ -158,6 +160,7 @@ export const PixlateProvider = ({ children }) => {
     setDensity(30);
     setBrightness(0);
     setContrast(100);
+    setBorderRadius(0);
   };
 
   const fileInputRef = useRef(null);
@@ -351,11 +354,21 @@ export const PixlateProvider = ({ children }) => {
       canvas.height = img.height;
       const ctx = canvas.getContext('2d');
 
-      if (blur) {
-        ctx.filter = `blur(${blurStrength}px)`;
-      } else {
-        ctx.filter = 'none';
+      if (borderRadius > 0) {
+        ctx.beginPath();
+        const r = Math.min(canvas.width, canvas.height) * (borderRadius / 100);
+        ctx.roundRect(0, 0, canvas.width, canvas.height, r);
+        ctx.clip();
       }
+
+      let filterString = '';
+      if (blur) filterString += `blur(${blurStrength}px) `;
+      filterString += `brightness(${100 + brightness}%) `;
+      filterString += `contrast(${contrast}%) `;
+      filterString += `saturate(${100 + (density - 30)}%) `;
+      filterString += `drop-shadow(0 0 ${edgeEmphasis / 5}px rgba(255,255,255,${edgeEmphasis / 200})) `;
+
+      ctx.filter = filterString.trim() || 'none';
 
       if (chromatic) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -374,7 +387,9 @@ export const PixlateProvider = ({ children }) => {
           ctx.drawImage(img, 0, y, canvas.width, h, xOffset, y, canvas.width, h);
         }
       } else {
+        ctx.globalAlpha = coverage / 85;
         ctx.drawImage(img, 0, 0);
+        ctx.globalAlpha = 1.0;
       }
 
       ctx.filter = 'none';
@@ -568,6 +583,7 @@ export const PixlateProvider = ({ children }) => {
     density, setDensity,
     brightness, setBrightness,
     contrast, setContrast,
+    borderRadius, setBorderRadius,
 
     // Refs
     fileInputRef,
