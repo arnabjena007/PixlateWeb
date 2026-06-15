@@ -35,14 +35,15 @@ export default function SidebarSection() {
     blur, setBlur, blurStrength, setBlurStrength,
     halftone, setHalftone, halftoneSize, setHalftoneSize,
     coverage, setCoverage, edgeEmphasis, setEdgeEmphasis, density, setDensity, brightness, setBrightness, contrast, setContrast, borderRadius, setBorderRadius,
+    variations, setVariations,
     handleReset, handleProcess
   } = usePixlate();
 
   if (isCollapsed) {
     return (
       <aside className="sidebar" style={{ width: '60px', padding: '20px 0', alignItems: 'center', transition: 'width 0.2s' }}>
-        <button 
-          onClick={() => setIsCollapsed(false)} 
+        <button
+          onClick={() => setIsCollapsed(false)}
           style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', padding: '8px' }}
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -65,8 +66,8 @@ export default function SidebarSection() {
         >
           Pixlate
         </span>
-        <button 
-          onClick={() => setIsMenuOpen(!isMenuOpen)} 
+        <button
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
           style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', display: 'flex', alignItems: 'center' }}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -92,18 +93,18 @@ export default function SidebarSection() {
             flexDirection: 'column',
             padding: '6px 0'
           }}>
-            <button 
+            <button
               onClick={() => { setIsCollapsed(true); setIsMenuOpen(false); }}
               style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', background: 'transparent', border: 'none', color: '#e4e4e7', width: '100%', cursor: 'pointer', fontSize: '13px', textAlign: 'left' }}
               onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'}
               onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
               Collapse Toolbar
             </button>
             <div style={{ height: '1px', backgroundColor: '#27272a', margin: '4px 0' }}></div>
-            
-            <a 
+
+            <a
               href="https://github.com/arnabjena007/PixlateWeb/issues" target="_blank" rel="noopener noreferrer"
               style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', textDecoration: 'none', color: '#a1a1aa', width: '100%', cursor: 'pointer', fontSize: '13px' }}
               onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#e4e4e7'; }}
@@ -112,7 +113,7 @@ export default function SidebarSection() {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
               Report a Bug
             </a>
-            <a 
+            <a
               href="https://github.com/arnabjena007/PixlateWeb/issues" target="_blank" rel="noopener noreferrer"
               style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', textDecoration: 'none', color: '#a1a1aa', width: '100%', cursor: 'pointer', fontSize: '13px' }}
               onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#e4e4e7'; }}
@@ -121,10 +122,10 @@ export default function SidebarSection() {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
               Suggest a Feature
             </a>
-            
+
             <div style={{ height: '1px', backgroundColor: '#27272a', margin: '4px 0' }}></div>
-            
-            <button 
+
+            <button
               onClick={() => { setShowEditor(false); setIsMenuOpen(false); }}
               style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', background: 'transparent', border: 'none', color: '#a1a1aa', width: '100%', cursor: 'pointer', fontSize: '13px', textAlign: 'left' }}
               onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#e4e4e7'; }}
@@ -133,8 +134,8 @@ export default function SidebarSection() {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
               Landing page
             </button>
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', textDecoration: 'none', color: '#a1a1aa', width: '100%', cursor: 'pointer', fontSize: '13px' }}
               onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#e4e4e7'; }}
               onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#a1a1aa'; }}
@@ -142,8 +143,8 @@ export default function SidebarSection() {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
               Changelog
             </Link>
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', textDecoration: 'none', color: '#a1a1aa', width: '100%', cursor: 'pointer', fontSize: '13px' }}
               onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#e4e4e7'; }}
               onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#a1a1aa'; }}
@@ -151,8 +152,8 @@ export default function SidebarSection() {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
               Privacy
             </Link>
-            <Link 
-              href="/about" 
+            <Link
+              href="/about"
               style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', textDecoration: 'none', color: '#a1a1aa', width: '100%', cursor: 'pointer', fontSize: '13px' }}
               onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#e4e4e7'; }}
               onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#a1a1aa'; }}
@@ -334,6 +335,29 @@ export default function SidebarSection() {
           />
         </div>
 
+        <div className="control-group" style={{ marginTop: '16px' }}>
+          <div className="control-label-row">
+            <span>Algorithm Variation</span>
+          </div>
+          <select
+            className="select-dropdown"
+            value={variations}
+            onChange={(e) => setVariations(parseInt(e.target.value))}
+            style={{ marginBottom: '8px' }}
+          >
+            <option value={1}>Standard Processing</option>
+            <option value={2}>Two Seed Points</option>
+            <option value={7}>Average Selection</option>
+            <option value={4}>Poisson-disc Sampling</option>
+          </select>
+          <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: '1.4', fontStyle: 'italic' }}>
+            {variations === 1 && "The default generation method starting from the center."}
+            {variations === 2 && "As before, but with two seed points placed in opposite corners of the canvas."}
+            {variations === 7 && "Colors shuffled randomly and placed via average selection."}
+            {variations === 4 && "Seed points scattered across the canvas using poisson-disc sampling."}
+          </div>
+        </div>
+
       </ToolbarCollapse>
 
       {/* Text Overlay Section */}
@@ -401,10 +425,10 @@ export default function SidebarSection() {
                     <span>Size</span>
                   </div>
                   <select className="select-dropdown" value={selectedText.size} onChange={(e) => updateText({ size: e.target.value })} style={{ marginBottom: '12px' }}>
-                    <option value="Small">Small (30px)</option>
+                    <option value="Small">Small (50px)</option>
                     <option value="Medium">Medium (70px)</option>
                     <option value="Large">Large (150px)</option>
-                    <option value="Extra Large">Extra Large (300px)</option>
+                    <option value="Extra Large">Extra Large (250px)</option>
                   </select>
 
                   <div className="control-label-row">
@@ -417,22 +441,22 @@ export default function SidebarSection() {
                     <button className={`tab-btn ${selectedText.italic ? 'active' : ''}`} onClick={() => updateText({ italic: !selectedText.italic })} style={{ padding: '6px 12px', fontSize: '14px', fontStyle: 'italic', flex: 1 }}>I</button>
                     <button className={`tab-btn ${selectedText.underline ? 'active' : ''}`} onClick={() => updateText({ underline: !selectedText.underline })} style={{ padding: '6px 12px', fontSize: '14px', textDecoration: 'underline', flex: 1 }}>U</button>
                   </div>
-                  
+
                   <div className="control-label-row" style={{ marginTop: '16px', marginBottom: '8px' }}>
                     <span>Layer Position</span>
                   </div>
                   <div style={{ display: 'flex', gap: '8px' }}>
-                    <button 
-                      className={`tab-btn ${selectedText.front ? 'active' : ''}`} 
-                      onClick={() => updateText({ front: true })} 
+                    <button
+                      className={`tab-btn ${selectedText.front ? 'active' : ''}`}
+                      onClick={() => updateText({ front: true })}
                       title="Bring to Front"
                       style={{ padding: '8px', fontSize: '12px', flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
                     >
                       In front of img
                     </button>
-                    <button 
-                      className={`tab-btn ${!selectedText.front ? 'active' : ''}`} 
-                      onClick={() => updateText({ front: false })} 
+                    <button
+                      className={`tab-btn ${!selectedText.front ? 'active' : ''}`}
+                      onClick={() => updateText({ front: false })}
                       title="Send to Back"
                       style={{ padding: '8px', fontSize: '12px', flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
                     >
@@ -478,7 +502,7 @@ export default function SidebarSection() {
 
       {/* Intensity Section */}
       <ToolbarCollapse title="Intensity">
-        
+
         <div className="control-group">
           <div className="control-label-row">
             <span>Coverage</span>
@@ -551,7 +575,7 @@ export default function SidebarSection() {
 
         <div className="control-group">
           <div className="control-label-row">
-            <span>Rounded Border</span>
+            <span>Rounded Corner</span>
             <span className="control-value">{borderRadius}%</span>
           </div>
           <input
