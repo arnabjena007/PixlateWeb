@@ -7,6 +7,57 @@ import os from 'os';
 
 const execAsync = promisify(exec);
 
+// Seeded random number generator helper
+function seededRandom(seed) {
+  return function () {
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed / 233280;
+  };
+}
+
+// Generate scattered seed points using a simplified Poisson-disc approach
+function generatePoissonSeeds(width, height, numPoints = 12, seed = 0) {
+  const rng = seededRandom(seed);
+  const points = [];
+  const minDistance = Math.min(width, height) / 5;
+  
+  // Try to place points randomly but spaced out
+  for (let attempt = 0; attempt < 200 && points.length < numPoints; attempt++) {
+    const x = Math.floor(rng() * (width - 40)) + 20;
+    const y = Math.floor(rng() * (height - 40)) + 20;
+    
+    let ok = true;
+    for (const p of points) {
+      const dist = Math.hypot(x - p.x, y - p.y);
+      if (dist < minDistance) {
+        ok = false;
+        break;
+      }
+    }
+    if (ok) {
+      points.push({ x, y });
+    }
+  }
+  
+  // Fallback to a nice layout if we couldn't generate enough points
+  if (points.length < 4) {
+    const cols = 3;
+    const rows = 3;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        // Skip the center (which is standard) to make it distinct
+        if (r === 1 && c === 1) continue;
+        const x = Math.floor((c + 0.5) * (width / cols) + (rng() - 0.5) * (width / (cols * 2)));
+        const y = Math.floor((r + 0.5) * (height / rows) + (rng() - 0.5) * (height / (rows * 2)));
+        points.push({ x, y });
+      }
+    }
+  }
+  
+  return points.map(p => `${p.x} ${p.y}`).join(' ');
+}
+
+
 export async function POST(request) {
   try {
     const formData = await request.formData();
@@ -73,18 +124,41 @@ export async function POST(request) {
       );
     }
 
+    // Parse variation mode and map it to Go binary flags
+    let finalSeeds = seeds || '';
+    let finalRandom = random;
+    let finalColorSort = colorSort;
+
+    const variationMode = variations ? parseInt(variations) : 1;
+    if (variationMode === 2) {
+      // Two Seed Points: opposite corners of the canvas
+      const w = parseInt(width) || 800;
+      const h = parseInt(height) || 800;
+      finalSeeds = `0 0 ${w - 1} ${h - 1}`;
+    } else if (variationMode === 7) {
+      // Average Selection: random shuffle and colors sorted by similarity
+      finalColorSort = true;
+      if (finalRandom === 0) {
+        finalRandom = 10;
+      }
+    } else if (variationMode === 4) {
+      // Poisson-disc Sampling: scattered seed points
+      const w = parseInt(width) || 800;
+      const h = parseInt(height) || 800;
+      finalSeeds = generatePoissonSeeds(w, h, 12, randomSeed);
+    }
+
     // Build the CLI execution string
     let cmd = `"${binaryPath}" -in "${inputPath}" -out "${outputPath}" -width ${width} -height ${height}`;
     
     if (whitePercent) cmd += ` -white-percent ${whitePercent}`;
-    if (colorSort) cmd += ' -colorsort 90'; // default colorsort weight when enabled
-    if (random > 0) cmd += ` -random ${random}`;
+    if (finalColorSort) cmd += ' -colorsort 90'; // default colorsort weight when enabled
+    if (finalRandom > 0) cmd += ` -random ${finalRandom}`;
     if (reverse) cmd += ' -reverse';
     if (sweep) cmd += ' -sweep';
     if (randomSeed > 0) cmd += ` -random-seed ${randomSeed}`;
-    if (variations && parseInt(variations) > 1) cmd += ` -variations ${variations}`;
     if (compress) cmd += ` -compress ${compress}`;
-    if (seeds && seeds.trim()) cmd += ` -seeds "${seeds.replace(/"/g, '\\"')}"`;
+    if (finalSeeds && finalSeeds.trim()) cmd += ` -seeds "${finalSeeds.replace(/"/g, '\\"')}"`;
 
     // Execute the Go binary
     await execAsync(cmd);
