@@ -342,7 +342,11 @@ export default function SidebarSection() {
           <select
             className="select-dropdown"
             value={variations}
-            onChange={(e) => setVariations(parseInt(e.target.value))}
+            onChange={(e) => {
+              const val = parseInt(e.target.value);
+              setVariations(val);
+              handleProcess(undefined, undefined, undefined, undefined, undefined, undefined, undefined, val);
+            }}
             style={{ marginBottom: '8px' }}
           >
             <option value={1}>Standard Processing</option>
@@ -428,7 +432,7 @@ export default function SidebarSection() {
                     <option value="Small">Small (50px)</option>
                     <option value="Medium">Medium (70px)</option>
                     <option value="Large">Large (150px)</option>
-                    <option value="Extra Large">Extra Large (250px)</option>
+                    <option value="Extra Large">Extra Large (250ipx)</option>
                   </select>
 
                   <div className="control-label-row">
