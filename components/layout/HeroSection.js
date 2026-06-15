@@ -26,9 +26,9 @@ export default function HeroSection() {
           </svg>
           Star on GitHub
         </a>
-        <h1 className="hero-title">Pixlate Studio</h1>
+        <h1 className="hero-title">Pixlate</h1>
         <p className="hero-subtitle">
-          Professional-grade background patterns and gradients. Easily download and seamlessly integrate it into your projects.
+          A generative art project combining algorithms and fine arts to create organic, visually captivating patterns. Easily download and seamlessly integrate it into your projects.
         </p>
         <div className="hero-buttons">
           <button

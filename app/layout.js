@@ -24,7 +24,7 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata = {
-  title: "Pixlate Studio - Premium Image Pixel-Sorting & Shuffling Tool",
+  title: "Pixlate - Premium Image Pixel-Sorting & Shuffling Tool",
   description: "High-performance image pixel sorting, shuffling, and custom processing. Customize sorting threshold, dimensions, color-sorting, and reverse operations dynamically.",
 };
 

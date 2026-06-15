@@ -112,6 +112,13 @@ export const PixlateProvider = ({ children }) => {
   const [halftone, setHalftone] = useState(false);
   const [halftoneSize, setHalftoneSize] = useState(4);
 
+  // Intensity State
+  const [coverage, setCoverage] = useState(85);
+  const [edgeEmphasis, setEdgeEmphasis] = useState(60);
+  const [density, setDensity] = useState(30);
+  const [brightness, setBrightness] = useState(0);
+  const [contrast, setContrast] = useState(100);
+
   const handleReset = () => {
     setTextOverlay(false);
     setTextOverlays([]);
@@ -145,6 +152,12 @@ export const PixlateProvider = ({ children }) => {
     setBlurStrength(5);
     setHalftone(false);
     setHalftoneSize(4);
+
+    setCoverage(85);
+    setEdgeEmphasis(60);
+    setDensity(30);
+    setBrightness(0);
+    setContrast(100);
   };
 
   const fileInputRef = useRef(null);
@@ -302,6 +315,11 @@ export const PixlateProvider = ({ children }) => {
     formData.append('variations', varCount);
     formData.append('compress', 0);
     formData.append('seeds', '');
+    formData.append('coverage', coverage);
+    formData.append('edgeEmphasis', edgeEmphasis);
+    formData.append('density', density);
+    formData.append('brightness', brightness);
+    formData.append('contrast', contrast);
 
     try {
       const response = await fetch('/api/pixlate', {
@@ -544,6 +562,12 @@ export const PixlateProvider = ({ children }) => {
     blurStrength, setBlurStrength,
     halftone, setHalftone,
     halftoneSize, setHalftoneSize,
+
+    coverage, setCoverage,
+    edgeEmphasis, setEdgeEmphasis,
+    density, setDensity,
+    brightness, setBrightness,
+    contrast, setContrast,
 
     // Refs
     fileInputRef,

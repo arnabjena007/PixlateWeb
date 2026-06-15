@@ -68,7 +68,7 @@ export default function AboutPage() {
     <div className="about-page">
       {/* Top Nav */}
       <nav className="about-nav">
-        <Link href="/" className="about-nav-logo">Pixlate Studio</Link>
+        <Link href="/" className="about-nav-logo">Pixlate</Link>
       </nav>
 
       {/* Hero */}
@@ -343,7 +343,7 @@ export default function AboutPage() {
 
       {/* Footer */}
       <footer className="about-footer">
-        <Link href="/" className="about-footer-link">← Back to Pixlate Studio</Link>
+        <Link href="/" className="about-footer-link">← Back to Pixlate</Link>
       </footer>
     </div>
   );

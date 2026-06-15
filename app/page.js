@@ -45,7 +45,7 @@ function PixlateAppContent() {
         style={{ display: 'none' }}
       />
 
-      <HeroSection />
+      {!showEditor && <HeroSection />}
 
       {showEditor && (
         <section id="editor-section" className="editor-section">

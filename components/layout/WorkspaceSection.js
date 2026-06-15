@@ -28,16 +28,48 @@ export default function WorkspaceSection() {
             onDragOver={handleDrag}
             onDrop={handleDrop}
             onClick={triggerFileInput}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '24px', border: 'none', background: 'transparent', height: '100%' }}
           >
-            <span className="dropzone-title">Drop an image here</span>
-            <span className="dropzone-sub">or click to browse / paste from clipboard</span>
-
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#52525b" strokeWidth="1">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+              <span style={{ color: '#a1a1aa', fontSize: '16px' }}>Drop an image or video here</span>
+              <span style={{ color: '#71717a', fontSize: '13px' }}>or click to browse / paste from clipboard</span>
+            </div>
             <button
               type="button"
-              className="btn-secondary"
               onClick={(e) => { e.stopPropagation(); handleInspireMe(); }}
-              style={{ marginTop: '12px', width: 'auto', padding: '8px 20px' }}
+              style={{ 
+                marginTop: '16px', 
+                background: '#27272a', 
+                color: '#e4e4e7', 
+                border: '1px solid #3f3f46', 
+                borderRadius: '8px', 
+                padding: '8px 16px', 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '8px',
+                cursor: 'pointer',
+                fontSize: '13px'
+              }}
+              onMouseOver={(e) => e.currentTarget.style.background = '#3f3f46'}
+              onMouseOut={(e) => e.currentTarget.style.background = '#27272a'}
             >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 2v1"></path>
+                <path d="M12 21v1"></path>
+                <path d="M4 12H3"></path>
+                <path d="M21 12h-1"></path>
+                <path d="M19.07 4.93l-.71.71"></path>
+                <path d="M5.64 18.36l-.71.71"></path>
+                <path d="M4.93 4.93l.71.71"></path>
+                <path d="M18.36 18.36l.71.71"></path>
+                <path d="M9 16a5 5 0 1 1 6 0 3.5 3.5 0 0 0-1 3 2 2 0 0 1-4 0 3.5 3.5 0 0 0-1-3z"></path>
+                <path d="M9.7 20h4.6"></path>
+              </svg>
               Inspire Me
             </button>
           </div>

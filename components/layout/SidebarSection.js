@@ -1,9 +1,26 @@
 'use client';
+import { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
 import { usePixlate, PRESETS, DIMENSION_PRESETS } from '@/context/PixlateContext';
+import ToolbarCollapse from '@/components/ui/ToolbarCollapse';
 
 export default function SidebarSection() {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menuRef]);
+
   const {
-    image, loading, previewUrl, scrollToHero, handleSelectPreset, triggerFileInput,
+    image, loading, previewUrl, handleSelectPreset, triggerFileInput, setShowEditor,
     dimensionPreset, setDimensionPreset, width, setWidth, height, setHeight,
     sliderMaxWidth, sliderMaxHeight,
     whitePercent, setWhitePercent, colorSort, setColorSort, reverse, setReverse, randomSeed, setRandomSeed,
@@ -17,26 +34,138 @@ export default function SidebarSection() {
     glitch, setGlitch, glitchStrength, setGlitchStrength,
     blur, setBlur, blurStrength, setBlurStrength,
     halftone, setHalftone, halftoneSize, setHalftoneSize,
+    coverage, setCoverage, edgeEmphasis, setEdgeEmphasis, density, setDensity, brightness, setBrightness, contrast, setContrast,
     handleReset, handleProcess
   } = usePixlate();
 
+  if (isCollapsed) {
+    return (
+      <aside className="sidebar" style={{ width: '60px', padding: '20px 0', alignItems: 'center', transition: 'width 0.2s' }}>
+        <button 
+          onClick={() => setIsCollapsed(false)} 
+          style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', padding: '8px' }}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </aside>
+    );
+  }
+
   return (
-    <aside className="sidebar">
+    <aside className="sidebar" style={{ transition: 'width 0.2s' }}>
 
       {/* Header */}
-      <div className="sidebar-header">
+      <div className="sidebar-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }} ref={menuRef}>
         <span
           className="sidebar-title"
-          onClick={scrollToHero}
-          style={{ cursor: 'pointer' }}
         >
-          Pixlate Studio
+          Pixlate
         </span>
+        <button 
+          onClick={() => setIsMenuOpen(!isMenuOpen)} 
+          style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', display: 'flex', alignItems: 'center' }}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+
+        {/* Dropdown Menu */}
+        {isMenuOpen && (
+          <div style={{
+            position: 'absolute',
+            top: '30px',
+            right: '0',
+            backgroundColor: '#1c1c1e',
+            border: '1px solid #27272a',
+            borderRadius: '8px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+            width: '200px',
+            zIndex: 100,
+            display: 'flex',
+            flexDirection: 'column',
+            padding: '6px 0'
+          }}>
+            <button 
+              onClick={() => { setIsCollapsed(true); setIsMenuOpen(false); }}
+              style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', background: 'transparent', border: 'none', color: '#e4e4e7', width: '100%', cursor: 'pointer', fontSize: '13px', textAlign: 'left' }}
+              onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'}
+              onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
+              Collapse Toolbar
+            </button>
+            <div style={{ height: '1px', backgroundColor: '#27272a', margin: '4px 0' }}></div>
+            
+            <a 
+              href="https://github.com/arnabjena007/PixlateWeb/issues" target="_blank" rel="noopener noreferrer"
+              style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', textDecoration: 'none', color: '#a1a1aa', width: '100%', cursor: 'pointer', fontSize: '13px' }}
+              onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#e4e4e7'; }}
+              onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#a1a1aa'; }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+              Report a Bug
+            </a>
+            <a 
+              href="https://github.com/arnabjena007/PixlateWeb/issues" target="_blank" rel="noopener noreferrer"
+              style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', textDecoration: 'none', color: '#a1a1aa', width: '100%', cursor: 'pointer', fontSize: '13px' }}
+              onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#e4e4e7'; }}
+              onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#a1a1aa'; }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+              Suggest a Feature
+            </a>
+            
+            <div style={{ height: '1px', backgroundColor: '#27272a', margin: '4px 0' }}></div>
+            
+            <button 
+              onClick={() => { setShowEditor(false); setIsMenuOpen(false); }}
+              style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', background: 'transparent', border: 'none', color: '#a1a1aa', width: '100%', cursor: 'pointer', fontSize: '13px', textAlign: 'left' }}
+              onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#e4e4e7'; }}
+              onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#a1a1aa'; }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+              Landing page
+            </button>
+            <Link 
+              href="/" 
+              style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', textDecoration: 'none', color: '#a1a1aa', width: '100%', cursor: 'pointer', fontSize: '13px' }}
+              onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#e4e4e7'; }}
+              onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#a1a1aa'; }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              Changelog
+            </Link>
+            <Link 
+              href="/" 
+              style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', textDecoration: 'none', color: '#a1a1aa', width: '100%', cursor: 'pointer', fontSize: '13px' }}
+              onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#e4e4e7'; }}
+              onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#a1a1aa'; }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
+              Privacy
+            </Link>
+            <Link 
+              href="/about" 
+              style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', textDecoration: 'none', color: '#a1a1aa', width: '100%', cursor: 'pointer', fontSize: '13px' }}
+              onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#e4e4e7'; }}
+              onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#a1a1aa'; }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+              About
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Backgrounds Section */}
-      <div className="section">
-        <span className="section-title">Backgrounds</span>
+      <ToolbarCollapse title="Backgrounds">
 
         <div className="presets-grid">
           {PRESETS.map((preset) => (
@@ -58,11 +187,10 @@ export default function SidebarSection() {
         >
           Upload Custom Image
         </button>
-      </div>
+      </ToolbarCollapse>
 
       {/* Dimensions Section */}
-      <div className="section">
-        <span className="section-title">Dimensions</span>
+      <ToolbarCollapse title="Dimensions">
 
         <div className="control-group">
           <div className="control-label-row">
@@ -138,11 +266,10 @@ export default function SidebarSection() {
             onChange={(e) => { setHeight(parseInt(e.target.value)); setDimensionPreset('Custom Size'); }}
           />
         </div>
-      </div>
+      </ToolbarCollapse>
 
       {/* Tuning Section */}
-      <div className="section">
-        <span className="section-title">Tuning</span>
+      <ToolbarCollapse title="Tuning">
 
         <div className="control-group">
           <div className="control-label-row">
@@ -203,11 +330,10 @@ export default function SidebarSection() {
           />
         </div>
 
-      </div>
+      </ToolbarCollapse>
 
       {/* Text Overlay Section */}
-      <div className="section">
-        <span className="section-title">Text Overlay</span>
+      <ToolbarCollapse title="Text Overlay">
 
         <div className="toggle-row" onClick={() => setTextOverlay(!textOverlay)}>
           <div className="toggle-info">
@@ -314,12 +440,11 @@ export default function SidebarSection() {
             })()}
           </div>
         )}
-      </div>
+      </ToolbarCollapse>
 
 
       {/* Image Overlay Section */}
-      <div className="section">
-        <span className="section-title">Image Overlay</span>
+      <ToolbarCollapse title="Image Overlay">
 
         <div className="toggle-row" onClick={() => setImageOverlay(!imageOverlay)}>
           <div className="toggle-info">
@@ -344,12 +469,87 @@ export default function SidebarSection() {
             </button>
           </div>
         )}
-      </div>
+      </ToolbarCollapse>
+
+
+      {/* Intensity Section */}
+      <ToolbarCollapse title="Intensity">
+        
+        <div className="control-group">
+          <div className="control-label-row">
+            <span>Coverage</span>
+            <span className="control-value">{coverage}%</span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={coverage}
+            onChange={(e) => setCoverage(parseInt(e.target.value))}
+          />
+        </div>
+
+        <div className="control-group">
+          <div className="control-label-row">
+            <span>Edge Emphasis</span>
+            <span className="control-value">{edgeEmphasis}%</span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={edgeEmphasis}
+            onChange={(e) => setEdgeEmphasis(parseInt(e.target.value))}
+          />
+        </div>
+
+        <div className="control-group">
+          <div className="control-label-row">
+            <span>Density</span>
+            <span className="control-value">{density}%</span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={density}
+            onChange={(e) => setDensity(parseInt(e.target.value))}
+          />
+        </div>
+
+        <div className="control-group">
+          <div className="control-label-row">
+            <span>Brightness</span>
+            <span className="control-value">{brightness}</span>
+          </div>
+          <input
+            type="range"
+            min="-100"
+            max="100"
+            value={brightness}
+            onChange={(e) => setBrightness(parseInt(e.target.value))}
+          />
+        </div>
+
+        <div className="control-group">
+          <div className="control-label-row">
+            <span>Contrast</span>
+            <span className="control-value">{contrast}</span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="200"
+            value={contrast}
+            onChange={(e) => setContrast(parseInt(e.target.value))}
+          />
+        </div>
+
+      </ToolbarCollapse>
 
 
       {/* Post-Processing Section */}
-      <div className="section">
-        <span className="section-title">Post-Processing</span>
+      <ToolbarCollapse title="Post-Processing">
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
           {/* Color Overlay */}
@@ -497,7 +697,7 @@ export default function SidebarSection() {
             )}
           </div>
         </div>
-      </div>
+      </ToolbarCollapse>
 
 
       {/* Action Buttons */}
