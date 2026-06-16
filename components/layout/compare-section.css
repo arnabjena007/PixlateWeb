@@ -1,0 +1,75 @@
+.compare-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  background-color: var(--workspace-bg);
+  position: relative;
+  z-index: 5;
+}
+
+@media (min-width: 768px) {
+  .compare-section {
+    padding: 8rem 4rem;
+  }
+}
+
+.compare-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  max-width: 1200px;
+  width: 100%;
+  align-items: center;
+}
+
+@media (min-width: 992px) {
+  .compare-content-wrapper {
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 4rem;
+  }
+}
+
+.compare-text-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.compare-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.compare-description {
+  font-size: 1.125rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.compare-demo-wrapper {
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 1.5rem;
+  background-color: #1E1E1E; /* dark bg */
+}
+
+/* Specific styling for the compare component instance */
+.compare-demo-instance {
+  height: 250px;
+  width: 300px;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .compare-demo-instance {
+    height: 400px;
+    width: 500px;
+  }
+}

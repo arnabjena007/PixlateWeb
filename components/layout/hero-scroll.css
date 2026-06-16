@@ -1,0 +1,116 @@
+.hero-scroll-wrapper {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin-top: 10rem;
+  position: relative;
+  z-index: 10;
+}
+
+.hero-scroll-title-container {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.hero-scroll-title {
+  font-size: 2.25rem;
+  line-height: 1;
+  font-weight: 700;
+  margin-top: 0.25rem;
+}
+
+@media (min-width: 768px) {
+  .hero-scroll-title {
+    font-size: 6rem;
+  }
+}
+
+.hero-scroll-image {
+  margin-left: auto;
+  margin-right: auto;
+  object-fit: contain;
+  height: 100%;
+  object-position: center;
+  width: 100%;
+  display: block;
+}
+
+.container-scroll-root {
+  height: 40rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .container-scroll-root {
+    height: 60rem;
+    padding: 2rem;
+  }
+}
+
+.container-scroll-inner {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  width: 100%;
+  position: relative;
+  perspective: 1000px;
+}
+
+@media (min-width: 768px) {
+  .container-scroll-inner {
+    padding-top: 2rem;
+    padding-bottom: 5rem;
+  }
+}
+
+.container-scroll-header {
+  max-width: 64rem;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+.container-scroll-card {
+  max-width: 64rem;
+  margin-top: 0;
+  margin-left: auto;
+  margin-right: auto;
+  height: 30rem;
+  width: 100%;
+  background-color: transparent;
+  border-radius: 30px;
+  box-shadow: 0 0 #0000004d, 0 9px 20px #0000004a, 0 37px 37px #00000042, 0 84px 50px #00000026, 0 149px 60px #0000000a, 0 233px 65px #00000003;
+}
+
+@media (min-width: 768px) {
+  .container-scroll-card {
+    height: 40rem;
+  }
+}
+
+.container-scroll-card-inner {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 30px;
+  background-color: #18181b;
+  border: 6px solid #4B5563;
+}
+
+@media (min-width: 768px) {
+  .container-scroll-card-inner {
+    border-radius: 30px;
+  }
+}
+
+.hero-buttons-container {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}

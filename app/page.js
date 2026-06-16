@@ -1,8 +1,11 @@
 'use client';
 import { PixlateProvider, usePixlate } from '@/context/PixlateContext';
 import HeroSection from '@/components/layout/HeroSection';
+import { HeroScrollDemo } from '@/components/layout/HeroScrollDemo';
+import { CompareSection } from '@/components/layout/CompareSection';
 import WorkspaceSection from '@/components/layout/WorkspaceSection';
 import SidebarSection from '@/components/layout/SidebarSection';
+import Footer from '@/components/layout/Footer';
 
 function PixlateAppContent() {
   const { showEditor, fileInputRef, overlayFileInputRef, handleFileChange, handleOverlayFileChange, chromaticStrength, glitchStrength } = usePixlate();
@@ -45,7 +48,14 @@ function PixlateAppContent() {
         style={{ display: 'none' }}
       />
 
-      {!showEditor && <HeroSection />}
+      {!showEditor && (
+        <>
+          <HeroSection />
+          <HeroScrollDemo />
+          <CompareSection />
+          <Footer />
+        </>
+      )}
 
       {showEditor && (
         <section id="editor-section" className="editor-section">
