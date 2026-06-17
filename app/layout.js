@@ -30,7 +30,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${instrumentSans.variable} ${instrumentSerif.variable}`}>
+    <html lang="en" className={`dark ${geistSans.variable} ${geistMono.variable} ${instrumentSans.variable} ${instrumentSerif.variable}`}>
       <body suppressHydrationWarning>{children}</body>
     </html>
   );

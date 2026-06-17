@@ -30,10 +30,8 @@
 .hero-scroll-image {
   margin-left: auto;
   margin-right: auto;
-  object-fit: contain;
-  height: 100%;
-  object-position: center;
   width: 100%;
+  height: auto;
   display: block;
 }
 
@@ -77,11 +75,13 @@
 
 .container-scroll-card {
   max-width: 64rem;
-  margin-top: 0;
+  margin-top: -3rem;
   margin-left: auto;
   margin-right: auto;
   height: 30rem;
   width: 100%;
+  position: relative;
+  z-index: 20;
   background-color: transparent;
   border-radius: 30px;
   box-shadow: 0 0 #0000004d, 0 9px 20px #0000004a, 0 37px 37px #00000042, 0 84px 50px #00000026, 0 149px 60px #0000000a, 0 233px 65px #00000003;
@@ -90,6 +90,7 @@
 @media (min-width: 768px) {
   .container-scroll-card {
     height: 40rem;
+    margin-top: -5rem;
   }
 }
 
@@ -106,11 +107,4 @@
   .container-scroll-card-inner {
     border-radius: 30px;
   }
-}
-
-.hero-buttons-container {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 2rem;
 }

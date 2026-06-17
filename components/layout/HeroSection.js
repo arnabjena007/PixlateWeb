@@ -27,7 +27,7 @@ export default function HeroSection() {
     <section id="hero-section" className="hero-section">
       <BackgroundRippleEffect />
 
-      <motion.div 
+      <motion.div
         className="hero-content"
         variants={containerVariants}
         initial="hidden"
@@ -48,13 +48,13 @@ export default function HeroSection() {
           </svg>
           Star on GitHub
         </motion.a>
-        
+
         <motion.h1 variants={itemVariants} className="hero-title">Pixlate</motion.h1>
-        
+
         <motion.p variants={itemVariants} className="hero-subtitle">
           A generative art project combining algorithms and fine arts to create organic, visually captivating patterns. Easily download and seamlessly integrate it into your projects.
         </motion.p>
-        
+
         <motion.div variants={itemVariants} className="hero-buttons">
           <button
             type="button"

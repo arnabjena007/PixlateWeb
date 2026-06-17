@@ -2,6 +2,7 @@
 import { PixlateProvider, usePixlate } from '@/context/PixlateContext';
 import HeroSection from '@/components/layout/HeroSection';
 import { HeroScrollDemo } from '@/components/layout/HeroScrollDemo';
+import { FeaturesSectionDemo } from '@/components/layout/FeaturesSection';
 import { CompareSection } from '@/components/layout/CompareSection';
 import WorkspaceSection from '@/components/layout/WorkspaceSection';
 import SidebarSection from '@/components/layout/SidebarSection';
@@ -52,6 +53,7 @@ function PixlateAppContent() {
         <>
           <HeroSection />
           <HeroScrollDemo />
+          <FeaturesSectionDemo />
           <CompareSection />
           <Footer />
         </>

@@ -6,27 +6,11 @@ export const ContainerScroll = ({ titleComponent, children }) => {
   const containerRef = useRef(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
+    offset: ["start end", "end start"]
   });
-  const [isMobile, setIsMobile] = React.useState(false);
 
-  React.useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => {
-      window.removeEventListener("resize", checkMobile);
-    };
-  }, []);
-
-  const scaleDimensions = () => {
-    return isMobile ? [0.7, 0.9] : [1.05, 1];
-  };
-
-  const rotate = useTransform(scrollYProgress, [0, 1], [20, 0]);
-  const scale = useTransform(scrollYProgress, [0, 1], scaleDimensions());
-  const translate = useTransform(scrollYProgress, [0, 1], [0, -100]);
+  // Moves the header up as we scroll down, creating the "space out" effect
+  const translate = useTransform(scrollYProgress, [0, 1], [0, -150]);
 
   return (
     <div
@@ -37,7 +21,7 @@ export const ContainerScroll = ({ titleComponent, children }) => {
         className="container-scroll-inner"
       >
         {titleComponent && <Header translate={translate} titleComponent={titleComponent} />}
-        <Card rotate={rotate} translate={translate} scale={scale}>
+        <Card>
           {children}
         </Card>
       </div>
@@ -58,18 +42,12 @@ export const Header = ({ translate, titleComponent }) => {
   );
 };
 
-export const Card = ({ rotate, scale, children }) => {
+export const Card = ({ children }) => {
   return (
-    <motion.div
-      style={{
-        rotateX: rotate,
-        scale,
-      }}
-      className="container-scroll-card"
-    >
+    <div className="container-scroll-card">
       <div className="container-scroll-card-inner">
         {children}
       </div>
-    </motion.div>
+    </div>
   );
 };

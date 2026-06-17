@@ -31,7 +31,7 @@ body {
   flex-direction: column;
   width: 100%;
   min-height: 100vh;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 .workspace {
@@ -753,9 +753,9 @@ input:checked + .toggle-slider:before {
 }
 
 .hero-title {
-  font-size: clamp(3rem, 7vw, 5rem);
+  font-size: clamp(4rem, 12vw, 10rem);
   font-weight: 800;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.04em;
   background: linear-gradient(to right, #ffffff, #a1a1aa);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -945,4 +945,16 @@ input:checked + .toggle-slider:before {
 * {
   scrollbar-width: thin;
   scrollbar-color: #3f3f46 transparent;
+}
+
+/* Features Section Grid */
+@media (max-width: 1023px) {
+  .features-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .feature-card {
+    grid-column: span 1 !important;
+    border-right: none !important;
+    border-bottom: 1px solid #262626 !important;
+  }
 }

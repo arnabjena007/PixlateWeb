@@ -48,7 +48,7 @@ export const BackgroundRippleEffect = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 1
+        zIndex: 0
       }}
     >
       <div className="relative h-full w-full overflow-hidden" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
