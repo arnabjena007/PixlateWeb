@@ -95,41 +95,54 @@ export default function GenerativeCanvas({ outputUrl, width, height, imageStyle 
     }
   }, [outputUrl, width, height]);
 
-  const generateGrowthSequence = (artWidth, artHeight) => {
+  const generateColorSortSequence = (artWidth, artHeight, colorAtPosition) => {
     const numPixels = artWidth * artHeight;
     const positions = new Int32Array(numPixels);
-    const distances = new Float32Array(numPixels);
-    
-    // Choose some seed points
-    const numSeeds = 15;
-    const seeds = [];
-    for (let i = 0; i < numSeeds; i++) {
-      seeds.push({
-        x: Math.random() * artWidth,
-        y: Math.random() * artHeight
-      });
-    }
+    const hsvData = new Float32Array(numPixels * 3);
+
+    const rgbToHsv = (r, g, b) => {
+      r /= 255; g /= 255; b /= 255;
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      const d = max - min;
+      let h = 0;
+      if (d !== 0) {
+        if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+        else if (max === g) h = ((b - r) / d + 2) / 6;
+        else h = ((r - g) / d + 4) / 6;
+      }
+      return [h * 360, (max === 0 ? 0 : d / max) * 100, max * 100];
+    };
 
     for (let i = 0; i < numPixels; i++) {
       positions[i] = i;
       const x = i % artWidth;
       const y = Math.floor(i / artWidth);
       
-      let minDist = Infinity;
-      for (let s = 0; s < numSeeds; s++) {
-        const dx = x - seeds[s].x;
-        const dy = y - seeds[s].y;
-        const d = Math.sqrt(dx * dx + dy * dy);
-        if (d < minDist) {
-          minDist = d;
-        }
+      const rgbStr = colorAtPosition(x, y); 
+      const match = rgbStr.match(/rgb\((\d+),(\d+),(\d+)\)/);
+      if (match) {
+        const [h, s, v] = rgbToHsv(parseInt(match[1]), parseInt(match[2]), parseInt(match[3]));
+        hsvData[i * 3] = h;
+        hsvData[i * 3 + 1] = s;
+        hsvData[i * 3 + 2] = v;
       }
-      // Add organic noise to make the crystal edges rough and natural
-      distances[i] = minDist + (Math.random() * 30);
     }
 
-    // Sort positions based on distance
-    positions.sort((a, b) => distances[a] - distances[b]);
+    // Sort positions by Hue, Saturation, and Value to naturally group by the shapes in the image
+    positions.sort((a, b) => {
+      const hA = hsvData[a * 3];
+      const sA = hsvData[a * 3 + 1];
+      const vA = hsvData[a * 3 + 2];
+      
+      const hB = hsvData[b * 3];
+      const sB = hsvData[b * 3 + 1];
+      const vB = hsvData[b * 3 + 2];
+
+      if (Math.abs(hA - hB) > 10) return hA - hB;
+      if (Math.abs(sA - sB) > 10) return sB - sA;
+      return vA - vB;
+    });
 
     return positions;
   };
@@ -169,7 +182,7 @@ export default function GenerativeCanvas({ outputUrl, width, height, imageStyle 
 
     try {
       const colorAtPosition = await getSourceImageColors(outputUrl);
-      const positions = generateGrowthSequence(width, height);
+      const positions = generateColorSortSequence(width, height, colorAtPosition);
       
       const positionAtIndex = (index) => {
         if (index < positions.length) {
