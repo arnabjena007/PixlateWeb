@@ -99,6 +99,13 @@ export default function GenerativeCanvas({ outputUrl, width, height, imageStyle 
     const numPixels = artWidth * artHeight;
     const positions = new Int32Array(numPixels);
     const hsvData = new Float32Array(numPixels * 3);
+    const distances = new Float32Array(numPixels);
+
+    const numSeeds = 15;
+    const seeds = [];
+    for (let i = 0; i < numSeeds; i++) {
+      seeds.push({ x: Math.random() * artWidth, y: Math.random() * artHeight });
+    }
 
     const rgbToHsv = (r, g, b) => {
       r /= 255; g /= 255; b /= 255;
@@ -127,9 +134,19 @@ export default function GenerativeCanvas({ outputUrl, width, height, imageStyle 
         hsvData[i * 3 + 1] = s;
         hsvData[i * 3 + 2] = v;
       }
+
+      let minDist = Infinity;
+      for (let s = 0; s < numSeeds; s++) {
+        const dx = x - seeds[s].x;
+        const dy = y - seeds[s].y;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        if (d < minDist) minDist = d;
+      }
+      // Add a tiny bit of noise to distance to blur sharp edges
+      distances[i] = minDist + Math.random() * 15;
     }
 
-    // Sort positions by Hue, Saturation, and Value to naturally group by the shapes in the image
+    // Sort positions by Hue, Saturation, and Value to naturally group by shapes
     positions.sort((a, b) => {
       const hA = hsvData[a * 3];
       const sA = hsvData[a * 3 + 1];
@@ -141,7 +158,10 @@ export default function GenerativeCanvas({ outputUrl, width, height, imageStyle 
 
       if (Math.abs(hA - hB) > 10) return hA - hB;
       if (Math.abs(sA - sB) > 10) return sB - sA;
-      return vA - vB;
+      if (Math.abs(vA - vB) > 2) return vA - vB;
+      
+      // Break ties organically using distance from seeds!
+      return distances[a] - distances[b];
     });
 
     return positions;
