@@ -117,7 +117,6 @@ export default function GenerativeCanvas({ outputUrl, width, height, imageStyle 
   const getSourceImageColors = (srcUrl) => {
     return new Promise((resolve, reject) => {
       const img = new Image();
-      img.crossOrigin = 'anonymous';
       img.onload = () => {
         const canvas = document.createElement('canvas');
         canvas.width = img.width;
@@ -130,7 +129,7 @@ export default function GenerativeCanvas({ outputUrl, width, height, imageStyle 
           return `rgb(${data[offset]},${data[offset+1]},${data[offset+2]})`;
         });
       };
-      img.onerror = reject;
+      img.onerror = () => reject(new Error("Failed to load source image for colors"));
       img.src = srcUrl;
     });
   };
@@ -142,7 +141,7 @@ export default function GenerativeCanvas({ outputUrl, width, height, imageStyle 
         resolve(img);
         URL.revokeObjectURL(img.src);
       };
-      img.onerror = reject;
+      img.onerror = () => reject(new Error("Failed to load compressed sequence image"));
       img.src = URL.createObjectURL(blob);
     });
   };
@@ -250,15 +249,15 @@ export default function GenerativeCanvas({ outputUrl, width, height, imageStyle 
         src={outputUrl}
         alt="Processed Image"
         className="preview-image"
-        style={{ ...imageStyle, position: 'absolute', width: '100%', height: '100%', objectFit: 'contain' }}
+        style={{ ...imageStyle, position: 'absolute', width: '100%', height: '100%', objectFit: 'cover' }}
       />
       <canvas 
         ref={maskRef}
-        style={{ ...imageStyle, position: 'absolute', width: '100%', height: '100%', objectFit: 'contain', pointerEvents: 'none' }}
+        style={{ ...imageStyle, position: 'absolute', width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none' }}
       />
       <canvas 
         ref={particlesRef}
-        style={{ position: 'absolute', width: '100%', height: '100%', objectFit: 'contain', pointerEvents: 'none', mixBlendMode: 'screen' }}
+        style={{ position: 'absolute', width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none', mixBlendMode: 'screen' }}
       />
       
       {status === 'loading' && (
