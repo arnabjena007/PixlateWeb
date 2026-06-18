@@ -1,6 +1,7 @@
 'use client';
 import { Rnd } from 'react-rnd';
 import { usePixlate } from '@/context/PixlateContext';
+import GenerativeCanvas from './GenerativeCanvas';
 
 export default function WorkspaceSection() {
   const {
@@ -168,11 +169,11 @@ export default function WorkspaceSection() {
                           }
                         }}
                       >
-                        <img
-                          src={outputUrl}
-                          alt="Processed Image"
-                          className="preview-image"
-                          style={{ 
+                        <GenerativeCanvas
+                          outputUrl={outputUrl}
+                          width={width}
+                          height={height}
+                          imageStyle={{ 
                             filter: `
                               ${chromatic ? 'url(#chromatic) ' : ''}
                               ${glitch ? 'url(#glitch) ' : ''}

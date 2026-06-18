@@ -19,11 +19,12 @@ export function HeroScrollDemo() {
           </>
         }>
         <img
-          src={`/linear.webp`}
+          src={`/img/hero-screenshot.png`}
           alt="hero"
-          height={720}
-          width={1400}
-          className="mx-auto rounded-2xl object-cover h-full object-left-top"
+          height={640}
+          width={1024}
+          className="mx-auto rounded-2xl h-full w-full"
+          style={{ objectFit: 'cover' }}
           draggable={false} />
       </ContainerScroll>
     </div>

@@ -343,6 +343,33 @@ export const PixlateProvider = ({ children }) => {
     }
   };
 
+  const fetchSequenceData = async () => {
+    if (!image) return null;
+    const formData = new FormData();
+    formData.append('image', image);
+    formData.append('width', width);
+    formData.append('height', height);
+    formData.append('whitePercent', whitePercent);
+    formData.append('colorSort', colorSort);
+    formData.append('random', 0);
+    formData.append('reverse', reverse);
+    formData.append('sweep', false);
+    formData.append('randomSeed', randomSeed);
+    formData.append('variations', variations);
+    formData.append('compress', 1); // Get compressed sequence image
+
+    try {
+      const response = await fetch('/api/pixlate', {
+        method: 'POST',
+        body: formData,
+      });
+      if (!response.ok) return null;
+      return await response.blob();
+    } catch (err) {
+      return null;
+    }
+  };
+
   const handleDownload = () => {
     if (!outputUrl) return;
 
@@ -453,19 +480,19 @@ export const PixlateProvider = ({ children }) => {
           let fontString = '';
           if (textObj.italic) fontString += 'italic ';
           if (textObj.bold) fontString += 'bold ';
-          
+
           let numericSize = 70; // Medium
           if (textObj.size === 'Small') numericSize = 30;
           else if (textObj.size === 'Large') numericSize = 150;
           else if (textObj.size === 'Extra Large') numericSize = 300;
-          
+
           fontString += `${numericSize}px "${textObj.font}", sans-serif`;
           ctx.font = fontString;
-          
+
           const xPos = canvas.width * (textObj.x / 100);
           const yPos = canvas.height * (textObj.y / 100);
           ctx.fillText(textObj.value, xPos, yPos);
-  
+
           if (textObj.underline) {
             const textMetrics = ctx.measureText(textObj.value);
             const textWidth = textMetrics.width;
@@ -507,12 +534,12 @@ export const PixlateProvider = ({ children }) => {
             });
           }
         }
-        
+
         drawTextOverlay(true); // Draw foreground texts
-        
+
         exportCanvas();
       };
-      
+
       drawOverlaysAndExport();
     };
     img.src = outputUrl;
@@ -600,6 +627,7 @@ export const PixlateProvider = ({ children }) => {
     handleInspireMe,
     handleSelectPreset,
     handleProcess,
+    fetchSequenceData,
     handleDownload,
     scrollToEditor,
     scrollToHero,
