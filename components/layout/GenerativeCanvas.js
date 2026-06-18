@@ -78,7 +78,7 @@ export default function GenerativeCanvas({ outputUrl, width, height, imageStyle 
   const particlesRef = useRef(null);
   const animationFrameRef = useRef(null);
 
-  // Stop animation if the image changes
+  // Automatically start animation when the image changes
   useEffect(() => {
     setStatus('initial');
     if (animationFrameRef.current) {
@@ -88,6 +88,10 @@ export default function GenerativeCanvas({ outputUrl, width, height, imageStyle 
       const mask = new Mask(width, height, maskRef.current);
       mask.arm('rgba(24, 24, 27, 0)'); // Transparent initially
       mask.draw();
+    }
+    
+    if (outputUrl && width && height) {
+      startAnimation();
     }
   }, [outputUrl, width, height]);
 
@@ -143,7 +147,7 @@ export default function GenerativeCanvas({ outputUrl, width, height, imageStyle 
     });
   };
 
-  const handleClick = async () => {
+  const startAnimation = async () => {
     if (status === 'playing' || status === 'loading') return;
 
     setStatus('loading');
@@ -158,7 +162,7 @@ export default function GenerativeCanvas({ outputUrl, width, height, imageStyle 
 
     try {
       const sequenceBlob = await fetchSequenceData();
-      if (!sequenceBlob) throw new Error("Failed to fetch sequence");
+      if (!sequenceBlob) throw new Error("Failed to fetch sequence from /api/pixlate");
       
       const seqImg = await loadCompressedSequence(sequenceBlob);
       const positions = decompressPositionSequence(seqImg, width, height);
@@ -220,18 +224,23 @@ export default function GenerativeCanvas({ outputUrl, width, height, imageStyle 
       const resetMask = new Mask(width, height, maskRef.current);
       resetMask.arm('rgba(24, 24, 27, 0)'); // reset mask
       resetMask.draw();
+      
+      if (particlesRef.current) {
+        const ctx = particlesRef.current.getContext('2d');
+        ctx.fillStyle = 'red';
+        ctx.font = '16px sans-serif';
+        ctx.fillText("Animation Error: " + err.toString(), 20, 30);
+      }
     }
   };
 
   return (
     <div 
       className="generative-canvas-container" 
-      onClick={handleClick}
       style={{
         position: 'relative',
         width: '100%',
         height: '100%',
-        cursor: status === 'playing' ? 'default' : 'pointer',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -255,12 +264,7 @@ export default function GenerativeCanvas({ outputUrl, width, height, imageStyle 
       {status === 'loading' && (
         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(24, 24, 27, 0.5)' }}>
           <div className="spinner"></div>
-        </div>
-      )}
-      
-      {status === 'initial' && (
-        <div style={{ position: 'absolute', top: '16px', right: '16px', background: 'rgba(0,0,0,0.6)', color: 'white', padding: '6px 12px', borderRadius: '20px', fontSize: '12px', backdropFilter: 'blur(4px)', pointerEvents: 'none', zIndex: 10 }}>
-          Click to Animate
+          <span style={{ color: 'white', marginLeft: '12px', fontSize: '14px' }}>Preparing Animation...</span>
         </div>
       )}
     </div>
