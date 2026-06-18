@@ -156,11 +156,21 @@ export default function GenerativeCanvas({ outputUrl, width, height, imageStyle 
       const sB = hsvData[b * 3 + 1];
       const vB = hsvData[b * 3 + 2];
 
-      if (Math.abs(hA - hB) > 10) return hA - hB;
-      if (Math.abs(sA - sB) > 10) return sB - sA;
-      if (Math.abs(vA - vB) > 2) return vA - vB;
+      // Use discrete buckets to guarantee strict transitivity for the sorting algorithm
+      // This prevents the browser from giving up and leaving pixels in horizontal reading-order!
+      const bucketH_A = Math.floor(hA / 15);
+      const bucketH_B = Math.floor(hB / 15);
+      if (bucketH_A !== bucketH_B) return bucketH_A - bucketH_B;
+
+      const bucketS_A = Math.floor(sA / 15);
+      const bucketS_B = Math.floor(sB / 15);
+      if (bucketS_A !== bucketS_B) return bucketS_B - bucketS_A;
+
+      const bucketV_A = Math.floor(vA / 15);
+      const bucketV_B = Math.floor(vB / 15);
+      if (bucketV_A !== bucketV_B) return bucketV_A - bucketV_B;
       
-      // Break ties organically using distance from seeds!
+      // Inside the exact same color bucket, break ties organically using distance from seeds!
       return distances[a] - distances[b];
     });
 
