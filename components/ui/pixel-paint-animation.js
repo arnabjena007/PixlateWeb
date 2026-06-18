@@ -185,18 +185,18 @@ function brighterColor(rgbStr) {
 
 // --- React Component ---
 const GALLERY_IMAGES = [
-  { num: '56', label: 'No. 56' },
-  { num: '5',  label: 'No. 5' },
-  { num: '84', label: 'No. 84' },
-  { num: '44', label: 'No. 44' },
-  { num: '65', label: 'No. 65' },
-  { num: '52', label: 'No. 52' },
-  { num: '80', label: 'No. 80' },
-  { num: '41', label: 'No. 41' },
-  { num: '14', label: 'No. 14' },
-  { num: '24', label: 'No. 24' },
-  { num: '27', label: 'No. 27' },
-  { num: '1',  label: 'No. 1' },
+  { num: 'pixlate-demo-9', label: 'Pixlate Demo 9' },
+  { num: 'pixlate-demo-2',  label: 'Pixlate Demo 2' },
+  { num: 'pixlate-demo-12', label: 'Pixlate Demo 12' },
+  { num: 'pixlate-demo-7', label: 'Pixlate Demo 7' },
+  { num: 'pixlate-demo-10', label: 'Pixlate Demo 10' },
+  { num: 'pixlate-demo-8', label: 'Pixlate Demo 8' },
+  { num: 'pixlate-demo-11', label: 'Pixlate Demo 11' },
+  { num: 'pixlate-demo-6', label: 'Pixlate Demo 6' },
+  { num: 'pixlate-demo-3', label: 'Pixlate Demo 3' },
+  { num: 'pixlate-demo-4', label: 'Pixlate Demo 4' },
+  { num: 'pixlate-demo-5', label: 'Pixlate Demo 5' },
+  { num: 'pixlate-demo-1',  label: 'Pixlate Demo 1' },
 ];
 
 export default function PixelPaintAnimation() {
