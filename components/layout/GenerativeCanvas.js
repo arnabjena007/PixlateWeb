@@ -249,6 +249,8 @@ export default function GenerativeCanvas({ outputUrl, width, height, imageStyle 
           setStatus('played');
           mask.arm('rgba(24, 24, 27, 0)');
           mask.draw();
+          // Clear any remaining particles so they don't freeze on the screen
+          particles.reset();
         }
       };
 
