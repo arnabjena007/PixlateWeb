@@ -72,11 +72,12 @@ class Mask {
 }
 
 export default function GenerativeCanvas({ outputUrl, width, height, imageStyle }) {
-  const { fetchSequenceData } = usePixlate();
+  const { fetchSequenceData, previewUrl } = usePixlate();
   const [status, setStatus] = useState('initial'); // initial, loading, playing, played
   const maskRef = useRef(null);
   const particlesRef = useRef(null);
   const animationFrameRef = useRef(null);
+  const lastImageRef = useRef(null);
 
   // Automatically start animation when the image changes
   useEffect(() => {
@@ -84,16 +85,34 @@ export default function GenerativeCanvas({ outputUrl, width, height, imageStyle 
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
     }
-    if (maskRef.current && width && height) {
-      const mask = new Mask(width, height, maskRef.current);
-      mask.arm('rgba(24, 24, 27, 0)'); // Transparent initially
-      mask.draw();
-    }
     
     if (outputUrl && width && height) {
-      startAnimation();
+      if (lastImageRef.current !== previewUrl) {
+        // New image selected: play the animation!
+        lastImageRef.current = previewUrl;
+        
+        if (maskRef.current) {
+          const mask = new Mask(width, height, maskRef.current);
+          mask.arm('rgba(24, 24, 27, 0)'); // Transparent initially
+          mask.draw();
+        }
+        
+        startAnimation();
+      } else {
+        // Settings changed but same image: instantly show the result!
+        setStatus('played');
+        if (maskRef.current) {
+          const mask = new Mask(width, height, maskRef.current);
+          mask.arm('rgba(24, 24, 27, 0)'); // Immediately transparent to reveal output
+          mask.draw();
+        }
+        if (particlesRef.current) {
+          const particles = new Particles(width, height, 1.5, particlesRef.current);
+          particles.reset(); // Clear any lingering particles
+        }
+      }
     }
-  }, [outputUrl, width, height]);
+  }, [outputUrl, width, height, previewUrl]);
 
   const generateColorSortSequence = (artWidth, artHeight, colorAtPosition) => {
     const numPixels = artWidth * artHeight;
