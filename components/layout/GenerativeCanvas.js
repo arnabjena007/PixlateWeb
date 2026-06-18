@@ -98,54 +98,39 @@ export default function GenerativeCanvas({ outputUrl, width, height, imageStyle 
   const generateGrowthSequence = (artWidth, artHeight) => {
     const numPixels = artWidth * artHeight;
     const positions = new Int32Array(numPixels);
-    const visited = new Uint8Array(numPixels);
-    const queueX = new Int32Array(numPixels);
-    const queueY = new Int32Array(numPixels);
+    const distances = new Float32Array(numPixels);
     
-    let head = 0;
-    let tail = 0;
-
-    const numSeeds = 12;
+    // Choose some seed points
+    const numSeeds = 15;
+    const seeds = [];
     for (let i = 0; i < numSeeds; i++) {
-      const x = Math.floor(Math.random() * artWidth);
-      const y = Math.floor(Math.random() * artHeight);
-      const idx = y * artWidth + x;
-      if (visited[idx] === 0) {
-        queueX[tail] = x;
-        queueY[tail] = y;
-        visited[idx] = 1;
-        tail++;
-      }
+      seeds.push({
+        x: Math.random() * artWidth,
+        y: Math.random() * artHeight
+      });
     }
 
-    const dx = [1, -1, 0, 0];
-    const dy = [0, 0, 1, -1];
-
-    let index = 0;
-    while (head < tail) {
-      const px = queueX[head];
-      const py = queueY[head];
-      head++;
+    for (let i = 0; i < numPixels; i++) {
+      positions[i] = i;
+      const x = i % artWidth;
+      const y = Math.floor(i / artWidth);
       
-      positions[index++] = py * artWidth + px;
-
-      // Randomize direction order slightly
-      const startDir = Math.floor(Math.random() * 4);
-      for (let i = 0; i < 4; i++) {
-        const d = (startDir + i) % 4;
-        const nx = px + dx[d];
-        const ny = py + dy[d];
-        if (nx >= 0 && nx < artWidth && ny >= 0 && ny < artHeight) {
-          const idx = ny * artWidth + nx;
-          if (visited[idx] === 0) {
-            visited[idx] = 1;
-            queueX[tail] = nx;
-            queueY[tail] = ny;
-            tail++;
-          }
+      let minDist = Infinity;
+      for (let s = 0; s < numSeeds; s++) {
+        const dx = x - seeds[s].x;
+        const dy = y - seeds[s].y;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        if (d < minDist) {
+          minDist = d;
         }
       }
+      // Add organic noise to make the crystal edges rough and natural
+      distances[i] = minDist + (Math.random() * 30);
     }
+
+    // Sort positions based on distance
+    positions.sort((a, b) => distances[a] - distances[b]);
+
     return positions;
   };
 
