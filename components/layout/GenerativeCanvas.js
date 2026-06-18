@@ -72,12 +72,11 @@ class Mask {
 }
 
 export default function GenerativeCanvas({ outputUrl, width, height, imageStyle }) {
-  const { fetchSequenceData, previewUrl } = usePixlate();
+  const { fetchSequenceData, previewUrl, lastAnimatedImageRef } = usePixlate();
   const [status, setStatus] = useState('initial'); // initial, loading, playing, played
   const maskRef = useRef(null);
   const particlesRef = useRef(null);
   const animationFrameRef = useRef(null);
-  const lastImageRef = useRef(null);
 
   // Automatically start animation when the image changes
   useEffect(() => {
@@ -87,9 +86,9 @@ export default function GenerativeCanvas({ outputUrl, width, height, imageStyle 
     }
     
     if (outputUrl && width && height) {
-      if (lastImageRef.current !== previewUrl) {
+      if (lastAnimatedImageRef.current !== previewUrl) {
         // New image selected: play the animation!
-        lastImageRef.current = previewUrl;
+        lastAnimatedImageRef.current = previewUrl;
         
         if (maskRef.current) {
           const mask = new Mask(width, height, maskRef.current);
@@ -99,7 +98,7 @@ export default function GenerativeCanvas({ outputUrl, width, height, imageStyle 
         
         startAnimation();
       } else {
-        // Settings changed but same image: instantly show the result!
+        // Settings changed or tab toggled but same image: instantly show the result!
         setStatus('played');
         if (maskRef.current) {
           const mask = new Mask(width, height, maskRef.current);
@@ -112,7 +111,7 @@ export default function GenerativeCanvas({ outputUrl, width, height, imageStyle 
         }
       }
     }
-  }, [outputUrl, width, height, previewUrl]);
+  }, [outputUrl, width, height, previewUrl, lastAnimatedImageRef]);
 
   const generateColorSortSequence = (artWidth, artHeight, colorAtPosition) => {
     const numPixels = artWidth * artHeight;

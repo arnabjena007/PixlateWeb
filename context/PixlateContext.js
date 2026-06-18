@@ -59,6 +59,7 @@ export const PixlateProvider = ({ children }) => {
   const [dragActive, setDragActive] = useState(false);
   const [activeTab, setActiveTab] = useState('Processed');
   const [showEditor, setShowEditor] = useState(false);
+  const lastAnimatedImageRef = useRef(null);
 
   useEffect(() => {
     if (showEditor) {
@@ -566,6 +567,7 @@ export const PixlateProvider = ({ children }) => {
     dragActive, setDragActive,
     activeTab, setActiveTab,
     showEditor, setShowEditor,
+    lastAnimatedImageRef,
 
     dimensionPreset, setDimensionPreset,
     width, setWidth,
