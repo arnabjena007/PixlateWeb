@@ -61,6 +61,9 @@ export const Compare = ({
         position: "relative",
         overflow: "hidden",
         userSelect: "none",
+        height: "100%",
+        width: "100%",
+        flex: 1,
         cursor: slideMode === "drag" ? (isDragging ? "grabbing" : "grab") : "ew-resize",
       }}
     >
