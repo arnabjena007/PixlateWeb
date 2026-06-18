@@ -95,21 +95,56 @@ export default function GenerativeCanvas({ outputUrl, width, height, imageStyle 
     }
   }, [outputUrl, width, height]);
 
-  const decompressPositionSequence = (img, artWidth, artHeight) => {
-    const canvas = document.createElement('canvas');
-    canvas.width = artWidth;
-    canvas.height = artHeight;
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    ctx.drawImage(img, 0, 0);
-    const { data: buf } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const generateGrowthSequence = (artWidth, artHeight) => {
     const numPixels = artWidth * artHeight;
     const positions = new Int32Array(numPixels);
-    const base = 256;
-    const baseSquared = base * base;
-    for (let i = 0; i < numPixels; i += 1) {
-      let index = i * 4;
-      let order = buf[index] * baseSquared + buf[index + 1] * base + buf[index + 2];
-      positions[order] = i;
+    const visited = new Uint8Array(numPixels);
+    const queueX = new Int32Array(numPixels);
+    const queueY = new Int32Array(numPixels);
+    
+    let head = 0;
+    let tail = 0;
+
+    const numSeeds = 12;
+    for (let i = 0; i < numSeeds; i++) {
+      const x = Math.floor(Math.random() * artWidth);
+      const y = Math.floor(Math.random() * artHeight);
+      const idx = y * artWidth + x;
+      if (visited[idx] === 0) {
+        queueX[tail] = x;
+        queueY[tail] = y;
+        visited[idx] = 1;
+        tail++;
+      }
+    }
+
+    const dx = [1, -1, 0, 0];
+    const dy = [0, 0, 1, -1];
+
+    let index = 0;
+    while (head < tail) {
+      const px = queueX[head];
+      const py = queueY[head];
+      head++;
+      
+      positions[index++] = py * artWidth + px;
+
+      // Randomize direction order slightly
+      const startDir = Math.floor(Math.random() * 4);
+      for (let i = 0; i < 4; i++) {
+        const d = (startDir + i) % 4;
+        const nx = px + dx[d];
+        const ny = py + dy[d];
+        if (nx >= 0 && nx < artWidth && ny >= 0 && ny < artHeight) {
+          const idx = ny * artWidth + nx;
+          if (visited[idx] === 0) {
+            visited[idx] = 1;
+            queueX[tail] = nx;
+            queueY[tail] = ny;
+            tail++;
+          }
+        }
+      }
     }
     return positions;
   };
@@ -134,18 +169,6 @@ export default function GenerativeCanvas({ outputUrl, width, height, imageStyle 
     });
   };
 
-  const loadCompressedSequence = (blob) => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        resolve(img);
-        URL.revokeObjectURL(img.src);
-      };
-      img.onerror = () => reject(new Error("Failed to load compressed sequence image"));
-      img.src = URL.createObjectURL(blob);
-    });
-  };
-
   const startAnimation = async () => {
     if (status === 'playing' || status === 'loading') return;
 
@@ -160,12 +183,8 @@ export default function GenerativeCanvas({ outputUrl, width, height, imageStyle 
     particles.reset();
 
     try {
-      const sequenceBlob = await fetchSequenceData();
-      if (!sequenceBlob) throw new Error("Failed to fetch sequence from /api/pixlate");
-      
-      const seqImg = await loadCompressedSequence(sequenceBlob);
-      const positions = decompressPositionSequence(seqImg, width, height);
       const colorAtPosition = await getSourceImageColors(outputUrl);
+      const positions = generateGrowthSequence(width, height);
       
       const positionAtIndex = (index) => {
         if (index < positions.length) {
