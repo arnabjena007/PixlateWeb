@@ -44,7 +44,7 @@ export default function HeroSection() {
 
         <motion.div variants={itemVariants} className="hero-buttons flex items-center justify-center gap-6 mt-8">
           <HoverBorderGradient
-            containerClassName="rounded-xl h-[52px] min-w-[180px]"
+            containerClassName="rounded-xl h-[52px] min-w-[180px] border border-white/20"
             as="button"
             className="text-white flex items-center justify-center h-full w-full px-8 text-[15px] font-medium relative overflow-hidden"
             onClick={scrollToEditor}
