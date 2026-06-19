@@ -210,9 +210,10 @@ export default function SidebarSection() {
               if (presetName !== 'Custom Size') {
                 const preset = DIMENSION_PRESETS.find(p => p.name === presetName);
                 if (preset) {
-                  setWidth(preset.width);
+                  const w = preset.width === 'FULL_WIDTH' ? window.innerWidth : preset.width;
+                  setWidth(w);
                   setHeight(preset.height);
-                  handleProcess(undefined, preset.width, preset.height);
+                  handleProcess(undefined, w, preset.height);
                 }
               }
             }}
@@ -233,7 +234,17 @@ export default function SidebarSection() {
               <input
                 type="number"
                 value={width}
-                onChange={(e) => { setWidth(parseInt(e.target.value) || 0); setDimensionPreset('Custom Size'); }}
+                onChange={(e) => { 
+                  const val = parseInt(e.target.value);
+                  setWidth(isNaN(val) ? '' : val); 
+                  setDimensionPreset('Custom Size'); 
+                }}
+                onBlur={(e) => {
+                  let val = parseInt(e.target.value);
+                  if (!val || val < 10) val = 800;
+                  setWidth(val);
+                  handleProcess(undefined, val, height);
+                }}
                 style={{ width: '60px', textAlign: 'right', background: 'transparent', border: '1px solid #3f3f46', color: 'var(--text-primary)', borderRadius: '4px', padding: '2px 4px', fontSize: '12px' }}
               />
               <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>px</span>
@@ -246,6 +257,8 @@ export default function SidebarSection() {
             step="50"
             value={width}
             onChange={(e) => { setWidth(parseInt(e.target.value)); setDimensionPreset('Custom Size'); }}
+            onMouseUp={(e) => handleProcess(undefined, parseInt(e.target.value), height)}
+            onTouchEnd={(e) => handleProcess(undefined, parseInt(e.target.value), height)}
           />
         </div>
 
@@ -256,7 +269,17 @@ export default function SidebarSection() {
               <input
                 type="number"
                 value={height}
-                onChange={(e) => { setHeight(parseInt(e.target.value) || 0); setDimensionPreset('Custom Size'); }}
+                onChange={(e) => { 
+                  const val = parseInt(e.target.value);
+                  setHeight(isNaN(val) ? '' : val); 
+                  setDimensionPreset('Custom Size'); 
+                }}
+                onBlur={(e) => {
+                  let val = parseInt(e.target.value);
+                  if (!val || val < 10) val = 800;
+                  setHeight(val);
+                  handleProcess(undefined, width, val);
+                }}
                 style={{ width: '60px', textAlign: 'right', background: 'transparent', border: '1px solid #3f3f46', color: 'var(--text-primary)', borderRadius: '4px', padding: '2px 4px', fontSize: '12px' }}
               />
               <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>px</span>
@@ -269,6 +292,8 @@ export default function SidebarSection() {
             step="50"
             value={height}
             onChange={(e) => { setHeight(parseInt(e.target.value)); setDimensionPreset('Custom Size'); }}
+            onMouseUp={(e) => handleProcess(undefined, width, parseInt(e.target.value))}
+            onTouchEnd={(e) => handleProcess(undefined, width, parseInt(e.target.value))}
           />
         </div>
       </ToolbarCollapse>

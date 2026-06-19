@@ -164,8 +164,17 @@ export default function GenerativeCanvas({ outputUrl, width, height, imageStyle 
       distances[i] = minDist + Math.random() * 15;
     }
 
-    // Sort positions by Hue, Saturation, and Value to naturally group by shapes
+    // Sort positions primarily by Y coordinate to sweep from bottom to top
     positions.sort((a, b) => {
+      const yA = Math.floor(a / artWidth);
+      const yB = Math.floor(b / artWidth);
+      
+      // Sweep from bottom to top in chunks so it's organic, not a perfect straight line
+      const bucketY_A = Math.floor((artHeight - yA) / 30); 
+      const bucketY_B = Math.floor((artHeight - yB) / 30);
+      if (bucketY_A !== bucketY_B) return bucketY_A - bucketY_B;
+
+      // Within the same horizontal band, sort by color
       const hA = hsvData[a * 3];
       const sA = hsvData[a * 3 + 1];
       const vA = hsvData[a * 3 + 2];
@@ -174,8 +183,6 @@ export default function GenerativeCanvas({ outputUrl, width, height, imageStyle 
       const sB = hsvData[b * 3 + 1];
       const vB = hsvData[b * 3 + 2];
 
-      // Use discrete buckets to guarantee strict transitivity for the sorting algorithm
-      // This prevents the browser from giving up and leaving pixels in horizontal reading-order!
       const bucketH_A = Math.floor(hA / 15);
       const bucketH_B = Math.floor(hB / 15);
       if (bucketH_A !== bucketH_B) return bucketH_A - bucketH_B;
@@ -188,7 +195,6 @@ export default function GenerativeCanvas({ outputUrl, width, height, imageStyle 
       const bucketV_B = Math.floor(vB / 15);
       if (bucketV_A !== bucketV_B) return bucketV_A - bucketV_B;
       
-      // Inside the exact same color bucket, break ties organically using distance from seeds!
       return distances[a] - distances[b];
     });
 

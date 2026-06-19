@@ -26,7 +26,7 @@ export const BackgroundRippleEffect = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const cellSize = 36;
+  const cellSize = 80;
   // Calculate cols and rows to cover the full window, plus a safety margin
   const cols = useMemo(() => Math.ceil(dimensions.width / cellSize) + 2, [dimensions.width, cellSize]);
   const rows = useMemo(() => Math.ceil(dimensions.height / cellSize) + 2, [dimensions.height, cellSize]);
@@ -76,7 +76,7 @@ const DivGrid = ({
   className,
   rows = 30,
   cols = 55,
-  cellSize = 36,
+  cellSize = 80,
   borderColor = "#3f3f46",
   fillColor = "rgba(14,165,233,0.3)",
   clickedCell = null,

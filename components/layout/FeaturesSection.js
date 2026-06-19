@@ -1,9 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import createGlobe from "cobe";
 import { motion } from "framer-motion";
-import { IconBrandYoutubeFilled } from "@tabler/icons-react";
 import { Compare } from "../ui/compare";
 
 export function FeaturesSectionDemo() {
@@ -25,28 +23,6 @@ export function FeaturesSectionDemo() {
       description:
         "Generate endless unique variations of organic, captivating patterns from your photos.",
       skeleton: <SkeletonTwo />,
-      style: {
-        gridColumn: 'span 3',
-        borderBottom: '1px solid #262626',
-      },
-      mobileStyle: {},
-    },
-    {
-      title: "Watch our demo to get started",
-      description:
-        "Check out our quick start guide to see how easily you can create stunning generative art with Pixlate.",
-      skeleton: <SkeletonThree />,
-      style: {
-        gridColumn: 'span 3',
-        borderRight: '1px solid #262626',
-      },
-      mobileStyle: {},
-    },
-    {
-      title: "Unleash Pixlate on the web",
-      description:
-        "Export and deploy your pixel-sorted masterpieces anywhere on the web, lightning fast.",
-      skeleton: <SkeletonFour />,
       style: {
         gridColumn: 'span 3',
       },
@@ -170,50 +146,6 @@ export const SkeletonOne = () => {
   );
 };
 
-export const SkeletonThree = () => {
-  return (
-      <a
-        href=""
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{ position: 'relative', display: 'flex', height: '100%', gap: '2.5rem', textDecoration: 'none' }}
-      >
-        <div style={{ marginLeft: 'auto', marginRight: 'auto', height: '100%', width: '100%' }}>
-          <div style={{ position: 'relative', display: 'flex', height: '100%', width: '100%', flex: 1, flexDirection: 'column', gap: '0.5rem' }}>
-            <IconBrandYoutubeFilled
-              style={{
-                position: 'absolute',
-                inset: 0,
-                zIndex: 10,
-                margin: 'auto',
-                height: '5rem',
-                width: '5rem',
-                color: '#ef4444',
-              }}
-            />
-            <img
-              src="https://assets.aceternity.com/fireship.jpg"
-              alt="header"
-              width={800}
-              height={800}
-              style={{
-                aspectRatio: '1',
-                height: '100%',
-                width: '100%',
-                borderRadius: '0.125rem',
-                objectFit: 'cover',
-                objectPosition: 'center',
-                transition: 'filter 0.2s',
-              }}
-              onMouseOver={(e) => { e.currentTarget.style.filter = 'blur(8px)'; }}
-              onMouseOut={(e) => { e.currentTarget.style.filter = 'none'; }}
-            />
-          </div>
-        </div>
-      </a>
-      );
-};
-
 export const SkeletonTwo = () => {
   const images = [
       "https://images.unsplash.com/photo-1517322048670-4fba75cbbb62?q=80&w=3000&auto=format&fit=crop",
@@ -244,12 +176,16 @@ export const SkeletonTwo = () => {
         overflow: 'hidden',
         padding: '1rem 0',
       }}>
-        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
-          {images.map((image, idx) => (
+        <motion.div 
+          style={{ display: 'flex', flexDirection: 'row', width: 'max-content' }}
+          animate={{ x: ["0%", "-25%"] }}
+          transition={{ repeat: Infinity, ease: "linear", duration: 20 }}
+        >
+          {[...images, ...images, ...images, ...images].map((image, idx) => (
             <motion.div
               variants={imageVariants}
               key={"images-first" + idx}
-              style={{ rotate: rotations1[idx] }}
+              style={{ rotate: rotations1[idx % rotations1.length] }}
               whileHover="whileHover"
               whileTap="whileTap"
             >
@@ -268,17 +204,21 @@ export const SkeletonTwo = () => {
                   alt="gallery"
                   width="500"
                   height="500"
-                  style={{ height: '6rem', width: '6rem', flexShrink: 0, borderRadius: '0.5rem', objectFit: 'cover' }}
+                  style={{ height: '10rem', width: '10rem', flexShrink: 0, borderRadius: '0.5rem', objectFit: 'cover' }}
                 />
               </div>
             </motion.div>
           ))}
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
-          {images.map((image, idx) => (
+        </motion.div>
+        <motion.div 
+          style={{ display: 'flex', flexDirection: 'row', width: 'max-content' }}
+          animate={{ x: ["-25%", "0%"] }}
+          transition={{ repeat: Infinity, ease: "linear", duration: 20 }}
+        >
+          {[...images, ...images, ...images, ...images].map((image, idx) => (
             <motion.div
               key={"images-second" + idx}
-              style={{ rotate: rotations2[idx] }}
+              style={{ rotate: rotations2[idx % rotations2.length] }}
               variants={imageVariants}
               whileHover="whileHover"
               whileTap="whileTap"
@@ -298,12 +238,12 @@ export const SkeletonTwo = () => {
                   alt="gallery"
                   width="500"
                   height="500"
-                  style={{ height: '6rem', width: '6rem', flexShrink: 0, borderRadius: '0.5rem', objectFit: 'cover' }}
+                  style={{ height: '10rem', width: '10rem', flexShrink: 0, borderRadius: '0.5rem', objectFit: 'cover' }}
                 />
               </div>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
         {/* Left/right fade gradients */}
         <div style={{
           pointerEvents: 'none',
@@ -328,80 +268,5 @@ export const SkeletonTwo = () => {
           background: 'linear-gradient(to left, #09090b, transparent)',
         }} />
       </div>
-      );
-};
-
-export const SkeletonFour = () => {
-  return (
-      <Globe style={{ position: 'absolute', right: '-12rem', bottom: '-12rem', pointerEvents: 'none' }} size={600} />
-      );
-};
-
-      export const Globe = ({style, size = 300}) => {
-  const containerRef = useRef(null);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-      // Clear any existing canvas from previous mount
-      while (containerRef.current.firstChild) {
-        containerRef.current.removeChild(containerRef.current.firstChild);
-    }
-
-      const canvas = document.createElement('canvas');
-      canvas.width = size * 2;
-      canvas.height = size * 2;
-      Object.assign(canvas.style, {
-        width: `${size}px`,
-      height: `${size}px`,
-      maxWidth: '100%',
-      aspectRatio: '1',
-    });
-      containerRef.current.appendChild(canvas);
-
-      let phi = 0;
-      let rafId;
-      let destroyed = false;
-
-      const globe = createGlobe(canvas, {
-        devicePixelRatio: 2,
-      width: size * 2,
-      height: size * 2,
-      phi: 0,
-      theta: 0.3,
-      dark: 1,
-      diffuse: 1.2,
-      mapSamples: 16000,
-      mapBrightness: 6,
-      baseColor: [0.3, 0.3, 0.3],
-      markerColor: [0.1, 0.8, 1],
-      glowColor: [1.2, 1.2, 1.2],
-      markers: [],
-      onRender: () => { },
-    });
-
-      // Manual animation loop for guaranteed spinning
-      function animate() {
-      if (destroyed) return;
-      phi += 0.01;
-      globe.update({phi});
-      rafId = requestAnimationFrame(animate);
-    }
-      rafId = requestAnimationFrame(animate);
-
-    return () => {
-        destroyed = true;
-      cancelAnimationFrame(rafId);
-      globe.destroy();
-      if (containerRef.current) {
-        while (containerRef.current.firstChild) {
-        containerRef.current.removeChild(containerRef.current.firstChild);
-        }
-      }
-    };
-  }, []);
-
-      return (
-      <div ref={containerRef} style={{ ...style }} />
-      );
+  );
 };
