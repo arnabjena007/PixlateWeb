@@ -22,6 +22,7 @@ export default function SidebarSection() {
   const {
     image, loading, previewUrl, handleSelectPreset, triggerFileInput, setShowEditor,
     dimensionPreset, setDimensionPreset, width, setWidth, height, setHeight,
+    processedWidth, processedHeight,
     sliderMaxWidth, sliderMaxHeight,
     whitePercent, setWhitePercent, colorSort, setColorSort, reverse, setReverse, randomSeed, setRandomSeed,
     textOverlay, setTextOverlay, textOverlays, setTextOverlays, selectedTextId, setSelectedTextId,
@@ -231,12 +232,12 @@ export default function SidebarSection() {
             <span>Width</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <input
-                type="number"
+                type="text"
                 value={width}
-                onChange={(e) => { 
-                  const val = parseInt(e.target.value);
-                  setWidth(isNaN(val) ? '' : val); 
-                  setDimensionPreset('Custom Size'); 
+                onChange={(e) => {
+                  const valStr = e.target.value.replace(/[^0-9]/g, '');
+                  setWidth(valStr === '' ? '' : parseInt(valStr));
+                  setDimensionPreset('Custom Size');
                 }}
                 onBlur={(e) => {
                   let val = parseInt(e.target.value);
@@ -268,10 +269,10 @@ export default function SidebarSection() {
               <input
                 type="number"
                 value={height}
-                onChange={(e) => { 
+                onChange={(e) => {
                   const val = parseInt(e.target.value);
-                  setHeight(isNaN(val) ? '' : val); 
-                  setDimensionPreset('Custom Size'); 
+                  setHeight(isNaN(val) ? '' : val);
+                  setDimensionPreset('Custom Size');
                 }}
                 onBlur={(e) => {
                   let val = parseInt(e.target.value);
@@ -412,14 +413,14 @@ export default function SidebarSection() {
                   id: Date.now().toString(),
                   value: 'NEW TEXT',
                   font: 'Instrument Serif',
-                  size: 'Medium',
+                  size: 70, // absolute px height
                   color: '#ffffff',
                   bold: true,
                   italic: false,
                   underline: false,
                   front: true,
-                  x: 50,
-                  y: 50,
+                  x: processedWidth / 2,
+                  y: processedHeight / 2,
                 };
                 setTextOverlays([...textOverlays, newText]);
                 setSelectedTextId(newText.id);

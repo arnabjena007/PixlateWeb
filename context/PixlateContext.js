@@ -76,6 +76,8 @@ export const PixlateProvider = ({ children }) => {
   const [dimensionPreset, setDimensionPreset] = useState('Custom Size');
   const [width, setWidth] = useState(800);
   const [height, setHeight] = useState(800);
+  const [processedWidth, setProcessedWidth] = useState(800);
+  const [processedHeight, setProcessedHeight] = useState(800);
   const [sliderMaxWidth, setSliderMaxWidth] = useState(2000);
   const [sliderMaxHeight, setSliderMaxHeight] = useState(2000);
   const [whitePercent, setWhitePercent] = useState(0);
@@ -174,10 +176,10 @@ export const PixlateProvider = ({ children }) => {
       const newOverlay = {
         id: Date.now().toString(),
         url,
-        x: 25,
-        y: 25,
-        width: 50,
-        height: 50
+        x: width / 4,
+        y: height / 4,
+        width: width / 2,
+        height: height / 2
       };
       setImageOverlays(prev => [...prev, newOverlay]);
       setSelectedOverlayId(newOverlay.id);
@@ -196,6 +198,8 @@ export const PixlateProvider = ({ children }) => {
         const dims = await getImageDimensions(file);
         setWidth(dims.width);
         setHeight(dims.height);
+        setProcessedWidth(dims.width);
+        setProcessedHeight(dims.height);
         setSliderMaxWidth(Math.max(2000, dims.width));
         setSliderMaxHeight(Math.max(2000, dims.height));
         await handleProcess(file, dims.width, dims.height, whitePercent, colorSort, reverse, randomSeed, variations);
@@ -203,6 +207,8 @@ export const PixlateProvider = ({ children }) => {
         console.error("Failed to read image dimensions:", err);
         setWidth(800);
         setHeight(800);
+        setProcessedWidth(800);
+        setProcessedHeight(800);
         await handleProcess(file, 800, 800, whitePercent, colorSort, reverse, randomSeed, variations);
       }
     } else {
@@ -257,6 +263,8 @@ export const PixlateProvider = ({ children }) => {
       const dims = await getImageDimensions(file);
       setWidth(dims.width);
       setHeight(dims.height);
+      setProcessedWidth(dims.width);
+      setProcessedHeight(dims.height);
       setSliderMaxWidth(Math.max(2000, dims.width));
       setSliderMaxHeight(Math.max(2000, dims.height));
       await handleProcess(file, dims.width, dims.height, whitePercent, colorSort, reverse, randomSeed, variations);
@@ -282,6 +290,8 @@ export const PixlateProvider = ({ children }) => {
       const dims = await getImageDimensions(file);
       setWidth(dims.width);
       setHeight(dims.height);
+      setProcessedWidth(dims.width);
+      setProcessedHeight(dims.height);
       setSliderMaxWidth(Math.max(2000, dims.width));
       setSliderMaxHeight(Math.max(2000, dims.height));
       await handleProcess(file, dims.width, dims.height, whitePercent, colorSort, reverse, randomSeed, variations);
@@ -336,6 +346,8 @@ export const PixlateProvider = ({ children }) => {
       const blob = await response.blob();
       setOutputBlob(blob);
       setOutputUrl(URL.createObjectURL(blob));
+      setProcessedWidth(w);
+      setProcessedHeight(h);
     } catch (err) {
       alert(err.message);
       setActiveTab('Comparison');
@@ -572,6 +584,8 @@ export const PixlateProvider = ({ children }) => {
     dimensionPreset, setDimensionPreset,
     width, setWidth,
     height, setHeight,
+    processedWidth, setProcessedWidth,
+    processedHeight, setProcessedHeight,
     sliderMaxWidth, setSliderMaxWidth,
     sliderMaxHeight, setSliderMaxHeight,
     whitePercent, setWhitePercent,

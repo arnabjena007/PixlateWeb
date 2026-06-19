@@ -5,7 +5,7 @@ import GenerativeCanvas from './GenerativeCanvas';
 
 export default function WorkspaceSection() {
   const {
-    image, width, height, whitePercent, colorSort, reverse, randomSeed, variations,
+    image, width, height, processedWidth, processedHeight, whitePercent, colorSort, reverse, randomSeed, variations,
     previewUrl, outputUrl, loading, dragActive, activeTab, setActiveTab,
     textOverlay, textOverlays, setTextOverlays, selectedTextId, setSelectedTextId,
     imageOverlay, imageOverlays, setImageOverlays, selectedOverlayId, setSelectedOverlayId,
@@ -155,7 +155,7 @@ export default function WorkspaceSection() {
                         className="effect-container" 
                         style={{ 
                           position: 'relative', 
-                          aspectRatio: `${width || 1} / ${height || 1}`,
+                          aspectRatio: `${processedWidth || width || 1} / ${processedHeight || height || 1}`,
                           maxWidth: '100%',
                           maxHeight: '100%',
                           display: 'flex', 
@@ -171,8 +171,8 @@ export default function WorkspaceSection() {
                       >
                         <GenerativeCanvas
                           outputUrl={outputUrl}
-                          width={width}
-                          height={height}
+                          width={processedWidth || width}
+                          height={processedHeight || height}
                           imageStyle={{ 
                             filter: `
                               ${chromatic ? 'url(#chromatic) ' : ''}
@@ -187,6 +187,27 @@ export default function WorkspaceSection() {
                             borderRadius: `${borderRadius}%`
                           }}
                         />
+                        {loading && (
+                          <div style={{ 
+                            position: 'absolute', 
+                            bottom: '20px', 
+                            right: '20px', 
+                            background: 'rgba(9, 9, 11, 0.8)', 
+                            color: 'white', 
+                            padding: '8px 16px', 
+                            borderRadius: '20px', 
+                            fontSize: '12px', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '8px', 
+                            zIndex: 100,
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                            border: '1px solid #27272a'
+                          }}>
+                            <div className="spinner" style={{ width: '14px', height: '14px', borderWidth: '2px' }}></div>
+                            Regenerating...
+                          </div>
+                        )}
                         <div className={`effect-overlays ${crt ? 'effect-crt' : ''}`} style={{
                           position: 'absolute', inset: 0, pointerEvents: 'none',
                           '--crt-opacity': crtStrength / 100,
@@ -210,27 +231,48 @@ export default function WorkspaceSection() {
                           alignItems: 'center',
                           justifyContent: 'center',
                           fontFamily: `"${textObj.font}", sans-serif`,
-                          fontSize: `${(textObj.size === 'Small' ? 30 : textObj.size === 'Large' ? 150 : textObj.size === 'Extra Large' ? 300 : 70) * ((document.getElementById('canvas-preview-container')?.clientWidth || 800) / Math.max(width || 1, 1))}px`,
+                          fontSize: `${(typeof textObj.size === 'number' ? textObj.size : 70) * ((document.getElementById('canvas-preview-container')?.clientWidth || 800) / Math.max(processedWidth || 1, 1))}px`,
                           color: textObj.color,
                           fontWeight: textObj.bold ? 'bold' : 'normal',
                           fontStyle: textObj.italic ? 'italic' : 'normal',
                           textDecoration: textObj.underline ? 'underline' : 'none',
-                          whiteSpace: 'nowrap'
+                          whiteSpace: 'nowrap',
+                          width: 'auto',
+                          height: 'auto'
                         }}
                         position={{
-                          x: (textObj.x / 100) * (document.getElementById('canvas-preview-container')?.clientWidth || 800),
-                          y: (textObj.y / 100) * (document.getElementById('canvas-preview-container')?.clientHeight || 800)
+                          x: (textObj.x / Math.max(processedWidth || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientWidth || 800),
+                          y: (textObj.y / Math.max(processedHeight || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientHeight || 800)
                         }}
-                        enableResizing={false}
+                        enableResizing={selectedTextId === textObj.id ? { bottomRight: true, bottomLeft: true, topRight: true, topLeft: true } : false}
                         onDragStart={() => setSelectedTextId(textObj.id)}
                         onDrag={(e, d) => {
                           const parent = document.getElementById('canvas-preview-container');
                           if (parent) {
                             setTextOverlays(prev => prev.map(t => t.id === textObj.id ? {
                               ...t,
-                              x: (d.x / parent.clientWidth) * 100,
-                              y: (d.y / parent.clientHeight) * 100
+                              x: (d.x / parent.clientWidth) * (processedWidth || 800),
+                              y: (d.y / parent.clientHeight) * (processedHeight || 800)
                             } : t));
+                          }
+                        }}
+                        onResize={(e, direction, ref, delta, position) => {
+                          const parent = document.getElementById('canvas-preview-container');
+                          if (parent) {
+                            // Derive the new font size from the dragged bounding box height (assuming line-height ~1.2)
+                            const screenFontSize = ref.offsetHeight / 1.2;
+                            const newSizeInPx = screenFontSize * (Math.max(processedWidth || 1, 1) / parent.clientWidth);
+                            
+                            setTextOverlays(prev => prev.map(t => t.id === textObj.id ? {
+                              ...t,
+                              x: (position.x / parent.clientWidth) * (processedWidth || 800),
+                              y: (position.y / parent.clientHeight) * (processedHeight || 800),
+                              size: Math.max(10, newSizeInPx)
+                            } : t));
+                            
+                            // Reset inline width/height injected by Rnd so the text container naturally fits the new fontSize
+                            ref.style.width = 'auto';
+                            ref.style.height = 'auto';
                           }
                         }}
                         onMouseDown={(e) => {
@@ -285,12 +327,12 @@ export default function WorkspaceSection() {
                           zIndex: selectedOverlayId === overlay.id ? 12 : 11 
                         }}
                         position={{
-                          x: (overlay.x / 100) * (document.getElementById('canvas-preview-container')?.clientWidth || 800),
-                          y: (overlay.y / 100) * (document.getElementById('canvas-preview-container')?.clientHeight || 800)
+                          x: (overlay.x / Math.max(processedWidth || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientWidth || 800),
+                          y: (overlay.y / Math.max(processedHeight || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientHeight || 800)
                         }}
                         size={{
-                          width: `${overlay.width}%`,
-                          height: `${overlay.height}%`
+                          width: (overlay.width / Math.max(processedWidth || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientWidth || 800),
+                          height: (overlay.height / Math.max(processedHeight || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientHeight || 800)
                         }}
                         onDragStart={() => setSelectedOverlayId(overlay.id)}
                         onDrag={(e, d) => {
@@ -298,8 +340,8 @@ export default function WorkspaceSection() {
                           if (parent) {
                             setImageOverlays(prev => prev.map(o => o.id === overlay.id ? {
                               ...o,
-                              x: (d.x / parent.clientWidth) * 100,
-                              y: (d.y / parent.clientHeight) * 100
+                              x: (d.x / parent.clientWidth) * (processedWidth || 800),
+                              y: (d.y / parent.clientHeight) * (processedHeight || 800)
                             } : o));
                           }
                         }}
@@ -308,10 +350,10 @@ export default function WorkspaceSection() {
                           if (parent) {
                             setImageOverlays(prev => prev.map(o => o.id === overlay.id ? {
                               ...o,
-                              width: (ref.offsetWidth / parent.clientWidth) * 100,
-                              height: (ref.offsetHeight / parent.clientHeight) * 100,
-                              x: (position.x / parent.clientWidth) * 100,
-                              y: (position.y / parent.clientHeight) * 100
+                              width: (ref.offsetWidth / parent.clientWidth) * (processedWidth || 800),
+                              height: (ref.offsetHeight / parent.clientHeight) * (processedHeight || 800),
+                              x: (position.x / parent.clientWidth) * (processedWidth || 800),
+                              y: (position.y / parent.clientHeight) * (processedHeight || 800)
                             } : o));
                           }
                         }}
