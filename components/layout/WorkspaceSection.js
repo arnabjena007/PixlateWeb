@@ -244,7 +244,17 @@ export default function WorkspaceSection() {
                           x: (textObj.x / Math.max(processedWidth || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientWidth || 800),
                           y: (textObj.y / Math.max(processedHeight || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientHeight || 800)
                         }}
-                        enableResizing={selectedTextId === textObj.id ? { bottomRight: true, bottomLeft: true, topRight: true, topLeft: true } : false}
+                        enableResizing={selectedTextId === textObj.id ? undefined : false}
+                        resizeHandleStyles={selectedTextId === textObj.id ? {
+                          top: { width: '20px', height: '8px', background: 'white', borderRadius: '4px', left: '50%', marginLeft: '-10px', top: '-5px', border: '1px solid #a855f7' },
+                          right: { width: '8px', height: '20px', background: 'white', borderRadius: '4px', top: '50%', marginTop: '-10px', right: '-5px', border: '1px solid #a855f7' },
+                          bottom: { width: '20px', height: '8px', background: 'white', borderRadius: '4px', left: '50%', marginLeft: '-10px', bottom: '-5px', border: '1px solid #a855f7' },
+                          left: { width: '8px', height: '20px', background: 'white', borderRadius: '4px', top: '50%', marginTop: '-10px', left: '-5px', border: '1px solid #a855f7' },
+                          topLeft: { width: '12px', height: '12px', background: 'white', borderRadius: '50%', left: '-6px', top: '-6px', border: '1px solid #a855f7' },
+                          topRight: { width: '12px', height: '12px', background: 'white', borderRadius: '50%', right: '-6px', top: '-6px', border: '1px solid #a855f7' },
+                          bottomLeft: { width: '12px', height: '12px', background: 'white', borderRadius: '50%', left: '-6px', bottom: '-6px', border: '1px solid #a855f7' },
+                          bottomRight: { width: '12px', height: '12px', background: 'white', borderRadius: '50%', right: '-6px', bottom: '-6px', border: '1px solid #a855f7' },
+                        } : {}}
                         onDragStart={() => setSelectedTextId(textObj.id)}
                         onDrag={(e, d) => {
                           const parent = document.getElementById('canvas-preview-container');

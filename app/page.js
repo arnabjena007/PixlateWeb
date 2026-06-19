@@ -68,6 +68,7 @@ function PixlateAppContent() {
   );
 }
 
+
 export default function PixlateApp() {
   return (
     <PixlateProvider>

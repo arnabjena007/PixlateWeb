@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { BackgroundRippleEffect } from "@/components/ui/background-ripple-effect";
 import { usePixlate } from '@/context/PixlateContext';
+import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 
 export default function HeroSection() {
   const { scrollToEditor } = usePixlate();
@@ -41,19 +42,20 @@ export default function HeroSection() {
           Create stunning, organic generative art. Export and integrate seamlessly into your projects.
         </motion.p>
 
-        <motion.div variants={itemVariants} className="hero-buttons">
-          <button
-            type="button"
-            className="btn-primary"
+        <motion.div variants={itemVariants} className="hero-buttons flex items-center justify-center gap-6 mt-8">
+          <HoverBorderGradient
+            containerClassName="rounded-xl h-[52px] min-w-[180px]"
+            as="button"
+            className="text-white flex items-center justify-center h-full w-full px-8 text-[15px] font-medium relative overflow-hidden"
             onClick={scrollToEditor}
-            style={{ width: 'auto', padding: '14px 36px', fontSize: '14px' }}
           >
-            Try it yourself
-          </button>
+            <span className="relative z-10">Try it yourself</span>
+            <div className="shiny-sweep z-0" />
+          </HoverBorderGradient>
+          
           <Link
             href="/about"
-            className="btn-secondary"
-            style={{ width: 'auto', padding: '14px 36px', fontSize: '14px', display: 'inline-block', textAlign: 'center', textDecoration: 'none' }}
+            className="bg-white text-black hover:bg-gray-200 transition-colors flex items-center justify-center h-[52px] min-w-[180px] rounded-xl px-8 text-[15px] font-medium"
           >
             About the Project
           </Link>
@@ -62,3 +64,4 @@ export default function HeroSection() {
     </section>
   );
 }
+

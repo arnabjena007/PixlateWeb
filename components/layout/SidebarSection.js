@@ -312,10 +312,16 @@ export default function SidebarSection() {
             max="100"
             value={whitePercent}
             onChange={(e) => setWhitePercent(parseInt(e.target.value))}
+            onMouseUp={(e) => handleProcess(undefined, undefined, undefined, parseInt(e.target.value))}
+            onTouchEnd={(e) => handleProcess(undefined, undefined, undefined, parseInt(e.target.value))}
           />
         </div>
 
-        <div className="toggle-row" onClick={() => setColorSort(!colorSort)}>
+        <div className="toggle-row" onClick={() => {
+          const newVal = !colorSort;
+          setColorSort(newVal);
+          handleProcess(undefined, undefined, undefined, undefined, newVal);
+        }}>
           <div className="toggle-info">
             <span className="toggle-title">Color Sorting</span>
             <span className="toggle-desc">Sort pixels by brightness</span>
@@ -324,13 +330,20 @@ export default function SidebarSection() {
             <input
               type="checkbox"
               checked={colorSort}
-              onChange={(e) => setColorSort(e.target.checked)}
+              onChange={(e) => {
+                setColorSort(e.target.checked);
+                handleProcess(undefined, undefined, undefined, undefined, e.target.checked);
+              }}
             />
             <span className="toggle-slider"></span>
           </label>
         </div>
 
-        <div className="toggle-row" onClick={() => setReverse(!reverse)}>
+        <div className="toggle-row" onClick={() => {
+          const newVal = !reverse;
+          setReverse(newVal);
+          handleProcess(undefined, undefined, undefined, undefined, undefined, newVal);
+        }}>
           <div className="toggle-info">
             <span className="toggle-title">Reverse Order</span>
             <span className="toggle-desc">Invert pixel sort direction</span>
@@ -339,7 +352,10 @@ export default function SidebarSection() {
             <input
               type="checkbox"
               checked={reverse}
-              onChange={(e) => setReverse(e.target.checked)}
+              onChange={(e) => {
+                setReverse(e.target.checked);
+                handleProcess(undefined, undefined, undefined, undefined, undefined, e.target.checked);
+              }}
             />
             <span className="toggle-slider"></span>
           </label>
@@ -357,6 +373,8 @@ export default function SidebarSection() {
             step="1"
             value={randomSeed}
             onChange={(e) => setRandomSeed(parseInt(e.target.value))}
+            onMouseUp={(e) => handleProcess(undefined, undefined, undefined, undefined, undefined, undefined, parseInt(e.target.value))}
+            onTouchEnd={(e) => handleProcess(undefined, undefined, undefined, undefined, undefined, undefined, parseInt(e.target.value))}
           />
         </div>
 
@@ -776,19 +794,13 @@ export default function SidebarSection() {
         <button
           type="button"
           className="btn-secondary"
-          onClick={handleReset}
+          onClick={() => {
+            handleReset();
+            handleProcess(undefined, undefined, undefined, 0, false, false, 0, 1);
+          }}
           style={{ width: '100%' }}
         >
           Reset to Defaults
-        </button>
-        <button
-          type="button"
-          className="btn-primary"
-          disabled={loading || !image}
-          onClick={() => handleProcess()}
-          style={{ width: '100%' }}
-        >
-          {loading ? 'Processing...' : 'Process Changes'}
         </button>
       </div>
 
