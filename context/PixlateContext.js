@@ -38,7 +38,6 @@ export const PRESETS = [
 
 export const DIMENSION_PRESETS = [
   { name: 'Custom Size', width: null, height: null },
-  { name: 'Full Width Banner', width: 'FULL_WIDTH', height: 400 },
   { name: 'Instagram Post', width: 1080, height: 1350 },
   { name: 'Facebook Post', width: 940, height: 788 },
   { name: 'Facebook Page Cover', width: 851, height: 315 },

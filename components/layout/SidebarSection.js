@@ -210,10 +210,9 @@ export default function SidebarSection() {
               if (presetName !== 'Custom Size') {
                 const preset = DIMENSION_PRESETS.find(p => p.name === presetName);
                 if (preset) {
-                  const w = preset.width === 'FULL_WIDTH' ? window.innerWidth : preset.width;
-                  setWidth(w);
+                  setWidth(preset.width);
                   setHeight(preset.height);
-                  handleProcess(undefined, w, preset.height);
+                  handleProcess(undefined, preset.width, preset.height);
                 }
               }
             }}
