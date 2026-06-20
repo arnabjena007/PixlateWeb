@@ -26,9 +26,9 @@ function PixlateAppContent() {
           <feBlend mode="screen" in="rg" in2="blueOffset" result="rgb" />
         </filter>
         <filter id="glitch">
-          <feTurbulence type="fractalNoise" baseFrequency={`0 ${glitchStrength / 100}`} numOctaves="1" result="noise" />
-          <feColorMatrix type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" in="noise" result="coloredNoise" />
-          <feDisplacementMap in="SourceGraphic" in2="coloredNoise" scale={glitchStrength * 2} xChannelSelector="R" yChannelSelector="G" />
+          <feTurbulence type="fractalNoise" baseFrequency={`${glitchStrength / 100} 0`} numOctaves="1" result="noise" />
+          <feColorMatrix type="matrix" values="1 0 0 0 0  0 0 0 0 0.5  0 0 0 0 0  0 0 0 1 0" in="noise" result="coloredNoise" />
+          <feDisplacementMap in="SourceGraphic" in2="coloredNoise" scale={glitchStrength * 2} xChannelSelector="G" yChannelSelector="R" />
         </filter>
       </svg>
 
