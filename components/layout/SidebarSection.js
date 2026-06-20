@@ -68,6 +68,7 @@ export default function SidebarSection() {
           href="/"
           className="sidebar-title"
           style={{ textDecoration: 'none', color: 'inherit' }}
+          onClick={() => setShowEditor(false)}
         >
           Pixlate
         </Link>
