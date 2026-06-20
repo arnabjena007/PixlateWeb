@@ -9,7 +9,7 @@
   --accent-color: #ffffff;
   --accent-text: #09090b;
   
-  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  font-family: var(--font-instrument-sans), system-ui, -apple-system, sans-serif;
 }
 
 * {

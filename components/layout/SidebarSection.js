@@ -135,7 +135,7 @@ export default function SidebarSection() {
               Landing page
             </button>
             <Link
-              href="/"
+              href="/changelog"
               style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', textDecoration: 'none', color: '#a1a1aa', width: '100%', cursor: 'pointer', fontSize: '13px' }}
               onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#e4e4e7'; }}
               onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#a1a1aa'; }}
@@ -144,7 +144,7 @@ export default function SidebarSection() {
               Changelog
             </Link>
             <Link
-              href="/"
+              href="/privacy"
               style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', textDecoration: 'none', color: '#a1a1aa', width: '100%', cursor: 'pointer', fontSize: '13px' }}
               onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#e4e4e7'; }}
               onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#a1a1aa'; }}
