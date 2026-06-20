@@ -3,10 +3,12 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePixlate, PRESETS, DIMENSION_PRESETS } from '@/context/PixlateContext';
 import ToolbarCollapse from '@/components/ui/ToolbarCollapse';
+import FeatureModal from '@/components/ui/FeatureModal';
 
 export default function SidebarSection() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showFeatureModal, setShowFeatureModal] = useState(false);
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -57,6 +59,7 @@ export default function SidebarSection() {
   }
 
   return (
+    <>
     <aside className="sidebar" style={{ transition: 'width 0.2s' }}>
 
       {/* Header */}
@@ -113,15 +116,15 @@ export default function SidebarSection() {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
               Report a Bug
             </a>
-            <a
-              href="https://github.com/arnabjena007/PixlateWeb/issues" target="_blank" rel="noopener noreferrer"
-              style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', textDecoration: 'none', color: '#a1a1aa', width: '100%', cursor: 'pointer', fontSize: '13px' }}
+            <button
+              onClick={() => { setShowFeatureModal(true); setIsMenuOpen(false); }}
+              style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', background: 'transparent', border: 'none', color: '#a1a1aa', width: '100%', cursor: 'pointer', fontSize: '13px', textAlign: 'left' }}
               onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#e4e4e7'; }}
               onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#a1a1aa'; }}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
               Suggest a Feature
-            </a>
+            </button>
 
             <div style={{ height: '1px', backgroundColor: '#27272a', margin: '4px 0' }}></div>
 
@@ -778,5 +781,10 @@ export default function SidebarSection() {
       </div>
 
     </aside>
+      <FeatureModal 
+        isOpen={showFeatureModal} 
+        onClose={() => setShowFeatureModal(false)} 
+      />
+    </>
   );
 }

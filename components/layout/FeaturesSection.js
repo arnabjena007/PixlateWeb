@@ -9,7 +9,7 @@ export function FeaturesSectionDemo() {
     {
       title: "Real-time Parameter Tweaking",
       description:
-        "Adjust glitch intensity and chromatic aberration in real-time. See your pixel sorted artwork transform instantly.",
+        "Tweak sorting thresholds and dimensions on the fly. Watch your artwork transform instantly.",
       skeleton: <SkeletonOne />,
       style: {
         gridColumn: 'span 3',
@@ -21,7 +21,7 @@ export function FeaturesSectionDemo() {
     {
       title: "Stunning Generative Output",
       description:
-        "Generate endless unique variations of organic, captivating patterns from your photos.",
+        "Generate endless unique variations of organic, captivating color flow patterns from your photos.",
       skeleton: <SkeletonTwo />,
       style: {
         gridColumn: 'span 3',
