@@ -30,12 +30,11 @@ export default function SidebarSection() {
     colorOverlay, setColorOverlay, overlayColor, setOverlayColor, overlayOpacity, setOverlayOpacity, overlayBlend, setOverlayBlend,
     vignette, setVignette, vignetteStrength, setVignetteStrength,
     scanLines, setScanLines, scanLineStrength, setScanLineStrength,
-    crt, setCrt, crtStrength, setCrtStrength,
     chromatic, setChromatic, chromaticStrength, setChromaticStrength,
     glitch, setGlitch, glitchStrength, setGlitchStrength,
     blur, setBlur, blurStrength, setBlurStrength,
     halftone, setHalftone, halftoneSize, setHalftoneSize,
-    coverage, setCoverage, edgeEmphasis, setEdgeEmphasis, density, setDensity, brightness, setBrightness, contrast, setContrast, borderRadius, setBorderRadius,
+    coverage, setCoverage, edgeEmphasis, setEdgeEmphasis, density, setDensity, brightness, setBrightness, contrast, setContrast,
     variations, setVariations,
     handleReset, handleProcess
   } = usePixlate();
@@ -301,22 +300,6 @@ export default function SidebarSection() {
       {/* Tuning Section */}
       <ToolbarCollapse title="Tuning">
 
-        <div className="control-group">
-          <div className="control-label-row">
-            <span>White Threshold</span>
-            <span className="control-value">{whitePercent}%</span>
-          </div>
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value={whitePercent}
-            onChange={(e) => setWhitePercent(parseInt(e.target.value))}
-            onMouseUp={(e) => handleProcess(undefined, undefined, undefined, parseInt(e.target.value))}
-            onTouchEnd={(e) => handleProcess(undefined, undefined, undefined, parseInt(e.target.value))}
-          />
-        </div>
-
         <div className="toggle-row" onClick={() => {
           const newVal = !colorSort;
           setColorSort(newVal);
@@ -359,6 +342,22 @@ export default function SidebarSection() {
             />
             <span className="toggle-slider"></span>
           </label>
+        </div>
+
+        <div className="control-group" style={{ marginTop: '16px' }}>
+          <div className="control-label-row">
+            <span>White Threshold</span>
+            <span className="control-value">{whitePercent}%</span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={whitePercent}
+            onChange={(e) => setWhitePercent(parseInt(e.target.value))}
+            onMouseUp={(e) => handleProcess(undefined, undefined, undefined, parseInt(e.target.value))}
+            onTouchEnd={(e) => handleProcess(undefined, undefined, undefined, parseInt(e.target.value))}
+          />
         </div>
 
         <div className="control-group">
@@ -429,7 +428,7 @@ export default function SidebarSection() {
               onClick={() => {
                 const newText = {
                   id: Date.now().toString(),
-                  value: 'NEW TEXT',
+                  value: 'PIXLATE',
                   font: 'Instrument Serif',
                   size: 70, // absolute px height
                   color: '#ffffff',
@@ -620,19 +619,7 @@ export default function SidebarSection() {
           />
         </div>
 
-        <div className="control-group">
-          <div className="control-label-row">
-            <span>Rounded Corner</span>
-            <span className="control-value">{borderRadius}%</span>
-          </div>
-          <input
-            type="range"
-            min="0"
-            max="50"
-            value={borderRadius}
-            onChange={(e) => setBorderRadius(parseInt(e.target.value))}
-          />
-        </div>
+
 
       </ToolbarCollapse>
 
@@ -706,21 +693,7 @@ export default function SidebarSection() {
             )}
           </div>
 
-          {/* CRT Curvature */}
-          <div className="toggle-row" onClick={() => setCrt(!crt)}>
-            <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
-              <input type="checkbox" checked={crt} onChange={(e) => setCrt(e.target.checked)} />
-              <span className="toggle-slider"></span>
-            </label>
-            <div className="toggle-info" style={{ flex: crt ? '0 0 auto' : 1, minWidth: '95px' }}>
-              <span className="toggle-title" style={{ color: '#d4d4d8' }}>CRT Curvature</span>
-            </div>
-            {crt && (
-              <div style={{ flex: 1, paddingLeft: '12px', display: 'flex', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
-                <input type="range" min="0" max="100" value={crtStrength} onChange={(e) => setCrtStrength(parseInt(e.target.value))} style={{ width: '100%', margin: 0 }} />
-              </div>
-            )}
-          </div>
+
 
           {/* RGB Split (formerly Chromatic) */}
           <div className="toggle-row" onClick={() => setChromatic(!chromatic)}>

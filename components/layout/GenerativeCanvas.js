@@ -71,7 +71,7 @@ class Mask {
   }
 }
 
-export default function GenerativeCanvas({ outputUrl, width, height, imageStyle }) {
+export default function GenerativeCanvas({ outputUrl, width, height, canvasWidth, canvasHeight, imageStyle }) {
   const { fetchSequenceData, previewUrl, lastAnimatedImageRef } = usePixlate();
   const [status, setStatus] = useState('initial'); // initial, loading, playing, played
   const maskRef = useRef(null);
@@ -319,15 +319,30 @@ export default function GenerativeCanvas({ outputUrl, width, height, imageStyle 
         src={outputUrl}
         alt="Processed Image"
         className="preview-image"
-        style={{ ...imageStyle, position: 'absolute', width: '100%', height: '100%', objectFit: 'cover' }}
+        style={{ ...imageStyle, position: 'absolute', 
+          width: '100%', 
+          height: '100%',
+          top: '0', left: '0', transform: 'none',
+          objectFit: 'cover' 
+        }}
       />
       <canvas 
         ref={maskRef}
-        style={{ ...imageStyle, position: 'absolute', width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none' }}
+        style={{ ...imageStyle, position: 'absolute', 
+          width: '100%', 
+          height: '100%',
+          top: '0', left: '0', transform: 'none',
+          objectFit: 'cover', pointerEvents: 'none' 
+        }}
       />
       <canvas 
         ref={particlesRef}
-        style={{ position: 'absolute', width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none', mixBlendMode: 'screen' }}
+        style={{ position: 'absolute', 
+          width: '100%', 
+          height: '100%',
+          top: '0', left: '0', transform: 'none',
+          objectFit: 'cover', pointerEvents: 'none', mixBlendMode: 'screen' 
+        }}
       />
       
       {status === 'loading' && (

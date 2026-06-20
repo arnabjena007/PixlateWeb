@@ -105,8 +105,7 @@ export const PixlateProvider = ({ children }) => {
   const [vignetteStrength, setVignetteStrength] = useState(50);
   const [scanLines, setScanLines] = useState(false);
   const [scanLineStrength, setScanLineStrength] = useState(20);
-  const [crt, setCrt] = useState(false);
-  const [crtStrength, setCrtStrength] = useState(20);
+
   const [chromatic, setChromatic] = useState(false);
   const [chromaticStrength, setChromaticStrength] = useState(4);
   const [glitch, setGlitch] = useState(false);
@@ -122,7 +121,7 @@ export const PixlateProvider = ({ children }) => {
   const [density, setDensity] = useState(30);
   const [brightness, setBrightness] = useState(0);
   const [contrast, setContrast] = useState(100);
-  const [borderRadius, setBorderRadius] = useState(0);
+
 
   const handleReset = () => {
     setTextOverlay(false);
@@ -147,8 +146,7 @@ export const PixlateProvider = ({ children }) => {
     setVignetteStrength(50);
     setScanLines(false);
     setScanLineStrength(20);
-    setCrt(false);
-    setCrtStrength(20);
+
     setChromatic(false);
     setChromaticStrength(4);
     setGlitch(false);
@@ -163,7 +161,7 @@ export const PixlateProvider = ({ children }) => {
     setDensity(30);
     setBrightness(0);
     setContrast(100);
-    setBorderRadius(0);
+
   };
 
   const fileInputRef = useRef(null);
@@ -383,23 +381,20 @@ export const PixlateProvider = ({ children }) => {
     }
   };
 
-  const handleDownload = () => {
-    if (!outputUrl) return;
+  const generateFinalCanvas = () => {
+    return new Promise((resolve, reject) => {
+      if (!outputUrl) {
+        resolve(null);
+        return;
+      }
 
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
       const canvas = document.createElement('canvas');
       canvas.width = img.width;
       canvas.height = img.height;
       const ctx = canvas.getContext('2d');
-
-      if (borderRadius > 0) {
-        ctx.beginPath();
-        const r = Math.min(canvas.width, canvas.height) * (borderRadius / 100);
-        ctx.roundRect(0, 0, canvas.width, canvas.height, r);
-        ctx.clip();
-      }
 
       let filterString = '';
       if (blur) filterString += `blur(${blurStrength}px) `;
@@ -458,17 +453,6 @@ export const PixlateProvider = ({ children }) => {
         }
       }
 
-      if (crt) {
-        ctx.fillStyle = `rgba(0,0,0,${crtStrength / 100})`;
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.quadraticCurveTo(canvas.width / 2, 20, canvas.width, 0);
-        ctx.lineTo(canvas.width, canvas.height);
-        ctx.quadraticCurveTo(canvas.width / 2, canvas.height - 20, 0, canvas.height);
-        ctx.closePath();
-        ctx.fill();
-      }
-
       if (halftone) {
         ctx.fillStyle = 'rgba(0,0,0,0.6)';
         ctx.globalCompositeOperation = 'overlay';
@@ -497,13 +481,13 @@ export const PixlateProvider = ({ children }) => {
           let numericSize = 70; // Medium
           if (textObj.size === 'Small') numericSize = 30;
           else if (textObj.size === 'Large') numericSize = 150;
-          else if (textObj.size === 'Extra Large') numericSize = 300;
+          else if (typeof textObj.size === 'number') numericSize = textObj.size;
 
           fontString += `${numericSize}px "${textObj.font}", sans-serif`;
           ctx.font = fontString;
 
-          const xPos = canvas.width * (textObj.x / 100);
-          const yPos = canvas.height * (textObj.y / 100);
+          const xPos = textObj.x;
+          const yPos = textObj.y;
           ctx.fillText(textObj.value, xPos, yPos);
 
           if (textObj.underline) {
@@ -516,19 +500,6 @@ export const PixlateProvider = ({ children }) => {
 
       drawTextOverlay(false); // Draw background texts
 
-      const exportCanvas = () => {
-        canvas.toBlob((blob) => {
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = 'custom-pixlate.png';
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          URL.revokeObjectURL(url);
-        }, 'image/png');
-      };
-
       const drawOverlaysAndExport = async () => {
         if (imageOverlay && imageOverlays.length > 0) {
           for (const overlay of imageOverlays) {
@@ -536,10 +507,10 @@ export const PixlateProvider = ({ children }) => {
               const overlayImg = new Image();
               overlayImg.crossOrigin = "anonymous";
               overlayImg.onload = () => {
-                const overlayW = canvas.width * (overlay.width / 100);
-                const overlayH = canvas.height * (overlay.height / 100);
-                const x = canvas.width * (overlay.x / 100);
-                const y = canvas.height * (overlay.y / 100);
+                const overlayW = overlay.width;
+                const overlayH = overlay.height;
+                const x = overlay.x;
+                const y = overlay.y;
                 ctx.drawImage(overlayImg, x, y, overlayW, overlayH);
                 resolve();
               };
@@ -550,12 +521,14 @@ export const PixlateProvider = ({ children }) => {
 
         drawTextOverlay(true); // Draw foreground texts
 
-        exportCanvas();
+        resolve(canvas);
       };
 
       drawOverlaysAndExport();
     };
+    img.onerror = reject;
     img.src = outputUrl;
+    });
   };
 
   const scrollToEditor = () => {
@@ -610,8 +583,7 @@ export const PixlateProvider = ({ children }) => {
     vignetteStrength, setVignetteStrength,
     scanLines, setScanLines,
     scanLineStrength, setScanLineStrength,
-    crt, setCrt,
-    crtStrength, setCrtStrength,
+
     chromatic, setChromatic,
     chromaticStrength, setChromaticStrength,
     glitch, setGlitch,
@@ -626,7 +598,7 @@ export const PixlateProvider = ({ children }) => {
     density, setDensity,
     brightness, setBrightness,
     contrast, setContrast,
-    borderRadius, setBorderRadius,
+
 
     // Refs
     fileInputRef,
@@ -644,7 +616,7 @@ export const PixlateProvider = ({ children }) => {
     handleSelectPreset,
     handleProcess,
     fetchSequenceData,
-    handleDownload,
+    generateFinalCanvas,
     scrollToEditor,
     scrollToHero,
   };

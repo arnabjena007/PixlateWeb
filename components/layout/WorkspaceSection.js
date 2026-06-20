@@ -1,7 +1,9 @@
 'use client';
+import { useState } from 'react';
 import { Rnd } from 'react-rnd';
 import { usePixlate } from '@/context/PixlateContext';
 import GenerativeCanvas from './GenerativeCanvas';
+import DownloadPreviewModal from '@/components/ui/DownloadPreviewModal';
 
 export default function WorkspaceSection() {
   const {
@@ -11,13 +13,17 @@ export default function WorkspaceSection() {
     imageOverlay, imageOverlays, setImageOverlays, selectedOverlayId, setSelectedOverlayId,
     colorOverlay, overlayColor, overlayOpacity, overlayBlend,
     vignette, vignetteStrength, scanLines, scanLineStrength,
-    crt, crtStrength, chromatic, chromaticStrength,
+    chromatic, chromaticStrength,
     glitch, glitchStrength, blur, blurStrength,
     halftone, halftoneSize,
-    coverage, edgeEmphasis, density, brightness, contrast, borderRadius,
+    coverage, edgeEmphasis, density, brightness, contrast,
     handleDrag, handleDrop, triggerFileInput, handleInspireMe,
-    handleProcess, handleDownload, setRandomSeed
+    handleProcess, generateFinalCanvas, setRandomSeed
   } = usePixlate();
+
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const [previewCanvas, setPreviewCanvas] = useState(null);
+  const [isGeneratingDownload, setIsGeneratingDownload] = useState(false);
 
   return (
     <div className="workspace">
@@ -101,8 +107,6 @@ export default function WorkspaceSection() {
                   onClick={() => {
                     const newSeed = Math.floor(Math.random() * 9999) + 1;
                     setRandomSeed(newSeed);
-                    // note: sweep, random, compress, seeds variables are not defined in main state as controlled variables in previous page.js but passed locally. 
-                    // To handle generate variation correctly, we use handleProcess directly.
                     handleProcess(image, width, height, whitePercent, colorSort, reverse, newSeed, variations);
                   }}
                   className="btn-primary"
@@ -112,11 +116,27 @@ export default function WorkspaceSection() {
                   Generate Variation
                 </button>
                 <button
-                  onClick={handleDownload}
+                  onClick={async () => {
+                    setIsGeneratingDownload(true);
+                    const canvas = await generateFinalCanvas();
+                    setPreviewCanvas(canvas);
+                    setIsPreviewModalOpen(true);
+                    setIsGeneratingDownload(false);
+                  }}
                   className="btn-secondary"
-                  style={{ width: 'auto', padding: '6px 16px', fontSize: '12px', height: '32px' }}
+                  disabled={isGeneratingDownload || loading}
+                  title="Download Image"
+                  style={{ width: '32px', padding: '0', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '32px' }}
                 >
-                  Download Image
+                  {isGeneratingDownload ? (
+                    <div className="spinner" style={{width: '14px', height: '14px', borderTopColor: '#a1a1aa', borderRightColor: '#a1a1aa'}}></div>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <polyline points="7 10 12 15 17 10"></polyline>
+                      <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                  )}
                 </button>
               </div>
             )}
@@ -140,8 +160,7 @@ export default function WorkspaceSection() {
                       saturate(${100 + (density - 30)}%)
                       drop-shadow(0 0 ${edgeEmphasis / 5}px rgba(255,255,255,${edgeEmphasis / 200}))
                     `.replace(/\n/g, ' ').trim(),
-                    opacity: coverage / 85,
-                    borderRadius: `${borderRadius}%`
+                    opacity: coverage / 85
                   }}
                 />
               </div>
@@ -155,12 +174,11 @@ export default function WorkspaceSection() {
                         className="effect-container" 
                         style={{ 
                           position: 'relative', 
-                          aspectRatio: `${processedWidth || width || 1} / ${processedHeight || height || 1}`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
                           maxWidth: '100%',
                           maxHeight: '100%',
-                          display: 'flex', 
-                          alignItems: 'center', 
-                          justifyContent: 'center' 
                         }}
                         onMouseDown={(e) => {
                           if (e.target.id === 'canvas-preview-container' || e.target.classList.contains('preview-image') || e.target.classList.contains('effect-overlay')) {
@@ -169,10 +187,26 @@ export default function WorkspaceSection() {
                           }
                         }}
                       >
-                        <GenerativeCanvas
+                        <img 
+                          src={`data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="${width || 1}" height="${height || 1}"></svg>`}
+                          alt=""
+                          style={{
+                            display: 'block',
+                            maxWidth: '100%',
+                            maxHeight: '100%',
+                            width: 'auto',
+                            height: 'auto',
+                            visibility: 'hidden',
+                            pointerEvents: 'none'
+                          }}
+                        />
+                        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+                          <GenerativeCanvas
                           outputUrl={outputUrl}
                           width={processedWidth || width}
                           height={processedHeight || height}
+                          canvasWidth={width || processedWidth}
+                          canvasHeight={height || processedHeight}
                           imageStyle={{ 
                             filter: `
                               ${chromatic ? 'url(#chromatic) ' : ''}
@@ -183,8 +217,7 @@ export default function WorkspaceSection() {
                               saturate(${100 + (density - 30)}%)
                               drop-shadow(0 0 ${edgeEmphasis / 5}px rgba(255,255,255,${edgeEmphasis / 200}))
                             `.replace(/\n/g, ' ').trim(),
-                            opacity: coverage / 85,
-                            borderRadius: `${borderRadius}%`
+                            opacity: coverage / 85
                           }}
                         />
                         {loading && (
@@ -208,9 +241,8 @@ export default function WorkspaceSection() {
                             Regenerating...
                           </div>
                         )}
-                        <div className={`effect-overlays ${crt ? 'effect-crt' : ''}`} style={{
+                        <div className={`effect-overlays`} style={{
                           position: 'absolute', inset: 0, pointerEvents: 'none',
-                          '--crt-opacity': crtStrength / 100,
                           '--halftone-size': `${halftoneSize}px`,
                           '--scanline-opacity': scanLineStrength / 100,
                           '--vignette-opacity': vignetteStrength / 100
@@ -231,7 +263,7 @@ export default function WorkspaceSection() {
                           alignItems: 'center',
                           justifyContent: 'center',
                           fontFamily: `"${textObj.font}", sans-serif`,
-                          fontSize: `${(typeof textObj.size === 'number' ? textObj.size : 70) * ((document.getElementById('canvas-preview-container')?.clientWidth || 800) / Math.max(processedWidth || 1, 1))}px`,
+                          fontSize: `${(typeof textObj.size === 'number' ? textObj.size : 70) * ((document.getElementById('canvas-preview-container')?.clientWidth || 800) / Math.max(width || 1, 1))}px`,
                           color: textObj.color,
                           fontWeight: textObj.bold ? 'bold' : 'normal',
                           fontStyle: textObj.italic ? 'italic' : 'normal',
@@ -241,8 +273,8 @@ export default function WorkspaceSection() {
                           height: 'auto'
                         }}
                         position={{
-                          x: (textObj.x / Math.max(processedWidth || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientWidth || 800),
-                          y: (textObj.y / Math.max(processedHeight || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientHeight || 800)
+                          x: (((width || 1) / 2 + (textObj.x - (processedWidth || 1) / 2)) / Math.max(width || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientWidth || 800),
+                          y: (((height || 1) / 2 + (textObj.y - (processedHeight || 1) / 2)) / Math.max(height || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientHeight || 800)
                         }}
                         enableResizing={selectedTextId === textObj.id ? undefined : false}
                         resizeHandleStyles={selectedTextId === textObj.id ? {
@@ -261,26 +293,24 @@ export default function WorkspaceSection() {
                           if (parent) {
                             setTextOverlays(prev => prev.map(t => t.id === textObj.id ? {
                               ...t,
-                              x: (d.x / parent.clientWidth) * (processedWidth || 800),
-                              y: (d.y / parent.clientHeight) * (processedHeight || 800)
+                              x: (d.x / parent.clientWidth) * (width || 800) - (width || 800) / 2 + (processedWidth || 800) / 2,
+                              y: (d.y / parent.clientHeight) * (height || 800) - (height || 800) / 2 + (processedHeight || 800) / 2
                             } : t));
                           }
                         }}
                         onResize={(e, direction, ref, delta, position) => {
                           const parent = document.getElementById('canvas-preview-container');
                           if (parent) {
-                            // Derive the new font size from the dragged bounding box height (assuming line-height ~1.2)
                             const screenFontSize = ref.offsetHeight / 1.2;
-                            const newSizeInPx = screenFontSize * (Math.max(processedWidth || 1, 1) / parent.clientWidth);
+                            const newSizeInPx = screenFontSize * (Math.max(width || 1, 1) / parent.clientWidth);
                             
                             setTextOverlays(prev => prev.map(t => t.id === textObj.id ? {
                               ...t,
-                              x: (position.x / parent.clientWidth) * (processedWidth || 800),
-                              y: (position.y / parent.clientHeight) * (processedHeight || 800),
+                              x: (position.x / parent.clientWidth) * (width || 800) - (width || 800) / 2 + (processedWidth || 800) / 2,
+                              y: (position.y / parent.clientHeight) * (height || 800) - (height || 800) / 2 + (processedHeight || 800) / 2,
                               size: Math.max(10, newSizeInPx)
                             } : t));
                             
-                            // Reset inline width/height injected by Rnd so the text container naturally fits the new fontSize
                             ref.style.width = 'auto';
                             ref.style.height = 'auto';
                           }
@@ -337,12 +367,12 @@ export default function WorkspaceSection() {
                           zIndex: selectedOverlayId === overlay.id ? 12 : 11 
                         }}
                         position={{
-                          x: (overlay.x / Math.max(processedWidth || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientWidth || 800),
-                          y: (overlay.y / Math.max(processedHeight || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientHeight || 800)
+                          x: (((width || 1) / 2 + (overlay.x - (processedWidth || 1) / 2)) / Math.max(width || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientWidth || 800),
+                          y: (((height || 1) / 2 + (overlay.y - (processedHeight || 1) / 2)) / Math.max(height || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientHeight || 800)
                         }}
                         size={{
-                          width: (overlay.width / Math.max(processedWidth || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientWidth || 800),
-                          height: (overlay.height / Math.max(processedHeight || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientHeight || 800)
+                          width: (overlay.width / Math.max(width || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientWidth || 800),
+                          height: (overlay.height / Math.max(height || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientHeight || 800)
                         }}
                         onDragStart={() => setSelectedOverlayId(overlay.id)}
                         onDrag={(e, d) => {
@@ -350,8 +380,8 @@ export default function WorkspaceSection() {
                           if (parent) {
                             setImageOverlays(prev => prev.map(o => o.id === overlay.id ? {
                               ...o,
-                              x: (d.x / parent.clientWidth) * (processedWidth || 800),
-                              y: (d.y / parent.clientHeight) * (processedHeight || 800)
+                              x: (d.x / parent.clientWidth) * (width || 800) - (width || 800) / 2 + (processedWidth || 800) / 2,
+                              y: (d.y / parent.clientHeight) * (height || 800) - (height || 800) / 2 + (processedHeight || 800) / 2
                             } : o));
                           }
                         }}
@@ -360,10 +390,10 @@ export default function WorkspaceSection() {
                           if (parent) {
                             setImageOverlays(prev => prev.map(o => o.id === overlay.id ? {
                               ...o,
-                              width: (ref.offsetWidth / parent.clientWidth) * (processedWidth || 800),
-                              height: (ref.offsetHeight / parent.clientHeight) * (processedHeight || 800),
-                              x: (position.x / parent.clientWidth) * (processedWidth || 800),
-                              y: (position.y / parent.clientHeight) * (processedHeight || 800)
+                              width: (ref.offsetWidth / parent.clientWidth) * (width || 800),
+                              height: (ref.offsetHeight / parent.clientHeight) * (height || 800),
+                              x: (position.x / parent.clientWidth) * (width || 800) - (width || 800) / 2 + (processedWidth || 800) / 2,
+                              y: (position.y / parent.clientHeight) * (height || 800) - (height || 800) / 2 + (processedHeight || 800) / 2
                             } : o));
                           }
                         }}
@@ -433,17 +463,23 @@ export default function WorkspaceSection() {
                     ))}
                   </div>
                 </div>
-                ) : loading ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-                    <div className="spinner"></div>
-                    <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Processing your image...</span>
-                  </div>
-                ) : (
-                  <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Waiting to run process...</span>
-                )}
+              </div>
+            ) : loading ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                <div className="spinner"></div>
+                <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Processing your image...</span>
+              </div>
+            ) : (
+              <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Waiting to run process...</span>
+            )}
               </div>
             )}
           </div>
+          <DownloadPreviewModal 
+            isOpen={isPreviewModalOpen} 
+            onClose={() => setIsPreviewModalOpen(false)} 
+            canvas={previewCanvas} 
+          />
         </>
       )}
     </div>
