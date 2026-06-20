@@ -634,7 +634,7 @@ export default function SidebarSection() {
               <input type="checkbox" checked={colorOverlay} onChange={(e) => setColorOverlay(e.target.checked)} />
               <span className="toggle-slider"></span>
             </label>
-            <div className="toggle-info">
+            <div className="toggle-info" style={{ flex: 1 }}>
               <span className="toggle-title" style={{ color: '#d4d4d8' }}>Color Overlay</span>
             </div>
           </div>

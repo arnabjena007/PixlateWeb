@@ -258,7 +258,7 @@ export default function WorkspaceSection() {
                         key={textObj.id}
                         style={{
                           border: selectedTextId === textObj.id ? '2px dashed #a855f7' : 'none',
-                          zIndex: selectedTextId === textObj.id ? 16 : textObj.front ? 15 : 10,
+                          zIndex: textObj.front ? (selectedTextId === textObj.id ? 31 : 30) : (selectedTextId === textObj.id ? 11 : 10),
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -364,7 +364,7 @@ export default function WorkspaceSection() {
                         key={overlay.id}
                         style={{ 
                           border: selectedOverlayId === overlay.id ? '2px solid #a855f7' : 'none', 
-                          zIndex: selectedOverlayId === overlay.id ? 12 : 11 
+                          zIndex: selectedOverlayId === overlay.id ? 21 : 20 
                         }}
                         position={{
                           x: (((width || 1) / 2 + (overlay.x - (processedWidth || 1) / 2)) / Math.max(width || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientWidth || 800),
