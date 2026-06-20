@@ -64,11 +64,13 @@ export default function SidebarSection() {
 
       {/* Header */}
       <div className="sidebar-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }} ref={menuRef}>
-        <span
+        <Link
+          href="/"
           className="sidebar-title"
+          style={{ textDecoration: 'none', color: 'inherit' }}
         >
           Pixlate
-        </span>
+        </Link>
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', display: 'flex', alignItems: 'center' }}
