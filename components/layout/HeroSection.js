@@ -28,13 +28,21 @@ export default function HeroSection() {
     <section id="hero-section" className="hero-section">
       <BackgroundRippleEffect />
 
-      <motion.div
+      <motion.div 
         className="hero-content"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
-
+        <motion.div variants={itemVariants} className="mb-6">
+          <img 
+            src="/peerlist.svg" 
+            alt="Launched on Peerlist spotlight" 
+            width="250" 
+            height="54" 
+            style={{ width: '250px', height: '54px' }}
+          />
+        </motion.div>
 
         <motion.h1 variants={itemVariants} className="hero-title">Pixlate</motion.h1>
 
@@ -42,7 +50,7 @@ export default function HeroSection() {
           Create stunning, organic generative art. Export and integrate seamlessly into your projects.
         </motion.p>
 
-        <motion.div variants={itemVariants} className="hero-buttons flex items-center justify-center gap-6 mt-8">
+        <motion.div variants={itemVariants} className="hero-buttons flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-8">
           <HoverBorderGradient
             containerClassName="rounded-xl h-[52px] min-w-[180px] border border-white/20"
             as="button"

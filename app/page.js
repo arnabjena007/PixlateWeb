@@ -6,12 +6,13 @@ import { FeaturesSectionDemo } from '@/components/layout/FeaturesSection';
 import WorkspaceSection from '@/components/layout/WorkspaceSection';
 import SidebarSection from '@/components/layout/SidebarSection';
 import Footer from '@/components/layout/Footer';
+import Header from '@/components/layout/Header';
 
 function PixlateAppContent() {
   const { showEditor, fileInputRef, overlayFileInputRef, handleFileChange, handleOverlayFileChange, chromaticStrength, glitchStrength } = usePixlate();
 
   return (
-    <div className="app-container">
+    <div className="app-container bg-[#09090b] text-white" suppressHydrationWarning>
 
       {/* SVG Filters */}
       <svg width="0" height="0" style={{ position: 'absolute' }}>
@@ -50,6 +51,7 @@ function PixlateAppContent() {
 
       {!showEditor && (
         <>
+          <Header />
           <HeroSection />
           <HeroScrollDemo />
           <FeaturesSectionDemo />
