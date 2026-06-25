@@ -3,7 +3,7 @@ import { PixlateProvider, usePixlate } from '@/context/PixlateContext';
 import HeroSection from '@/components/layout/HeroSection';
 import { HeroScrollDemo } from '@/components/layout/HeroScrollDemo';
 import { FeaturesSectionDemo } from '@/components/layout/FeaturesSection';
-import { PricingSection1 } from '@/components/pro-blocks/landing-page/pricing-sections/pricing-section-1';
+import PricingSection from '@/components/layout/PricingSection';
 import WorkspaceSection from '@/components/layout/WorkspaceSection';
 import SidebarSection from '@/components/layout/SidebarSection';
 import Footer from '@/components/layout/Footer';
@@ -56,7 +56,7 @@ function PixlateAppContent() {
           <HeroSection />
           <HeroScrollDemo />
           <FeaturesSectionDemo />
-          <PricingSection1 />
+          <PricingSection />
           <Footer />
         </>
       )}
