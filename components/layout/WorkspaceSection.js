@@ -24,6 +24,80 @@ export default function WorkspaceSection() {
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [previewCanvas, setPreviewCanvas] = useState(null);
   const [isGeneratingDownload, setIsGeneratingDownload] = useState(false);
+  const [activeGuides, setActiveGuides] = useState([]);
+
+  const calculateSnapping = (dragRect, otherRects, parentWidth, parentHeight) => {
+    const threshold = 8;
+    const guides = [];
+    let snappedX = dragRect.x;
+    let snappedY = dragRect.y;
+
+    const dragCenter = { x: dragRect.x + dragRect.width / 2, y: dragRect.y + dragRect.height / 2 };
+
+    const checkSnap = (current, target, isVertical) => {
+      if (Math.abs(current - target) <= threshold) {
+        if (isVertical) guides.push({ type: 'vertical', x: target });
+        else guides.push({ type: 'horizontal', y: target });
+        return target;
+      }
+      return null;
+    };
+
+    let snapX = checkSnap(dragCenter.x, parentWidth / 2, true);
+    if (snapX !== null) snappedX = snapX - dragRect.width / 2;
+    let snapY = checkSnap(dragCenter.y, parentHeight / 2, false);
+    if (snapY !== null) snappedY = snapY - dragRect.height / 2;
+
+    otherRects.forEach(other => {
+      const otherCenter = { x: other.x + other.width / 2, y: other.y + other.height / 2 };
+      let sx = checkSnap(dragCenter.x, otherCenter.x, true);
+      if (sx !== null) snappedX = sx - dragRect.width / 2;
+      let sy = checkSnap(dragCenter.y, otherCenter.y, false);
+      if (sy !== null) snappedY = sy - dragRect.height / 2;
+
+      sx = checkSnap(dragRect.x, other.x, true);
+      if (sx !== null) snappedX = sx;
+      sy = checkSnap(dragRect.y, other.y, false);
+      if (sy !== null) snappedY = sy;
+      
+      sx = checkSnap(dragRect.x + dragRect.width, other.x + other.width, true);
+      if (sx !== null) snappedX = sx - dragRect.width;
+      sy = checkSnap(dragRect.y + dragRect.height, other.y + other.height, false);
+      if (sy !== null) snappedY = sy - dragRect.height;
+    });
+
+    return { snappedX, snappedY, guides };
+  };
+
+  const handleDragSnap = (d, id, isText) => {
+    const parent = document.getElementById('canvas-preview-container');
+    if (!parent) return { x: d.x, y: d.y };
+    const pw = parent.clientWidth;
+    const ph = parent.clientHeight;
+    const dragRect = { x: d.x, y: d.y, width: d.node.offsetWidth, height: d.node.offsetHeight };
+    const otherElements = [];
+    
+    textOverlays.forEach(t => {
+      if (isText && t.id === id) return;
+      const el = document.getElementById(`overlay-text-${t.id}`);
+      if (el) {
+        const px = (((width || 1) / 2 + (t.x - (processedWidth || 1) / 2)) / Math.max(width || 1, 1)) * pw;
+        const py = (((height || 1) / 2 + (t.y - (processedHeight || 1) / 2)) / Math.max(height || 1, 1)) * ph;
+        otherElements.push({ x: px, y: py, width: el.offsetWidth, height: el.offsetHeight });
+      }
+    });
+
+    imageOverlays.forEach(o => {
+      if (!isText && o.id === id) return;
+      const px = (((width || 1) / 2 + (o.x - (processedWidth || 1) / 2)) / Math.max(width || 1, 1)) * pw;
+      const py = (((height || 1) / 2 + (o.y - (processedHeight || 1) / 2)) / Math.max(height || 1, 1)) * ph;
+      otherElements.push({ x: px, y: py, width: (o.width / Math.max(width || 1, 1)) * pw, height: (o.height / Math.max(height || 1, 1)) * ph });
+    });
+
+    const { snappedX, snappedY, guides } = calculateSnapping(dragRect, otherElements, pw, ph);
+    setActiveGuides(guides);
+    return { x: snappedX, y: snappedY };
+  };
 
   return (
     <div className="workspace">
@@ -253,8 +327,32 @@ export default function WorkspaceSection() {
                           {halftone && <div className="effect-overlay effect-halftone"></div>}
                         </div>
 
+                        {activeGuides.map((guide, i) => (
+                          <div
+                            key={i}
+                            style={{
+                              position: 'absolute',
+                              pointerEvents: 'none',
+                              zIndex: 50,
+                              backgroundColor: '#d946ef',
+                              ...(guide.type === 'vertical' ? {
+                                left: guide.x,
+                                top: 0,
+                                bottom: 0,
+                                width: '1px'
+                              } : {
+                                top: guide.y,
+                                left: 0,
+                                right: 0,
+                                height: '1px'
+                              })
+                            }}
+                          />
+                        ))}
+
                     {textOverlay && textOverlays.map(textObj => (
                       <Rnd
+                        id={`overlay-text-${textObj.id}`}
                         key={textObj.id}
                         style={{
                           border: selectedTextId === textObj.id ? '2px dashed #a855f7' : 'none',
@@ -291,13 +389,15 @@ export default function WorkspaceSection() {
                         onDrag={(e, d) => {
                           const parent = document.getElementById('canvas-preview-container');
                           if (parent) {
+                            const snapped = handleDragSnap(d, textObj.id, true);
                             setTextOverlays(prev => prev.map(t => t.id === textObj.id ? {
                               ...t,
-                              x: (d.x / parent.clientWidth) * (width || 800) - (width || 800) / 2 + (processedWidth || 800) / 2,
-                              y: (d.y / parent.clientHeight) * (height || 800) - (height || 800) / 2 + (processedHeight || 800) / 2
+                              x: (snapped.x / parent.clientWidth) * (width || 800) - (width || 800) / 2 + (processedWidth || 800) / 2,
+                              y: (snapped.y / parent.clientHeight) * (height || 800) - (height || 800) / 2 + (processedHeight || 800) / 2
                             } : t));
                           }
                         }}
+                        onDragStop={() => setActiveGuides([])}
                         onResize={(e, direction, ref, delta, position) => {
                           const parent = document.getElementById('canvas-preview-container');
                           if (parent) {
@@ -378,13 +478,15 @@ export default function WorkspaceSection() {
                         onDrag={(e, d) => {
                           const parent = document.getElementById('canvas-preview-container');
                           if (parent) {
+                            const snapped = handleDragSnap(d, overlay.id, false);
                             setImageOverlays(prev => prev.map(o => o.id === overlay.id ? {
                               ...o,
-                              x: (d.x / parent.clientWidth) * (width || 800) - (width || 800) / 2 + (processedWidth || 800) / 2,
-                              y: (d.y / parent.clientHeight) * (height || 800) - (height || 800) / 2 + (processedHeight || 800) / 2
+                              x: (snapped.x / parent.clientWidth) * (width || 800) - (width || 800) / 2 + (processedWidth || 800) / 2,
+                              y: (snapped.y / parent.clientHeight) * (height || 800) - (height || 800) / 2 + (processedHeight || 800) / 2
                             } : o));
                           }
                         }}
+                        onDragStop={() => setActiveGuides([])}
                         onResize={(e, direction, ref, delta, position) => {
                           const parent = document.getElementById('canvas-preview-container');
                           if (parent) {

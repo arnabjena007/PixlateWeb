@@ -34,7 +34,7 @@ export default function HeroSection() {
         initial="hidden"
         animate="visible"
       >
-        <motion.div variants={itemVariants} className="mb-6">
+        {/* <motion.div variants={itemVariants} className="mb-6">
           <img 
             src="/peerlist.svg" 
             alt="Launched on Peerlist spotlight" 
@@ -42,7 +42,7 @@ export default function HeroSection() {
             height="54" 
             style={{ width: '250px', height: '54px' }}
           />
-        </motion.div>
+        </motion.div> */}
 
         <motion.h1 variants={itemVariants} className="hero-title">Pixlate</motion.h1>
 
