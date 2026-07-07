@@ -83,31 +83,49 @@ export function FeaturesSectionDemo() {
                 position: 'relative',
                 overflow: 'hidden',
                 padding: '2rem',
+                backgroundColor: '#09090b',
                 ...feature.style,
               }}
             >
-              <p style={{
-                maxWidth: '64rem',
-                textAlign: 'left',
-                fontSize: '1.25rem',
-                letterSpacing: '-0.01em',
-                color: 'white',
-                fontWeight: 500,
-              }}>
-                {feature.title}
-              </p>
-              <p style={{
-                maxWidth: '24rem',
-                textAlign: 'left',
-                fontSize: '0.875rem',
-                fontWeight: 400,
-                color: '#a3a3a3',
-                marginTop: '0.5rem',
-                marginBottom: '0.5rem',
-              }}>
-                {feature.description}
-              </p>
-              <div style={{ height: '100%', width: '100%' }}>{feature.skeleton}</div>
+              {/* Faint Grid Background */}
+              <div style={{
+                position: 'absolute',
+                inset: 0,
+                backgroundImage: `
+                  linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                  linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px)
+                `,
+                backgroundSize: '24px 24px',
+                pointerEvents: 'none',
+                zIndex: 1,
+                maskImage: 'radial-gradient(ellipse at 50% 50%, black 20%, transparent 80%)',
+                WebkitMaskImage: 'radial-gradient(ellipse at 50% 50%, black 20%, transparent 80%)',
+              }} />
+
+              <div style={{ position: 'relative', zIndex: 10 }}>
+                <p style={{
+                  maxWidth: '64rem',
+                  textAlign: 'left',
+                  fontSize: '1.25rem',
+                  letterSpacing: '-0.01em',
+                  color: 'white',
+                  fontWeight: 500,
+                }}>
+                  {feature.title}
+                </p>
+                <p style={{
+                  maxWidth: '24rem',
+                  textAlign: 'left',
+                  fontSize: '0.875rem',
+                  fontWeight: 400,
+                  color: '#a3a3a3',
+                  marginTop: '0.5rem',
+                  marginBottom: '0.5rem',
+                }}>
+                  {feature.description}
+                </p>
+              </div>
+              <div style={{ position: 'relative', zIndex: 10, height: '100%', width: '100%' }}>{feature.skeleton}</div>
             </div>
           ))}
         </div>
