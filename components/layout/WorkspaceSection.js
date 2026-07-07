@@ -226,8 +226,8 @@ export default function WorkspaceSection() {
                   className="preview-image" 
                   style={{ 
                     filter: `
-                      ${chromatic ? 'url(#chromatic) ' : ''}
-                      ${glitch ? 'url(#glitch) ' : ''}
+                      ${chromatic ? `url(#chromatic-${chromaticStrength}) ` : ''}
+                      ${glitch ? `url(#glitch-${glitchStrength}) ` : ''}
                       ${blur ? `blur(${blurStrength}px) ` : ''}
                       brightness(${100 + brightness}%)
                       contrast(${contrast}%)
@@ -283,8 +283,8 @@ export default function WorkspaceSection() {
                           canvasHeight={height || processedHeight}
                           imageStyle={{ 
                             filter: `
-                              ${chromatic ? 'url(#chromatic) ' : ''}
-                              ${glitch ? 'url(#glitch) ' : ''}
+                              ${chromatic ? `url(#chromatic-${chromaticStrength}) ` : ''}
+                              ${glitch ? `url(#glitch-${glitchStrength}) ` : ''}
                               ${blur ? `blur(${blurStrength}px) ` : ''}
                               brightness(${100 + brightness}%)
                               contrast(${contrast}%)

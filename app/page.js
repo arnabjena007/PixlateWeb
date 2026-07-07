@@ -3,7 +3,7 @@ import { PixlateProvider, usePixlate } from '@/context/PixlateContext';
 import HeroSection from '@/components/layout/HeroSection';
 import { HeroScrollDemo } from '@/components/layout/HeroScrollDemo';
 import { FeaturesSectionDemo } from '@/components/layout/FeaturesSection';
-import PricingSection from '@/components/layout/PricingSection';
+
 import WorkspaceSection from '@/components/layout/WorkspaceSection';
 import SidebarSection from '@/components/layout/SidebarSection';
 import Footer from '@/components/layout/Footer';
@@ -17,7 +17,7 @@ function PixlateAppContent() {
 
       {/* SVG Filters */}
       <svg width="0" height="0" style={{ position: 'absolute' }}>
-        <filter id="chromatic">
+        <filter id={`chromatic-${chromaticStrength}`}>
           <feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="red" />
           <feOffset in="red" dx={chromaticStrength * 2} dy="0" result="redOffset" />
           <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="green" />
@@ -27,10 +27,10 @@ function PixlateAppContent() {
           <feBlend mode="screen" in="redOffset" in2="greenOffset" result="rg" />
           <feBlend mode="screen" in="rg" in2="blueOffset" result="rgb" />
         </filter>
-        <filter id="glitch">
+        <filter id={`glitch-${glitchStrength}`}>
           <feTurbulence type="fractalNoise" baseFrequency={`${glitchStrength / 100} 0`} numOctaves="1" result="noise" />
-          <feColorMatrix type="matrix" values="1 0 0 0 0  0 0 0 0 0.5  0 0 0 0 0  0 0 0 1 0" in="noise" result="coloredNoise" />
-          <feDisplacementMap in="SourceGraphic" in2="coloredNoise" scale={glitchStrength * 2} xChannelSelector="G" yChannelSelector="R" />
+          <feColorMatrix type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0 1" in="noise" result="coloredNoise" />
+          <feDisplacementMap in="SourceGraphic" in2="coloredNoise" scale={glitchStrength * 2} xChannelSelector="R" yChannelSelector="G" />
         </filter>
       </svg>
 
@@ -56,7 +56,6 @@ function PixlateAppContent() {
           <HeroSection />
           <HeroScrollDemo />
           <FeaturesSectionDemo />
-          <PricingSection />
           <Footer />
         </>
       )}

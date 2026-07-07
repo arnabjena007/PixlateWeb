@@ -7,7 +7,7 @@ export default function Footer() {
       color: '#ffffff', /* Changed back to white text for dark background */
       fontSize: '0.875rem',
       backgroundColor: '#09090B', /* Reverted to the dark background you specified */
-      height: '350px', /* Reduced height to crop out the empty gap */
+      height: '500px', /* Increased height to show more of the artwork */
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'flex-start',
@@ -20,7 +20,7 @@ export default function Footer() {
         right: 0,
         bottom: 0,
         backgroundImage: 'url("/footer-art-wide.png")',
-        backgroundSize: 'cover',
+        backgroundSize: '100% auto',
         backgroundPosition: 'center bottom',
         backgroundRepeat: 'no-repeat',
         mixBlendMode: 'screen',

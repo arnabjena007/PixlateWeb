@@ -36,7 +36,7 @@ export const BackgroundRippleEffect = () => {
       ref={ref}
       className={cn(
         "ripple-grid-container",
-        "[--cell-border-color:rgba(255,255,255,0.06)] [--cell-fill-color:transparent] [--cell-shadow-color:rgba(255,255,255,0.005)]"
+        "[--cell-border-color:rgba(255,255,255,0.12)] [--cell-fill-color:transparent] [--cell-shadow-color:rgba(255,255,255,0.005)]"
       )}
       style={{ 
         position: 'absolute',
