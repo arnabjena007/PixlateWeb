@@ -74,10 +74,10 @@ export const PixlateProvider = ({ children }) => {
 
   // Custom Settings State
   const [dimensionPreset, setDimensionPreset] = useState('Custom Size');
-  const [width, setWidth] = useState(800);
-  const [height, setHeight] = useState(800);
-  const [processedWidth, setProcessedWidth] = useState(800);
-  const [processedHeight, setProcessedHeight] = useState(800);
+  const [width, setWidth] = useState(1024);
+  const [height, setHeight] = useState(767);
+  const [processedWidth, setProcessedWidth] = useState(1024);
+  const [processedHeight, setProcessedHeight] = useState(767);
   const [sliderMaxWidth, setSliderMaxWidth] = useState(2000);
   const [sliderMaxHeight, setSliderMaxHeight] = useState(2000);
   const [whitePercent, setWhitePercent] = useState(0);
@@ -174,10 +174,10 @@ export const PixlateProvider = ({ children }) => {
       const newOverlay = {
         id: Date.now().toString(),
         url,
-        x: width / 4,
-        y: height / 4,
-        width: width / 2,
-        height: height / 2
+        x: processedWidth / 4,
+        y: processedHeight / 4,
+        width: processedWidth / 2,
+        height: processedHeight / 2
       };
       setImageOverlays(prev => [...prev, newOverlay]);
       setSelectedOverlayId(newOverlay.id);
@@ -203,11 +203,11 @@ export const PixlateProvider = ({ children }) => {
         await handleProcess(file, dims.width, dims.height, whitePercent, colorSort, reverse, randomSeed, variations);
       } catch (err) {
         console.error("Failed to read image dimensions:", err);
-        setWidth(800);
-        setHeight(800);
-        setProcessedWidth(800);
-        setProcessedHeight(800);
-        await handleProcess(file, 800, 800, whitePercent, colorSort, reverse, randomSeed, variations);
+        setWidth(1024);
+        setHeight(767);
+        setProcessedWidth(1024);
+        setProcessedHeight(767);
+        await handleProcess(file, 1024, 767, whitePercent, colorSort, reverse, randomSeed, variations);
       }
     } else {
       alert('Please upload a valid image file.');
@@ -391,9 +391,11 @@ export const PixlateProvider = ({ children }) => {
       const img = new Image();
       img.crossOrigin = "anonymous";
       img.onload = () => {
+      const exportW = processedWidth || 1024;
+      const exportH = processedHeight || 767;
       const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
+      canvas.width = exportW;
+      canvas.height = exportH;
       const ctx = canvas.getContext('2d');
 
       let filterString = '';
@@ -406,24 +408,24 @@ export const PixlateProvider = ({ children }) => {
       ctx.filter = filterString.trim() || 'none';
 
       if (chromatic) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, exportW, exportH);
         ctx.globalCompositeOperation = 'screen';
-        ctx.drawImage(img, chromaticStrength * 2, 0);
-        ctx.drawImage(img, 0, 0);
-        ctx.drawImage(img, -chromaticStrength * 2, 0);
+        ctx.drawImage(img, chromaticStrength * 2, 0, exportW, exportH);
+        ctx.drawImage(img, 0, 0, exportW, exportH);
+        ctx.drawImage(img, -chromaticStrength * 2, 0, exportW, exportH);
         ctx.globalCompositeOperation = 'source-over';
       } else if (glitch) {
-        ctx.drawImage(img, 0, 0);
+        ctx.drawImage(img, 0, 0, exportW, exportH);
         const sliceCount = glitchStrength * 2;
         for (let i = 0; i < sliceCount; i++) {
-          const y = Math.random() * canvas.height;
-          const h = Math.random() * (canvas.height / 15);
+          const y = Math.random() * exportH;
+          const h = Math.random() * (exportH / 15);
           const xOffset = (Math.random() - 0.5) * glitchStrength * 4;
-          ctx.drawImage(img, 0, y, canvas.width, h, xOffset, y, canvas.width, h);
+          ctx.drawImage(img, 0, y, exportW, h, xOffset, y, exportW, h);
         }
       } else {
         ctx.globalAlpha = coverage / 85;
-        ctx.drawImage(img, 0, 0);
+        ctx.drawImage(img, 0, 0, exportW, exportH);
         ctx.globalAlpha = 1.0;
       }
 

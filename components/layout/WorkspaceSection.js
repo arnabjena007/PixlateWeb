@@ -81,17 +81,17 @@ export default function WorkspaceSection() {
       if (isText && t.id === id) return;
       const el = document.getElementById(`overlay-text-${t.id}`);
       if (el) {
-        const px = (((width || 1) / 2 + (t.x - (processedWidth || 1) / 2)) / Math.max(width || 1, 1)) * pw;
-        const py = (((height || 1) / 2 + (t.y - (processedHeight || 1) / 2)) / Math.max(height || 1, 1)) * ph;
+        const px = (t.x / Math.max(processedWidth || 1, 1)) * pw;
+        const py = (t.y / Math.max(processedHeight || 1, 1)) * ph;
         otherElements.push({ x: px, y: py, width: el.offsetWidth, height: el.offsetHeight });
       }
     });
 
     imageOverlays.forEach(o => {
       if (!isText && o.id === id) return;
-      const px = (((width || 1) / 2 + (o.x - (processedWidth || 1) / 2)) / Math.max(width || 1, 1)) * pw;
-      const py = (((height || 1) / 2 + (o.y - (processedHeight || 1) / 2)) / Math.max(height || 1, 1)) * ph;
-      otherElements.push({ x: px, y: py, width: (o.width / Math.max(width || 1, 1)) * pw, height: (o.height / Math.max(height || 1, 1)) * ph });
+      const px = (o.x / Math.max(processedWidth || 1, 1)) * pw;
+      const py = (o.y / Math.max(processedHeight || 1, 1)) * ph;
+      otherElements.push({ x: px, y: py, width: (o.width / Math.max(processedWidth || 1, 1)) * pw, height: (o.height / Math.max(processedHeight || 1, 1)) * ph });
     });
 
     const { snappedX, snappedY, guides } = calculateSnapping(dragRect, otherElements, pw, ph);
@@ -262,7 +262,7 @@ export default function WorkspaceSection() {
                         }}
                       >
                         <img 
-                          src={`data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="${width || 1}" height="${height || 1}"></svg>`}
+                          src={`data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="${processedWidth || width || 1}" height="${processedHeight || height || 1}"></svg>`}
                           alt=""
                           style={{
                             display: 'block',
@@ -361,7 +361,7 @@ export default function WorkspaceSection() {
                           alignItems: 'center',
                           justifyContent: 'center',
                           fontFamily: `"${textObj.font}", sans-serif`,
-                          fontSize: `${(typeof textObj.size === 'number' ? textObj.size : 70) * ((document.getElementById('canvas-preview-container')?.clientWidth || 800) / Math.max(width || 1, 1))}px`,
+                          fontSize: `${(typeof textObj.size === 'number' ? textObj.size : 70) * ((document.getElementById('canvas-preview-container')?.clientWidth || 800) / Math.max(processedWidth || 1, 1))}px`,
                           color: textObj.color,
                           fontWeight: textObj.bold ? 'bold' : 'normal',
                           fontStyle: textObj.italic ? 'italic' : 'normal',
@@ -371,8 +371,8 @@ export default function WorkspaceSection() {
                           height: 'auto'
                         }}
                         position={{
-                          x: (((width || 1) / 2 + (textObj.x - (processedWidth || 1) / 2)) / Math.max(width || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientWidth || 800),
-                          y: (((height || 1) / 2 + (textObj.y - (processedHeight || 1) / 2)) / Math.max(height || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientHeight || 800)
+                          x: (textObj.x / Math.max(processedWidth || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientWidth || 800),
+                          y: (textObj.y / Math.max(processedHeight || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientHeight || 800)
                         }}
                         enableResizing={selectedTextId === textObj.id ? undefined : false}
                         resizeHandleStyles={selectedTextId === textObj.id ? {
@@ -392,8 +392,8 @@ export default function WorkspaceSection() {
                             const snapped = handleDragSnap(d, textObj.id, true);
                             setTextOverlays(prev => prev.map(t => t.id === textObj.id ? {
                               ...t,
-                              x: (snapped.x / parent.clientWidth) * (width || 800) - (width || 800) / 2 + (processedWidth || 800) / 2,
-                              y: (snapped.y / parent.clientHeight) * (height || 800) - (height || 800) / 2 + (processedHeight || 800) / 2
+                              x: (snapped.x / parent.clientWidth) * (processedWidth || 800),
+                              y: (snapped.y / parent.clientHeight) * (processedHeight || 800)
                             } : t));
                           }
                         }}
@@ -402,12 +402,12 @@ export default function WorkspaceSection() {
                           const parent = document.getElementById('canvas-preview-container');
                           if (parent) {
                             const screenFontSize = ref.offsetHeight / 1.2;
-                            const newSizeInPx = screenFontSize * (Math.max(width || 1, 1) / parent.clientWidth);
+                            const newSizeInPx = screenFontSize * (Math.max(processedWidth || 1, 1) / parent.clientWidth);
                             
                             setTextOverlays(prev => prev.map(t => t.id === textObj.id ? {
                               ...t,
-                              x: (position.x / parent.clientWidth) * (width || 800) - (width || 800) / 2 + (processedWidth || 800) / 2,
-                              y: (position.y / parent.clientHeight) * (height || 800) - (height || 800) / 2 + (processedHeight || 800) / 2,
+                              x: (position.x / parent.clientWidth) * (processedWidth || 800),
+                              y: (position.y / parent.clientHeight) * (processedHeight || 800),
                               size: Math.max(10, newSizeInPx)
                             } : t));
                             
@@ -467,12 +467,12 @@ export default function WorkspaceSection() {
                           zIndex: selectedOverlayId === overlay.id ? 21 : 20 
                         }}
                         position={{
-                          x: (((width || 1) / 2 + (overlay.x - (processedWidth || 1) / 2)) / Math.max(width || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientWidth || 800),
-                          y: (((height || 1) / 2 + (overlay.y - (processedHeight || 1) / 2)) / Math.max(height || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientHeight || 800)
+                          x: (overlay.x / Math.max(processedWidth || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientWidth || 800),
+                          y: (overlay.y / Math.max(processedHeight || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientHeight || 800)
                         }}
                         size={{
-                          width: (overlay.width / Math.max(width || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientWidth || 800),
-                          height: (overlay.height / Math.max(height || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientHeight || 800)
+                          width: (overlay.width / Math.max(processedWidth || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientWidth || 800),
+                          height: (overlay.height / Math.max(processedHeight || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientHeight || 800)
                         }}
                         onDragStart={() => setSelectedOverlayId(overlay.id)}
                         onDrag={(e, d) => {
@@ -481,8 +481,8 @@ export default function WorkspaceSection() {
                             const snapped = handleDragSnap(d, overlay.id, false);
                             setImageOverlays(prev => prev.map(o => o.id === overlay.id ? {
                               ...o,
-                              x: (snapped.x / parent.clientWidth) * (width || 800) - (width || 800) / 2 + (processedWidth || 800) / 2,
-                              y: (snapped.y / parent.clientHeight) * (height || 800) - (height || 800) / 2 + (processedHeight || 800) / 2
+                              x: (snapped.x / parent.clientWidth) * (processedWidth || 800),
+                              y: (snapped.y / parent.clientHeight) * (processedHeight || 800)
                             } : o));
                           }
                         }}
@@ -492,10 +492,10 @@ export default function WorkspaceSection() {
                           if (parent) {
                             setImageOverlays(prev => prev.map(o => o.id === overlay.id ? {
                               ...o,
-                              width: (ref.offsetWidth / parent.clientWidth) * (width || 800),
-                              height: (ref.offsetHeight / parent.clientHeight) * (height || 800),
-                              x: (position.x / parent.clientWidth) * (width || 800) - (width || 800) / 2 + (processedWidth || 800) / 2,
-                              y: (position.y / parent.clientHeight) * (height || 800) - (height || 800) / 2 + (processedHeight || 800) / 2
+                              width: (ref.offsetWidth / parent.clientWidth) * (processedWidth || 800),
+                              height: (ref.offsetHeight / parent.clientHeight) * (processedHeight || 800),
+                              x: (position.x / parent.clientWidth) * (processedWidth || 800),
+                              y: (position.y / parent.clientHeight) * (processedHeight || 800)
                             } : o));
                           }
                         }}
