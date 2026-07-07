@@ -26,6 +26,23 @@ export default function WorkspaceSection() {
   const [isGeneratingDownload, setIsGeneratingDownload] = useState(false);
   const [activeGuides, setActiveGuides] = useState([]);
 
+  const [containerSize, setContainerSize] = useState({ width: 800, height: 800 });
+  const containerRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        setContainerSize({
+          width: entry.contentRect.width,
+          height: entry.contentRect.height
+        });
+      }
+    });
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, [outputUrl, activeTab]);
+
   const calculateSnapping = (dragRect, otherRects, parentWidth, parentHeight) => {
     const threshold = 8;
     const guides = [];
@@ -245,6 +262,7 @@ export default function WorkspaceSection() {
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
                       <div 
                         id="canvas-preview-container" 
+                        ref={containerRef}
                         className="effect-container" 
                         style={{ 
                           position: 'relative', 
@@ -361,7 +379,7 @@ export default function WorkspaceSection() {
                           alignItems: 'center',
                           justifyContent: 'center',
                           fontFamily: `"${textObj.font}", sans-serif`,
-                          fontSize: `${(typeof textObj.size === 'number' ? textObj.size : 70) * ((document.getElementById('canvas-preview-container')?.clientWidth || 800) / Math.max(processedWidth || 1, 1))}px`,
+                          fontSize: `${(typeof textObj.size === 'number' ? textObj.size : 70) * (containerSize.width / Math.max(processedWidth || 1, 1))}px`,
                           color: textObj.color,
                           fontWeight: textObj.bold ? 'bold' : 'normal',
                           fontStyle: textObj.italic ? 'italic' : 'normal',
@@ -371,8 +389,8 @@ export default function WorkspaceSection() {
                           height: 'auto'
                         }}
                         position={{
-                          x: (textObj.x / Math.max(processedWidth || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientWidth || 800),
-                          y: (textObj.y / Math.max(processedHeight || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientHeight || 800)
+                          x: (textObj.x / Math.max(processedWidth || 1, 1)) * containerSize.width,
+                          y: (textObj.y / Math.max(processedHeight || 1, 1)) * containerSize.height
                         }}
                         enableResizing={selectedTextId === textObj.id ? undefined : false}
                         resizeHandleStyles={selectedTextId === textObj.id ? {
@@ -467,12 +485,12 @@ export default function WorkspaceSection() {
                           zIndex: selectedOverlayId === overlay.id ? 21 : 20 
                         }}
                         position={{
-                          x: (overlay.x / Math.max(processedWidth || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientWidth || 800),
-                          y: (overlay.y / Math.max(processedHeight || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientHeight || 800)
+                          x: (overlay.x / Math.max(processedWidth || 1, 1)) * containerSize.width,
+                          y: (overlay.y / Math.max(processedHeight || 1, 1)) * containerSize.height
                         }}
                         size={{
-                          width: (overlay.width / Math.max(processedWidth || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientWidth || 800),
-                          height: (overlay.height / Math.max(processedHeight || 1, 1)) * (document.getElementById('canvas-preview-container')?.clientHeight || 800)
+                          width: (overlay.width / Math.max(processedWidth || 1, 1)) * containerSize.width,
+                          height: (overlay.height / Math.max(processedHeight || 1, 1)) * containerSize.height
                         }}
                         onDragStart={() => setSelectedOverlayId(overlay.id)}
                         onDrag={(e, d) => {

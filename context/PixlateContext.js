@@ -474,8 +474,8 @@ export const PixlateProvider = ({ children }) => {
         textOverlays.forEach(textObj => {
           if (textObj.front !== isFront) return;
           ctx.fillStyle = textObj.color;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'top';
           let fontString = '';
           if (textObj.italic) fontString += 'italic ';
           if (textObj.bold) fontString += 'bold ';
@@ -495,7 +495,7 @@ export const PixlateProvider = ({ children }) => {
           if (textObj.underline) {
             const textMetrics = ctx.measureText(textObj.value);
             const textWidth = textMetrics.width;
-            ctx.fillRect(xPos - textWidth / 2, yPos + numericSize / 2 - (numericSize * 0.1), textWidth, numericSize / 15);
+            ctx.fillRect(xPos, yPos + numericSize * 1.05, textWidth, numericSize / 15);
           }
         });
       };
