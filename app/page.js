@@ -7,6 +7,7 @@ import { FeaturesSectionDemo } from '@/components/layout/FeaturesSection';
 import WorkspaceSection from '@/components/layout/WorkspaceSection';
 import SidebarSection from '@/components/layout/SidebarSection';
 import Footer from '@/components/layout/Footer';
+import FAQSection from '@/components/layout/FAQSection';
 
 
 function PixlateAppContent() {
@@ -56,6 +57,7 @@ function PixlateAppContent() {
           <HeroSection />
           <HeroScrollDemo />
           <FeaturesSectionDemo />
+          <FAQSection />
           <Footer />
         </>
       )}
