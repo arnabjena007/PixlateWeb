@@ -7,7 +7,7 @@ import { FeaturesSectionDemo } from '@/components/layout/FeaturesSection';
 import WorkspaceSection from '@/components/layout/WorkspaceSection';
 import SidebarSection from '@/components/layout/SidebarSection';
 import Footer from '@/components/layout/Footer';
-import Header from '@/components/layout/Header';
+
 
 function PixlateAppContent() {
   const { showEditor, fileInputRef, overlayFileInputRef, handleFileChange, handleOverlayFileChange, chromaticStrength, glitchStrength } = usePixlate();
@@ -52,7 +52,7 @@ function PixlateAppContent() {
 
       {!showEditor && (
         <>
-          <Header />
+
           <HeroSection />
           <HeroScrollDemo />
           <FeaturesSectionDemo />
