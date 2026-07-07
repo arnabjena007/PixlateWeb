@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Rnd } from 'react-rnd';
 import { usePixlate } from '@/context/PixlateContext';
 import GenerativeCanvas from './GenerativeCanvas';
@@ -27,9 +27,9 @@ export default function WorkspaceSection() {
   const [activeGuides, setActiveGuides] = useState([]);
 
   const [containerSize, setContainerSize] = useState({ width: 800, height: 800 });
-  const containerRef = React.useRef(null);
+  const containerRef = useRef(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!containerRef.current) return;
     const observer = new ResizeObserver((entries) => {
       for (let entry of entries) {
