@@ -69,7 +69,7 @@ export default function FAQSection() {
             fontWeight: 600,
             letterSpacing: '0.12em',
             textTransform: 'uppercase',
-            color: '#a855f7',
+            color: '#71717a',
             marginBottom: '12px',
           }}>FAQ</p>
           <h2 style={{
@@ -103,9 +103,9 @@ export default function FAQSection() {
                 transition={{ duration: 0.4, delay: i * 0.05 }}
                 style={{
                   borderRadius: '12px',
-                  border: `1px solid ${isOpen ? 'rgba(168,85,247,0.3)' : '#262626'}`,
+                  border: `1px solid ${isOpen ? 'rgba(255,255,255,0.12)' : '#262626'}`,
                   background: isOpen
-                    ? 'linear-gradient(135deg, rgba(168,85,247,0.04) 0%, rgba(9,9,11,1) 100%)'
+                    ? 'linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(9,9,11,1) 100%)'
                     : '#111113',
                   overflow: 'hidden',
                   transition: 'border-color 0.25s ease, background 0.25s ease',
@@ -124,7 +124,7 @@ export default function FAQSection() {
                   <span style={{
                     fontSize: '0.975rem',
                     fontWeight: 500,
-                    color: isOpen ? '#e4e4e7' : '#a1a1aa',
+                    color: isOpen ? '#ffffff' : '#a1a1aa',
                     transition: 'color 0.2s ease',
                     userSelect: 'none',
                   }}>
@@ -137,12 +137,12 @@ export default function FAQSection() {
                       flexShrink: 0,
                       width: '22px', height: '22px',
                       borderRadius: '50%',
-                      background: isOpen ? 'rgba(168,85,247,0.15)' : 'rgba(255,255,255,0.05)',
-                      border: `1px solid ${isOpen ? 'rgba(168,85,247,0.4)' : 'rgba(255,255,255,0.08)'}`,
+                      background: isOpen ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.05)',
+                      border: `1px solid ${isOpen ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.08)'}`,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      color: isOpen ? '#a855f7' : '#52525b',
+                      color: isOpen ? '#ffffff' : '#52525b',
                       fontSize: '16px',
                       lineHeight: 1,
                       fontWeight: 300,
