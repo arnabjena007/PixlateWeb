@@ -92,14 +92,14 @@ export function FeaturesSectionDemo() {
                 position: 'absolute',
                 inset: 0,
                 backgroundImage: `
-                  linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                  linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px)
+                  linear-gradient(to right, rgba(255, 255, 255, 0.075) 1px, transparent 1px),
+                  linear-gradient(to bottom, rgba(255, 255, 255, 0.075) 1px, transparent 1px)
                 `,
                 backgroundSize: '24px 24px',
                 pointerEvents: 'none',
                 zIndex: 1,
-                maskImage: 'radial-gradient(ellipse at 50% 50%, black 20%, transparent 80%)',
-                WebkitMaskImage: 'radial-gradient(ellipse at 50% 50%, black 20%, transparent 80%)',
+                maskImage: 'radial-gradient(ellipse at 50% 50%, black 35%, transparent 85%)',
+                WebkitMaskImage: 'radial-gradient(ellipse at 50% 50%, black 35%, transparent 85%)',
               }} />
 
               <div style={{ position: 'relative', zIndex: 10 }}>
