@@ -323,7 +323,7 @@ export default function GenerativeCanvas({ outputUrl, width, height, canvasWidth
           width: '100%', 
           height: '100%',
           top: '0', left: '0', transform: 'none',
-          objectFit: 'cover' 
+          objectFit: 'fill' 
         }}
       />
       <canvas 
@@ -332,7 +332,7 @@ export default function GenerativeCanvas({ outputUrl, width, height, canvasWidth
           width: '100%', 
           height: '100%',
           top: '0', left: '0', transform: 'none',
-          objectFit: 'cover', pointerEvents: 'none' 
+          objectFit: 'fill', pointerEvents: 'none' 
         }}
       />
       <canvas 
@@ -341,7 +341,7 @@ export default function GenerativeCanvas({ outputUrl, width, height, canvasWidth
           width: '100%', 
           height: '100%',
           top: '0', left: '0', transform: 'none',
-          objectFit: 'cover', pointerEvents: 'none', mixBlendMode: 'screen' 
+          objectFit: 'fill', pointerEvents: 'none', mixBlendMode: 'screen' 
         }}
       />
       

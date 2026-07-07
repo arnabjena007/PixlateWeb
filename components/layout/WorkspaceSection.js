@@ -86,11 +86,14 @@ export default function WorkspaceSection() {
     return { snappedX, snappedY, guides };
   };
 
+  const targetW = processedWidth || width || 1024;
+  const targetH = processedHeight || height || 767;
+
+  const scaleX = (containerSize.width - 40) / targetW;
+  const scaleY = (containerSize.height - 40) / targetH;
+  const scale = Math.min(scaleX, scaleY);
+
   const handleDragSnap = (d, id, isText) => {
-    const parent = document.getElementById('canvas-preview-container');
-    if (!parent) return { x: d.x, y: d.y };
-    const pw = parent.clientWidth;
-    const ph = parent.clientHeight;
     const dragRect = { x: d.x, y: d.y, width: d.node.offsetWidth, height: d.node.offsetHeight };
     const otherElements = [];
     
@@ -98,20 +101,16 @@ export default function WorkspaceSection() {
       if (isText && t.id === id) return;
       const el = document.getElementById(`overlay-text-${t.id}`);
       if (el) {
-        const px = (t.x / Math.max(processedWidth || 1, 1)) * pw;
-        const py = (t.y / Math.max(processedHeight || 1, 1)) * ph;
-        otherElements.push({ x: px, y: py, width: el.offsetWidth, height: el.offsetHeight });
+        otherElements.push({ x: t.x, y: t.y, width: el.offsetWidth, height: el.offsetHeight });
       }
     });
 
     imageOverlays.forEach(o => {
       if (!isText && o.id === id) return;
-      const px = (o.x / Math.max(processedWidth || 1, 1)) * pw;
-      const py = (o.y / Math.max(processedHeight || 1, 1)) * ph;
-      otherElements.push({ x: px, y: py, width: (o.width / Math.max(processedWidth || 1, 1)) * pw, height: (o.height / Math.max(processedHeight || 1, 1)) * ph });
+      otherElements.push({ x: o.x, y: o.y, width: o.width, height: o.height });
     });
 
-    const { snappedX, snappedY, guides } = calculateSnapping(dragRect, otherElements, pw, ph);
+    const { snappedX, snappedY, guides } = calculateSnapping(dragRect, otherElements, targetW, targetH);
     setActiveGuides(guides);
     return { x: snappedX, y: snappedY };
   };
@@ -257,20 +256,20 @@ export default function WorkspaceSection() {
               </div>
             )}
             {activeTab === 'Processed' && (
-              <div className="preview-wrapper">
+              <div className="preview-wrapper" ref={containerRef} style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
                 {outputUrl ? (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', overflow: 'hidden' }}>
                       <div 
                         id="canvas-preview-container" 
-                        ref={containerRef}
                         className="effect-container" 
                         style={{ 
                           position: 'relative', 
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          maxWidth: '100%',
-                          maxHeight: '100%',
+                          width: `${targetW}px`,
+                          height: `${targetH}px`,
+                          transform: `scale(${scale})`,
+                          transformOrigin: 'center center',
+                          flexShrink: 0,
+                          boxShadow: '0 12px 36px rgba(0,0,0,0.5)',
                         }}
                         onMouseDown={(e) => {
                           if (e.target.id === 'canvas-preview-container' || e.target.classList.contains('preview-image') || e.target.classList.contains('effect-overlay')) {
@@ -279,19 +278,6 @@ export default function WorkspaceSection() {
                           }
                         }}
                       >
-                        <img 
-                          src={`data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="${processedWidth || width || 1}" height="${processedHeight || height || 1}"></svg>`}
-                          alt=""
-                          style={{
-                            display: 'block',
-                            maxWidth: '100%',
-                            maxHeight: '100%',
-                            width: 'auto',
-                            height: 'auto',
-                            visibility: 'hidden',
-                            pointerEvents: 'none'
-                          }}
-                        />
                         <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
                           <GenerativeCanvas
                           outputUrl={outputUrl}
@@ -372,6 +358,7 @@ export default function WorkspaceSection() {
                       <Rnd
                         id={`overlay-text-${textObj.id}`}
                         key={textObj.id}
+                        scale={scale}
                         style={{
                           border: selectedTextId === textObj.id ? '2px dashed #a855f7' : 'none',
                           zIndex: textObj.front ? (selectedTextId === textObj.id ? 31 : 30) : (selectedTextId === textObj.id ? 11 : 10),
@@ -379,7 +366,7 @@ export default function WorkspaceSection() {
                           alignItems: 'center',
                           justifyContent: 'center',
                           fontFamily: `"${textObj.font}", sans-serif`,
-                          fontSize: `${(typeof textObj.size === 'number' ? textObj.size : 70) * (containerSize.width / Math.max(processedWidth || 1, 1))}px`,
+                          fontSize: `${typeof textObj.size === 'number' ? textObj.size : 70}px`,
                           color: textObj.color,
                           fontWeight: textObj.bold ? 'bold' : 'normal',
                           fontStyle: textObj.italic ? 'italic' : 'normal',
@@ -389,8 +376,8 @@ export default function WorkspaceSection() {
                           height: 'auto'
                         }}
                         position={{
-                          x: (textObj.x / Math.max(processedWidth || 1, 1)) * containerSize.width,
-                          y: (textObj.y / Math.max(processedHeight || 1, 1)) * containerSize.height
+                          x: textObj.x,
+                          y: textObj.y
                         }}
                         enableResizing={selectedTextId === textObj.id ? undefined : false}
                         resizeHandleStyles={selectedTextId === textObj.id ? {
@@ -405,33 +392,25 @@ export default function WorkspaceSection() {
                         } : {}}
                         onDragStart={() => setSelectedTextId(textObj.id)}
                         onDrag={(e, d) => {
-                          const parent = document.getElementById('canvas-preview-container');
-                          if (parent) {
-                            const snapped = handleDragSnap(d, textObj.id, true);
-                            setTextOverlays(prev => prev.map(t => t.id === textObj.id ? {
-                              ...t,
-                              x: (snapped.x / parent.clientWidth) * (processedWidth || 800),
-                              y: (snapped.y / parent.clientHeight) * (processedHeight || 800)
-                            } : t));
-                          }
+                          const snapped = handleDragSnap(d, textObj.id, true);
+                          setTextOverlays(prev => prev.map(t => t.id === textObj.id ? {
+                            ...t,
+                            x: snapped.x,
+                            y: snapped.y
+                          } : t));
                         }}
                         onDragStop={() => setActiveGuides([])}
                         onResize={(e, direction, ref, delta, position) => {
-                          const parent = document.getElementById('canvas-preview-container');
-                          if (parent) {
-                            const screenFontSize = ref.offsetHeight / 1.2;
-                            const newSizeInPx = screenFontSize * (Math.max(processedWidth || 1, 1) / parent.clientWidth);
-                            
-                            setTextOverlays(prev => prev.map(t => t.id === textObj.id ? {
-                              ...t,
-                              x: (position.x / parent.clientWidth) * (processedWidth || 800),
-                              y: (position.y / parent.clientHeight) * (processedHeight || 800),
-                              size: Math.max(10, newSizeInPx)
-                            } : t));
-                            
-                            ref.style.width = 'auto';
-                            ref.style.height = 'auto';
-                          }
+                          const screenFontSize = ref.offsetHeight / 1.2;
+                          setTextOverlays(prev => prev.map(t => t.id === textObj.id ? {
+                            ...t,
+                            x: position.x,
+                            y: position.y,
+                            size: Math.max(10, screenFontSize)
+                          } : t));
+                          
+                          ref.style.width = 'auto';
+                          ref.style.height = 'auto';
                         }}
                         onMouseDown={(e) => {
                           setSelectedTextId(textObj.id);
@@ -480,42 +459,37 @@ export default function WorkspaceSection() {
                     {imageOverlay && imageOverlays.map(overlay => (
                       <Rnd
                         key={overlay.id}
+                        scale={scale}
                         style={{ 
                           border: selectedOverlayId === overlay.id ? '2px solid #a855f7' : 'none', 
                           zIndex: selectedOverlayId === overlay.id ? 21 : 20 
                         }}
                         position={{
-                          x: (overlay.x / Math.max(processedWidth || 1, 1)) * containerSize.width,
-                          y: (overlay.y / Math.max(processedHeight || 1, 1)) * containerSize.height
+                          x: overlay.x,
+                          y: overlay.y
                         }}
                         size={{
-                          width: (overlay.width / Math.max(processedWidth || 1, 1)) * containerSize.width,
-                          height: (overlay.height / Math.max(processedHeight || 1, 1)) * containerSize.height
+                          width: overlay.width,
+                          height: overlay.height
                         }}
                         onDragStart={() => setSelectedOverlayId(overlay.id)}
                         onDrag={(e, d) => {
-                          const parent = document.getElementById('canvas-preview-container');
-                          if (parent) {
-                            const snapped = handleDragSnap(d, overlay.id, false);
-                            setImageOverlays(prev => prev.map(o => o.id === overlay.id ? {
-                              ...o,
-                              x: (snapped.x / parent.clientWidth) * (processedWidth || 800),
-                              y: (snapped.y / parent.clientHeight) * (processedHeight || 800)
-                            } : o));
-                          }
+                          const snapped = handleDragSnap(d, overlay.id, false);
+                          setImageOverlays(prev => prev.map(o => o.id === overlay.id ? {
+                            ...o,
+                            x: snapped.x,
+                            y: snapped.y
+                          } : o));
                         }}
                         onDragStop={() => setActiveGuides([])}
                         onResize={(e, direction, ref, delta, position) => {
-                          const parent = document.getElementById('canvas-preview-container');
-                          if (parent) {
-                            setImageOverlays(prev => prev.map(o => o.id === overlay.id ? {
-                              ...o,
-                              width: (ref.offsetWidth / parent.clientWidth) * (processedWidth || 800),
-                              height: (ref.offsetHeight / parent.clientHeight) * (processedHeight || 800),
-                              x: (position.x / parent.clientWidth) * (processedWidth || 800),
-                              y: (position.y / parent.clientHeight) * (processedHeight || 800)
-                            } : o));
-                          }
+                          setImageOverlays(prev => prev.map(o => o.id === overlay.id ? {
+                            ...o,
+                            width: ref.offsetWidth,
+                            height: ref.offsetHeight,
+                            x: position.x,
+                            y: position.y
+                          } : o));
                         }}
                         bounds="parent"
                         enableResizing={selectedOverlayId === overlay.id ? undefined : false}
