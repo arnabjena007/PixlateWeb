@@ -339,7 +339,16 @@ export const PixlateProvider = ({ children }) => {
         body: formData,
       });
 
-      if (!response.ok) throw new Error('Processing failed');
+      if (!response.ok) {
+        let errorMsg = 'Processing failed';
+        try {
+          const errData = await response.json();
+          if (errData && errData.error) {
+            errorMsg = errData.error;
+          }
+        } catch (_) {}
+        throw new Error(errorMsg);
+      }
 
       const blob = await response.blob();
       setOutputBlob(blob);

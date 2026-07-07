@@ -43,4 +43,5 @@ next-env.d.ts
 # temp files & binaries
 /tmp/
 /pix.exe
+/pix
 /suggestions.json
