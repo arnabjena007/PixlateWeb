@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node -e \"if (process.platform !== 'win32') require('child_process').execSync('chmod +x pix')\" && next build",
     "start": "next start",
     "lint": "eslint"
   },

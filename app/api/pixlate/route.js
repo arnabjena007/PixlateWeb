@@ -114,14 +114,12 @@ export async function POST(request) {
     const binaryName = isWin ? 'pix.exe' : 'pix';
     const binaryPath = path.join(process.cwd(), binaryName);
 
-    // Guard: check if the binary exists (it won't on Vercel / serverless)
+    // Guard: check if the binary exists
+    let useGoBinary = true;
     try {
       await fs.access(binaryPath);
     } catch {
-      return NextResponse.json(
-        { error: 'Processing engine not available in this environment. Run locally with pix.exe for full functionality.' },
-        { status: 501 }
-      );
+      useGoBinary = false;
     }
 
     // Parse variation mode and map it to Go binary flags
@@ -148,31 +146,55 @@ export async function POST(request) {
       finalSeeds = generatePoissonSeeds(w, h, 12, randomSeed);
     }
 
-    // Build the CLI execution string
-    let cmd = `"${binaryPath}" -in "${inputPath}" -out "${outputPath}" -width ${width} -height ${height}`;
-    
-    if (whitePercent) cmd += ` -white-percent ${whitePercent}`;
-    if (finalColorSort) cmd += ' -colorsort 90'; // default colorsort weight when enabled
-    if (finalRandom > 0) cmd += ` -random ${finalRandom}`;
-    if (reverse) cmd += ' -reverse';
-    if (sweep) cmd += ' -sweep';
-    if (randomSeed > 0) cmd += ` -random-seed ${randomSeed}`;
-    if (compress) cmd += ` -compress ${compress}`;
-    if (finalSeeds && finalSeeds.trim()) cmd += ` -seeds "${finalSeeds.replace(/"/g, '\\"')}"`;
+    if (useGoBinary) {
+      // Build the CLI execution string
+      let cmd = `"${binaryPath}" -in "${inputPath}" -out "${outputPath}" -width ${width} -height ${height}`;
+      
+      if (whitePercent) cmd += ` -white-percent ${whitePercent}`;
+      if (finalColorSort) cmd += ' -colorsort 90'; // default colorsort weight when enabled
+      if (finalRandom > 0) cmd += ` -random ${finalRandom}`;
+      if (reverse) cmd += ' -reverse';
+      if (sweep) cmd += ' -sweep';
+      if (randomSeed > 0) cmd += ` -random-seed ${randomSeed}`;
+      if (compress) cmd += ` -compress ${compress}`;
+      if (finalSeeds && finalSeeds.trim()) cmd += ` -seeds "${finalSeeds.replace(/"/g, '\\"')}"`;
 
-    // Execute the Go binary
-    await execAsync(cmd);
+      // Execute the Go binary
+      await execAsync(cmd);
 
-    // Read the final processed image
-    const outputBuffer = await fs.readFile(outputPath);
+      // Read the final processed image
+      const outputBuffer = await fs.readFile(outputPath);
 
-    // Clean up temporary files asynchronously
-    await fs.unlink(inputPath).catch(() => {});
-    await fs.unlink(outputPath).catch(() => {});
+      // Clean up temporary files asynchronously
+      await fs.unlink(inputPath).catch(() => {});
+      await fs.unlink(outputPath).catch(() => {});
 
-    return new NextResponse(outputBuffer, {
-      headers: { 'Content-Type': 'image/png' },
-    });
+      return new NextResponse(outputBuffer, {
+        headers: { 'Content-Type': 'image/png' },
+      });
+    } else {
+      // Fallback to pure JS processor using sharp
+      const { processPixelate } = await import('@/lib/pixelate-processor');
+      const outputBuffer = await processPixelate(buffer, {
+        width: parseInt(width),
+        height: parseInt(height),
+        whitePercent: whitePercent ? parseFloat(whitePercent) : 0,
+        colorSort: finalColorSort,
+        random: finalRandom,
+        reverse,
+        sweep,
+        randomSeed,
+        compress: compress ? parseInt(compress) : 0,
+      });
+
+      // Clean up temporary files asynchronously
+      await fs.unlink(inputPath).catch(() => {});
+      await fs.unlink(outputPath).catch(() => {});
+
+      return new NextResponse(outputBuffer, {
+        headers: { 'Content-Type': 'image/png' },
+      });
+    }
 
   } catch (error) {
     console.error('API Error:', error);
