@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { BackgroundRippleEffect } from "@/components/ui/background-ripple-effect";
 import { usePixlate } from '@/context/PixlateContext';
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
+import { NoiseBackground } from "@/components/ui/noise-background";
 
 export default function HeroSection() {
   const { scrollToEditor } = usePixlate();
@@ -50,31 +51,22 @@ export default function HeroSection() {
         style={{ maxWidth: '900px' }}
       >
         {/* Badge */}
-        <motion.div variants={itemVariants}>
-          <span className="hero-badge" style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '5px 14px',
-            background: 'rgba(168, 85, 247, 0.08)',
-            border: '1px solid rgba(168, 85, 247, 0.25)',
-            borderRadius: '20px',
-            fontSize: '12px',
-            fontWeight: 500,
-            color: '#c084fc',
-            letterSpacing: '0.06em',
-            textTransform: 'uppercase',
-          }}>
-            <span style={{
-              display: 'inline-block',
-              width: '6px', height: '6px',
-              borderRadius: '50%',
-              background: '#a855f7',
-              boxShadow: '0 0 8px #a855f7',
-              animation: 'pulse-dot 2s ease-in-out infinite',
-            }} />
-            Generative Art Engine
-          </span>
+        <motion.div variants={itemVariants} className="flex justify-center mb-4">
+          <NoiseBackground
+            containerClassName="w-fit p-1 rounded-full mx-auto"
+            gradientColors={[
+              "rgb(255, 100, 150)",
+              "rgb(100, 150, 255)",
+              "rgb(255, 200, 100)",
+            ]}
+          >
+            <button
+              className="h-full w-full cursor-pointer rounded-full bg-linear-to-r from-neutral-100 via-neutral-100 to-white px-4 py-1.5 text-xs font-semibold text-black shadow-[0px_2px_0px_0px_var(--color-neutral-50)_inset,0px_0.5px_1px_0px_var(--color-neutral-400)] transition-all duration-100 active:scale-98 dark:from-black dark:via-black dark:to-neutral-900 dark:text-white dark:shadow-[0px_1px_0px_0px_var(--color-neutral-950)_inset,0px_1px_0px_0px_var(--color-neutral-800)]"
+              onClick={scrollToEditor}
+            >
+              Generative Art Project &rarr;
+            </button>
+          </NoiseBackground>
         </motion.div>
 
         <motion.h1 variants={itemVariants} className="hero-title">Pixlate</motion.h1>
