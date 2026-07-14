@@ -45,7 +45,7 @@ export const NoiseBackground = ({
       />
 
       {/* Content wrapper */}
-      <div className={cn("relative z-20 w-full h-full", className)}>
+      <div className={cn("relative z-20", className)}>
         {children}
       </div>
 
