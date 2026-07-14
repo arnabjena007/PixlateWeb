@@ -29,7 +29,7 @@ export default function HeroSection() {
     <section id="hero-section" className="hero-section">
       <BackgroundRippleEffect />
 
-      {/* Purple ambient glow behind title */}
+      {/* Soft neutral glow behind title */}
       <div style={{
         position: 'absolute',
         top: '35%',
@@ -37,7 +37,7 @@ export default function HeroSection() {
         transform: 'translate(-50%, -50%)',
         width: '600px',
         height: '300px',
-        background: 'radial-gradient(ellipse at center, rgba(168, 85, 247, 0.18) 0%, transparent 70%)',
+        background: 'radial-gradient(ellipse at center, rgba(255, 255, 255, 0.10) 0%, transparent 70%)',
         pointerEvents: 'none',
         zIndex: 2,
         filter: 'blur(40px)',
@@ -53,18 +53,37 @@ export default function HeroSection() {
         {/* Badge */}
         <motion.div variants={itemVariants} className="flex justify-center mb-4">
           <NoiseBackground
-            containerClassName="w-fit p-1 rounded-full mx-auto"
+            containerClassName="inline-flex w-fit items-center justify-center rounded-[9999px] mx-auto p-[7px]"
+            containerStyle={{
+              background:
+                'linear-gradient(100deg, rgba(203,155,198,0.72) 0%, rgba(182,141,177,0.58) 18%, rgba(122,112,99,0.32) 48%, rgba(37,39,39,0.94) 76%, rgba(27,29,29,1) 100%)',
+              boxShadow:
+                '0 10px 24px rgba(0,0,0,0.42), inset 0 0 0 1px rgba(255,255,255,0.07)',
+            }}
             gradientColors={[
-              "rgb(255, 100, 150)",
-              "rgb(100, 150, 255)",
-              "rgb(255, 200, 100)",
+              "rgb(219, 166, 207)",
+              "rgb(196, 173, 136)",
+              "rgb(75, 82, 79)",
             ]}
+            noiseIntensity={0.16}
+            animating={false}
           >
             <button
-              className="cursor-pointer rounded-full bg-linear-to-r from-neutral-100 via-neutral-100 to-white px-4 py-1.5 text-xs font-semibold text-black shadow-[0px_2px_0px_0px_var(--color-neutral-50)_inset,0px_0.5px_1px_0px_var(--color-neutral-400)] transition-all duration-100 active:scale-98 dark:from-black dark:via-black dark:to-neutral-900 dark:text-white dark:shadow-[0px_1px_0px_0px_var(--color-neutral-950)_inset,0px_1px_0px_0px_var(--color-neutral-800)]"
+              className="inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-[9999px] border-0 text-white transition-all duration-100 active:scale-98"
+              style={{
+                minHeight: '28px',
+                padding: '0 12px',
+                background: 'linear-gradient(90deg, #111111 0%, #0d0d0d 58%, #131515 100%)',
+                fontSize: '13px',
+                lineHeight: '16px',
+                fontWeight: 600,
+                letterSpacing: '0',
+                boxShadow:
+                  'inset 0 1px 0 rgba(255,255,255,0.08), 0 1px 2px rgba(0,0,0,0.38)',
+              }}
               onClick={scrollToEditor}
             >
-              Generative Art Project &rarr;
+              Start publishing &rarr;
             </button>
           </NoiseBackground>
         </motion.div>
@@ -96,12 +115,6 @@ export default function HeroSection() {
 
       </motion.div>
 
-      <style>{`
-        @keyframes pulse-dot {
-          0%, 100% { opacity: 1; box-shadow: 0 0 6px #a855f7; }
-          50% { opacity: 0.5; box-shadow: 0 0 12px #a855f7; }
-        }
-      `}</style>
     </section>
   );
 }
