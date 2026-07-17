@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import NextImage from 'next/image';
 import { useRef, useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import './about.css';
@@ -156,6 +157,23 @@ export default function AboutPage() {
           colors by identifying the closest match in a 3D color space, such as RGB. Data structures like K-D trees
           are used to accelerate this process, allowing for quick retrieval of the most similar colors during
           placement. This ensures that the algorithm remains efficient even as the canvas size grows significantly.
+        </p>
+
+        <div className="about-process-diagram">
+          <NextImage
+            src="/img/pixlate-process-diagram.png"
+            alt="Diagram explaining how Pixlate uses HSL color space and KD-tree spatial search"
+            className="about-process-image"
+            width={1536}
+            height={864}
+          />
+        </div>
+
+        <p className="about-body" style={{ marginBottom: '1.25rem' }}>
+          This diagram shows the two main ideas behind Pixlate. HSL color space keeps each generated shape inside
+          a coherent palette by controlling hue, saturation, and lightness instead of choosing random RGB values.
+          KD-tree spatial search helps the engine place new shapes efficiently by checking nearby space first, so
+          dense compositions can grow without comparing every new candidate against every existing point.
         </p>
 
         <p className="about-body" style={{ marginBottom: '1.25rem', marginTop: '1.5rem' }}>

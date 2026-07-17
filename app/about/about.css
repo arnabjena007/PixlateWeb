@@ -241,6 +241,23 @@
   object-fit: contain;
 }
 
+/* ── Process diagram ── */
+.about-process-diagram {
+  width: min(100%, 1100px);
+  margin: 8px auto 28px;
+  padding: 10px;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+  background: #0d0d10;
+}
+
+.about-process-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px;
+}
+
 /* ── Progress thumbnails ── */
 .about-progress-grid {
   display: grid;
